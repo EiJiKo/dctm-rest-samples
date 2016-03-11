@@ -2,3 +2,5 @@ Servers
 RemoteSystemsTempFiles
 .metadata
 Rest-Sample-User-1/target
+.recommenders/index/http___download_eclipse_org_recommenders_models_mars_/_0.fdt
+.recommenders/

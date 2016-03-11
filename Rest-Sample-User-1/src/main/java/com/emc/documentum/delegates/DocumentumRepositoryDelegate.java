@@ -1,5 +1,6 @@
 package com.emc.documentum.delegates;
 
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.emc.documentum.dtos.DocumentCreation;
+import com.emc.documentum.dtos.NavigationObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentumException;
@@ -71,6 +73,23 @@ public class DocumentumRepositoryDelegate {
 			log.log(Level.SEVERE,e.getMessage(),e);
 			//TODO Object Not Found Exception
 			throw new CabinetNotFoundException(cabinetId);
+		}
+	}
+
+	public ArrayList<NavigationObject> getAllCabinets() {
+		try {
+			return dcAPI.getAllCabinets();
+		} catch (Exception e) {
+			throw e;
+		}
+	}
+
+	public ArrayList<NavigationObject> getChilderen(String folderId) {
+		try {
+			return dcAPI.getChilderen(folderId);
+		} catch (Exception e) {
+			//TODO Object Not Found Exception
+			throw e;
 		}
 	}
 }
