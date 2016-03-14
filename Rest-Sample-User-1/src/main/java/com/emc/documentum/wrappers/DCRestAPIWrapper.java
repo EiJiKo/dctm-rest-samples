@@ -285,8 +285,8 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 			if(link.getHref().endsWith("documents") || link.getHref().endsWith("objects") || link.getHref().endsWith("folders")){
 				JsonFeed child = getObjects(link.getHref());
 				for (JsonEntry entry : child.getEntries()) {
-					childeren.add(new NavigationObject((String) getObject(entry.getContentSrc()).getProperties().get("r_object_id"), folderId,
-							(String) getObject(entry.getContentSrc()).getProperties().get("object_name"), "cabinet"));
+					childeren.add(new NavigationObject((String) getObjectByUri(entry.getContentSrc()).getProperties().get("r_object_id"), folderId,
+							(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"), "cabinet"));
 				}
 			}
 		}
