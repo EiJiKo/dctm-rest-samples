@@ -1,9 +1,10 @@
 package com.emc.documentum.services.rest;
 
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,10 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.emc.documentum.delegates.DocumentumRepositoryDelegate;
 import com.emc.documentum.dtos.DocumentCreation;
+import com.emc.documentum.dtos.NavigationObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
-
 import com.emc.documentum.model.JsonObject;
 
 @RestController
@@ -67,6 +68,28 @@ public class DCRestRepositoryController {
 			return dcRestDelegate.getObjectById(cabinetId);
 		} catch (CabinetNotFoundException e) {
 			// TODO Auto-generated catch block
+			throw e;
+		}
+	}
+	
+	@CrossOrigin("*")
+	@RequestMapping(value = "get/cabinets")
+	public ArrayList<NavigationObject> getAllCabinets(){
+		try {
+			return dcRestDelegate.getAllCabinets();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			throw e;
+		}
+	}
+	
+	@CrossOrigin("*")
+	@RequestMapping(value = "get/{folderId}/childeren")
+	public ArrayList<NavigationObject> getChilderen(@PathVariable(value="folderId") String folderId){
+		try {
+			return dcRestDelegate.getChilderen(folderId);
+		} catch (Exception e) {
+			// TODO ObjectNotFoundException
 			throw e;
 		}
 	}

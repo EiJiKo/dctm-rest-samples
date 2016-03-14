@@ -26,5 +26,7 @@ public class DCRestAPIWrapperData {
 	public  String password;
 	@Value("http://${documentum.host}:8080/dctm-rest/repositories/${documentum.repo}/cabinets")
 	public  String fetchCabinetURI;
+	@Value("http://${documentum.host}:8080/dctm-rest/repositories/${documentum.repo}/folders")
+	public  String fetchFolderURI;
 
 }

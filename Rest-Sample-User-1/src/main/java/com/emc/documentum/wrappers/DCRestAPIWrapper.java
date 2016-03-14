@@ -30,7 +30,9 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.emc.documentum.constants.*;
+import com.emc.documentum.constants.DCRestAPIWrapperData;
+import com.emc.documentum.constants.LinkRelation;
+import com.emc.documentum.dtos.NavigationObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
@@ -249,11 +251,59 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 	}
 
 	@Override
-	public JsonObject[] getAllCabinets() {
-		// TODO Auto-generated method stub
-		return null;
+	public ArrayList<NavigationObject> getAllCabinets() {
+		RestTemplate restTemplate = new RestTemplate();
+		String URI = data.dqlQuery + "select * from dm_cabinet";
+		System.out.println("Fetch Cabinets URI is " + URI);
+		ResponseEntity<JsonFeed> response = restTemplate.exchange(URI, HttpMethod.GET,
+				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
+
+		JsonFeed feed = response.getBody();
+
+		ArrayList<NavigationObject> cabinets = new ArrayList<NavigationObject>();
+
+		for (JsonEntry entry : feed.getEntries()) {
+			cabinets.add(new NavigationObject((String) entry.getContent().getProperties().get("r_object_id"), "#",
+					(String) entry.getContent().getProperties().get("object_name"), "cabinet"));
+		}
+		return cabinets;
 	}
 
+	@Override
+	public ArrayList<NavigationObject> getChilderen(String folderId) {
+		RestTemplate restTemplate = new RestTemplate();
+		String URI = data.fetchFolderURI + "/" + folderId;
+		System.out.println("Fetch Folder URI is " + URI);
+		ResponseEntity<JsonObject> response = restTemplate.exchange(URI, HttpMethod.GET,
+				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonObject.class);
+
+		JsonObject feed = response.getBody();
+
+		ArrayList<NavigationObject> childeren = new ArrayList<NavigationObject>();
+
+		for (JsonLink link : feed.getLinks()) {
+			if(link.getHref().endsWith("documents") || link.getHref().endsWith("objects") || link.getHref().endsWith("folders")){
+				JsonFeed child = getObjects(link.getHref());
+				for (JsonEntry entry : child.getEntries()) {
+					childeren.add(new NavigationObject((String) getObject(entry.getContentSrc()).getProperties().get("r_object_id"), folderId,
+							(String) getObject(entry.getContentSrc()).getProperties().get("object_name"), "cabinet"));
+				}
+			}
+		}
+		return childeren;
+	}
+
+	@Override
+	public JsonFeed getObjects(String uri) {
+		RestTemplate restTemplate = new RestTemplate();
+		System.out.println("Fetch Object with URI is " + uri);
+		ResponseEntity<JsonFeed> response = restTemplate.exchange(uri, HttpMethod.GET,
+				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
+
+		return response.getBody();
+	}
+	
+	
 	@Override
 	public Object getDocumentContentById(String documentId) throws DocumentNotFoundException {
 		JsonObject document = getObjectById(documentId);
