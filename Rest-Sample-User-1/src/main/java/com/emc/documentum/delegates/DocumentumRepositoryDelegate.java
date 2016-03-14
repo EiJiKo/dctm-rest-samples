@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.emc.documentum.dtos.DocumentCreation;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.DocumentCreationException;
+import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
@@ -72,5 +73,9 @@ public class DocumentumRepositoryDelegate {
 			//TODO Object Not Found Exception
 			throw new CabinetNotFoundException(cabinetId);
 		}
+	}
+	
+	public Object getDocumentContentById(String documentId) throws DocumentNotFoundException{
+		return dcAPI.getDocumentContentById(documentId);
 	}
 }

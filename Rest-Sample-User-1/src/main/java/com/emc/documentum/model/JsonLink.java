@@ -61,4 +61,10 @@ public class JsonLink {
 		this.type = type;
 	}
 
+	@Override
+	public String toString() {
+		return "JsonLink [rel=" + rel + ", hreftemplate=" + hreftemplate + ", href=" + href + ", title=" + title
+				+ ", type=" + type + "]";
+	}
+
 }

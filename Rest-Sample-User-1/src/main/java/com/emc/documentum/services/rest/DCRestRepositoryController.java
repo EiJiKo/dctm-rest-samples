@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.emc.documentum.delegates.DocumentumRepositoryDelegate;
 import com.emc.documentum.dtos.DocumentCreation;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
+import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 
 import com.emc.documentum.model.JsonObject;
@@ -68,6 +69,11 @@ public class DCRestRepositoryController {
 			// TODO Auto-generated catch block
 			throw e;
 		}
+	}
+	
+	@RequestMapping(value= "get/document/content/id/{documentId}")
+	public Object getDocumentContentById(@PathVariable(value="documentId")String documentId) throws DocumentNotFoundException{
+		return dcRestDelegate.getDocumentContentById(documentId);
 	}
 
 }

@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.DocumentCreationException;
+import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
 import com.emc.documentum.model.JsonObject;
@@ -22,7 +23,7 @@ public interface DocumentumAPIWrapper {
 
 	JsonObject getCabinet(String cabinetName) throws CabinetNotFoundException;
 
-	JsonObject getObject(String uri);
+	JsonObject getObjectByUri(String uri);
 
 	JsonObject getObjectById(String id);
 
@@ -30,6 +31,7 @@ public interface DocumentumAPIWrapper {
 	
 	JsonObject[] getAllCabinets();
 	
+	Object getDocumentContentById(String documentId) throws DocumentNotFoundException;
 	
 
 
