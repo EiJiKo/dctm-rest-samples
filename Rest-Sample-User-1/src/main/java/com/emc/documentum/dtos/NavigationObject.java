@@ -6,22 +6,22 @@ public class NavigationObject {
 	String parent;
 	String text;
 	String type;
-	String childeren;
+	String children;
 	
-	public NavigationObject(String id, String parent ,String text, String type, String childeren) {
+	public NavigationObject(String id, String parent ,String text, String type, String children) {
 		this.id = id;
 		this.parent = parent;
 		this.text = text;
 		this.type = type;
-		this.childeren = childeren;
+		this.children = children;
 	}
 
 	public String getChilderen() {
-		return childeren;
+		return children;
 	}
 
-	public void setChilderen(String childeren) {
-		this.childeren = childeren;
+	public void setChilderen(String children) {
+		this.children = children;
 	}
 
 	public String getType() {

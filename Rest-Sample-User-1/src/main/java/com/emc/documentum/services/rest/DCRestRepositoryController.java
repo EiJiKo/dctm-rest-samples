@@ -84,7 +84,7 @@ public class DCRestRepositoryController {
 	}
 	
 	@CrossOrigin("*")
-	@RequestMapping(value = "get/{folderId}/childeren")
+	@RequestMapping(value = "get/{folderId}/children")
 	public ArrayList<NavigationObject> getChilderen(@PathVariable(value="folderId") String folderId){
 		try {
 			return dcRestDelegate.getChilderen(folderId);
