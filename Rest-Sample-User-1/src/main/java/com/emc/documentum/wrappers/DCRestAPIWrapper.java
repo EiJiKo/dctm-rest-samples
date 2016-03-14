@@ -1,32 +1,18 @@
 package com.emc.documentum.wrappers;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -264,7 +250,7 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 
 		for (JsonEntry entry : feed.getEntries()) {
 			cabinets.add(new NavigationObject((String) entry.getContent().getProperties().get("r_object_id"), "#",
-					(String) entry.getContent().getProperties().get("object_name"), "cabinet"));
+					(String) entry.getContent().getProperties().get("object_name"), "dmcabinet", "true"));
 		}
 		return cabinets;
 	}
@@ -283,10 +269,22 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 
 		for (JsonLink link : feed.getLinks()) {
 			if(link.getHref().endsWith("documents") || link.getHref().endsWith("objects") || link.getHref().endsWith("folders")){
+				String type = "";
+				String hasChilderen = "";
+				if(link.getHref().endsWith("documents")){
+					type = "dmdocument";
+					hasChilderen = "false";
+				}else if(link.getHref().endsWith("folders")){
+					type = "dmfolder";
+					hasChilderen = "true";
+				}else if(link.getHref().endsWith("objects")){
+					type = "dmobject";
+					hasChilderen = "false";
+				}
 				JsonFeed child = getObjects(link.getHref());
 				for (JsonEntry entry : child.getEntries()) {
 					childeren.add(new NavigationObject((String) getObjectByUri(entry.getContentSrc()).getProperties().get("r_object_id"), folderId,
-							(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"), "cabinet"));
+							(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"), type, hasChilderen));
 				}
 			}
 		}
