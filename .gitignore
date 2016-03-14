@@ -4,3 +4,8 @@ RemoteSystemsTempFiles
 Rest-Sample-User-1/target
 .recommenders/index/http___download_eclipse_org_recommenders_models_mars_/_0.fdt
 .recommenders/
+*.orig
+*_BACKUP_*.java
+*_BASE_*.java
+*_LOCAL_*.java
+*_REMOTE_*.java
