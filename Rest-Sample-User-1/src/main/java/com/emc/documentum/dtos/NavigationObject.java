@@ -6,9 +6,9 @@ public class NavigationObject {
 	String parent;
 	String text;
 	String type;
-	String children;
+	NavigationObject[] children;
 	
-	public NavigationObject(String id, String parent ,String text, String type, String children) {
+	public NavigationObject(String id, String parent ,String text, String type, NavigationObject[] children) {
 		this.id = id;
 		this.parent = parent;
 		this.text = text;
@@ -16,11 +16,11 @@ public class NavigationObject {
 		this.children = children;
 	}
 
-	public String getChilderen() {
+	public NavigationObject[]  getChilderen() {
 		return children;
 	}
 
-	public void setChilderen(String children) {
+	public void setChilderen(NavigationObject[]  children) {
 		this.children = children;
 	}
 

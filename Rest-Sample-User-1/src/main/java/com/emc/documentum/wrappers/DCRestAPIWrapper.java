@@ -250,7 +250,7 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 
 		for (JsonEntry entry : feed.getEntries()) {
 			cabinets.add(new NavigationObject((String) entry.getContent().getProperties().get("r_object_id"), "#",
-					(String) entry.getContent().getProperties().get("object_name"), "dmcabinet", "true"));
+					(String) entry.getContent().getProperties().get("object_name"), "dmcabinet", new NavigationObject[1]));
 		}
 		return cabinets;
 	}
@@ -284,7 +284,7 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 				JsonFeed child = getObjects(link.getHref());
 				for (JsonEntry entry : child.getEntries()) {
 					childeren.add(new NavigationObject((String) getObjectByUri(entry.getContentSrc()).getProperties().get("r_object_id"), folderId,
-							(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"), type, hasChilderen));
+							(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"), type, new NavigationObject[1]));
 				}
 			}
 		}
