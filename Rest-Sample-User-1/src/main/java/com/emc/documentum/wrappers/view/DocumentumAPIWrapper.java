@@ -37,7 +37,7 @@ public interface DocumentumAPIWrapper {
 	
 	ArrayList<NavigationObject> getAllCabinets();
 
-	ArrayList<NavigationObject> getChilderen(String folderId);
+	ArrayList<NavigationObject> getChildren(String folderId);
 	
 	JsonFeed getObjects(String uri);
 	
