@@ -32,6 +32,9 @@ import com.emc.documentum.model.Properties;
 import com.emc.documentum.model.UserModel;
 import com.emc.documentum.wrappers.view.DocumentumAPIWrapper;
 
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+
 @Component
 @PropertySource("classpath:application.properties")
 public class DCRestAPIWrapper implements DocumentumAPIWrapper {
@@ -290,7 +293,90 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 		}
 		return childeren;
 	}
+	
+	//TODO the transformation part at the end of the method should be moved to controller ...
+	@Override
+	public JSONObject getChildrenForFileManager(String folderId) {
 
+		RestTemplate restTemplate = new RestTemplate();
+		String URI = data.fetchFolderURI + "/" + folderId;
+		System.out.println("Fetch Folder URI is " + URI);
+		ResponseEntity<JsonObject> response = restTemplate.exchange(URI, HttpMethod.GET,new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonObject.class);
+		JsonObject feed = response.getBody();
+
+		JSONArray children = new JSONArray() ;
+		for (JsonLink link : feed.getLinks()) {
+			if(link.getHref().endsWith("documents") || link.getHref().endsWith("objects") || link.getHref().endsWith("folders")){
+				String type = "";
+				if(link.getHref().endsWith("documents")){
+					type = "file";
+				}else if(link.getHref().endsWith("folders")){
+					type = "dir";
+				}
+				else if (link.getHref().endsWith("objects")){
+					continue ;
+				}
+				
+				JsonFeed child = getObjects(link.getHref());
+				for (JsonEntry entry : child.getEntries()) {
+					JSONObject json = new JSONObject() ;
+					//TODO this fetch should not be done every iteration in the loop ... 
+					JsonObject tempObject = getObjectByUri(entry.getContentSrc()) ;
+					
+					json.put("id", (String) tempObject.getProperties().get("r_object_id")) ;
+					json.put("name", (String) tempObject.getProperties().get("object_name")) ;
+					json.put("rights", "drwxr-xr-x") ;
+					json.put("size", tempObject.getProperties().get("r_content_size")) ;					
+					
+					//parsing date
+					StringBuffer dateString = new StringBuffer((String)tempObject.getProperties().get("r_creation_date")) ;
+					dateString.replace(10, 11, " ").delete(18,28) ;
+					//System.out.println(dateString);
+					json.put("date", dateString.toString()) ;
+					json.put("type", type) ;
+					children.add(json) ;
+				}
+			}
+		}
+		JSONObject returnJson = new JSONObject() ;
+		returnJson.put("result", children) ;
+		return returnJson ;
+	}
+
+
+	//TODO the transformation part at the end of the method should be moved to controller ...
+	@Override
+	public JSONObject getAllCabinetsForFileManager() {
+		RestTemplate restTemplate = new RestTemplate();
+		String URI = data.dqlQuery + "select * from dm_cabinet";
+		System.out.println("Fetch Cabinets URI is " + URI);
+		ResponseEntity<JsonFeed> response = restTemplate.exchange(URI, HttpMethod.GET,
+				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
+
+		JsonFeed feed = response.getBody();
+		JSONArray children = new JSONArray() ;
+
+		
+		for (JsonEntry entry : feed.getEntries()) {			
+			JSONObject json = new JSONObject() ;
+			json.put("id", (String) entry.getContent().getProperties().get("r_object_id")) ;
+			json.put("name", (String) entry.getContent().getProperties().get("object_name")) ;
+			json.put("rights", "drwxr-xr-x") ;
+			json.put("size", "4096") ;
+			StringBuffer dateString = new StringBuffer((String) entry.getContent().getProperties().get("r_creation_date")) ;
+			dateString.replace(10, 11, " ").delete(18,28) ;
+			json.put("date", dateString.toString()) ;
+			json.put("type", "dir") ;
+			children.add(json) ;
+		}
+		
+		JSONObject returnJson = new JSONObject() ;
+		returnJson.put("result", children) ;
+		return returnJson ;
+
+	}
+	
+	
 	@Override
 	public JsonFeed getObjects(String uri) {
 		RestTemplate restTemplate = new RestTemplate();
