@@ -1,32 +1,26 @@
 package com.emc.documentum.wrappers;
 
+
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -50,6 +44,7 @@ import com.emc.documentum.wrappers.view.DocumentumAPIWrapper;
 @PropertySource("classpath:application.properties")
 public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 
+	Logger log = Logger.getLogger(this.getClass().getCanonicalName());
 	@Autowired
 	DCRestAPIWrapperData data;
 
@@ -282,11 +277,14 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 		ArrayList<NavigationObject> childeren = new ArrayList<NavigationObject>();
 
 		for (JsonLink link : feed.getLinks()) {
-			if(link.getHref().endsWith("documents") || link.getHref().endsWith("objects") || link.getHref().endsWith("folders")){
+			if (link.getHref().endsWith("documents") || link.getHref().endsWith("objects")
+					|| link.getHref().endsWith("folders")) {
 				JsonFeed child = getObjects(link.getHref());
 				for (JsonEntry entry : child.getEntries()) {
-					childeren.add(new NavigationObject((String) getObjectByUri(entry.getContentSrc()).getProperties().get("r_object_id"), folderId,
-							(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"), "cabinet"));
+					childeren.add(new NavigationObject(
+							(String) getObjectByUri(entry.getContentSrc()).getProperties().get("r_object_id"), folderId,
+							(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"),
+							"cabinet"));
 				}
 			}
 		}
@@ -302,8 +300,7 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 
 		return response.getBody();
 	}
-	
-	
+
 	@Override
 	public Object getDocumentContentById(String documentId) throws DocumentNotFoundException {
 		JsonObject document = getObjectById(documentId);
@@ -313,25 +310,43 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 	}
 
 	private Object getContentBase64Content(JsonObject content) {
-		JsonLink link = getLink(content.getLinks(), LinkRelation.enclosure);
-		String url = link.getHref();
-		RestTemplate restTemplate = new RestTemplate();
-		HttpHeaders httpHeader = createHeaders(data.username, data.password);
-		List<MediaType> mediaTypes = new ArrayList<MediaType>();
-		mediaTypes.add(MediaType.ALL);
-		httpHeader.setAccept(mediaTypes);
-		ResponseEntity<Resource> resource = restTemplate.exchange(url,HttpMethod.GET, new HttpEntity<Object>(httpHeader), Resource.class);
+		try {
+			JsonLink link = getLink(content.getLinks(), LinkRelation.enclosure);
+			String url = link.getHref();
+			System.out.println("ACS URL IS");
+			System.out.println(url);
+			RestTemplate restTemplate = new RestTemplate();
+			HttpHeaders httpHeader = createHeaders(data.username, data.password);
+			List<MediaType> mediaTypes = new ArrayList<MediaType>();
+			mediaTypes.add(MediaType.ALL);
+			httpHeader.setAccept(mediaTypes);
+			ResponseEntity<Resource> resource;
 
-		if (resource == null) {
-			
-		} else {
-			
+			resource = restTemplate.exchange(URLDecoder.decode(url, "UTF-8"), HttpMethod.GET,
+					new HttpEntity<Object>(httpHeader), Resource.class);
+
+			if (resource == null) {
+
+			} else {
+
 				System.out.println("Response Headers: " + resource.getHeaders());
 				System.out.println("Response status: " + resource.getStatusCode());
-			
+
+			}
+
+			if (resource.getBody() != null) {
+				InputStream docStream = resource.getBody().getInputStream();
+				byte[] fileContent = IOUtils.toByteArray(docStream);
+				byte[] encodedfile = Base64.encodeBase64(fileContent);
+				return encodedfile;
+			}else{
+				log.fine(content.getName() + " has empty content");
+			}
+		}  catch (IOException e) {
+			log.log(Level.SEVERE,"IO Exception while reading dm_document input stream",e);
 		}
-		
-		return resource;
+
+		return new byte [0];
 	}
 
 	private JsonLink getLink(List<JsonLink> links, String linkRelation) {
