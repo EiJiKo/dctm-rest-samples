@@ -250,7 +250,7 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 
 		for (JsonEntry entry : feed.getEntries()) {
 			cabinets.add(new NavigationObject((String) entry.getContent().getProperties().get("r_object_id"), "#",
-					(String) entry.getContent().getProperties().get("object_name"), "dmcabinet", new NavigationObject[1]));
+					(String) entry.getContent().getProperties().get("object_name"), "dmcabinet"));
 		}
 		return cabinets;
 	}
@@ -270,21 +270,17 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 		for (JsonLink link : feed.getLinks()) {
 			if(link.getHref().endsWith("documents") || link.getHref().endsWith("objects") || link.getHref().endsWith("folders")){
 				String type = "";
-				String hasChilderen = "";
 				if(link.getHref().endsWith("documents")){
 					type = "dmdocument";
-					hasChilderen = "false";
 				}else if(link.getHref().endsWith("folders")){
 					type = "dmfolder";
-					hasChilderen = "true";
 				}else if(link.getHref().endsWith("objects")){
 					type = "dmobject";
-					hasChilderen = "false";
 				}
 				JsonFeed child = getObjects(link.getHref());
 				for (JsonEntry entry : child.getEntries()) {
 					childeren.add(new NavigationObject((String) getObjectByUri(entry.getContentSrc()).getProperties().get("r_object_id"), folderId,
-							(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"), type, new NavigationObject[1]));
+							(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"), type));
 				}
 			}
 		}
