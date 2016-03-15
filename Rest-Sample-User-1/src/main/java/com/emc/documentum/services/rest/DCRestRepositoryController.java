@@ -85,9 +85,9 @@ public class DCRestRepositoryController {
 	
 	@CrossOrigin("*")
 	@RequestMapping(value = "get/{folderId}/children")
-	public ArrayList<NavigationObject> getChilderen(@PathVariable(value="folderId") String folderId){
+	public ArrayList<NavigationObject> getChildren(@PathVariable(value="folderId") String folderId){
 		try {
-			return dcRestDelegate.getChilderen(folderId);
+			return dcRestDelegate.getChildren(folderId);
 		} catch (Exception e) {
 			// TODO ObjectNotFoundException
 			throw e;

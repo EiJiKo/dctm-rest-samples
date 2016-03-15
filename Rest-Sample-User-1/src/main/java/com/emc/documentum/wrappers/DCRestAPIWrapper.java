@@ -264,7 +264,7 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 	}
 
 	@Override
-	public ArrayList<NavigationObject> getChilderen(String folderId) {
+	public ArrayList<NavigationObject> getChildren(String folderId) {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = data.fetchFolderURI + "/" + folderId;
 		System.out.println("Fetch Folder URI is " + URI);
@@ -273,30 +273,30 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 
 		JsonObject feed = response.getBody();
 
-		ArrayList<NavigationObject> childeren = new ArrayList<NavigationObject>();
+		ArrayList<NavigationObject> children = new ArrayList<NavigationObject>();
 
 		for (JsonLink link : feed.getLinks()) {
 			if (link.getHref().endsWith("documents") || link.getHref().endsWith("objects")){
 				String type = "";
-				String hasChilderen = "";
+				String hasChildren = "";
 				if(link.getHref().endsWith("documents")){
 					type = "dmdocument";
-					hasChilderen = "false";
+					hasChildren = "false";
 				}else if(link.getHref().endsWith("folders")){
 					type = "dmfolder";
-					hasChilderen = "true";
+					hasChildren = "true";
 				}else if(link.getHref().endsWith("objects")){
 					type = "dmobject";
-					hasChilderen = "false";
+					hasChildren = "false";
 				}
 				JsonFeed child = getObjects(link.getHref());
 				for (JsonEntry entry : child.getEntries()) {
-					childeren.add(new NavigationObject((String) getObjectByUri(entry.getContentSrc()).getProperties().get("r_object_id"), folderId,
+					children.add(new NavigationObject((String) getObjectByUri(entry.getContentSrc()).getProperties().get("r_object_id"), folderId,
 							(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"), type, new NavigationObject[1]));
 				}
 			}
 		}
-		return childeren;
+		return children;
 	}
 
 	@Override
