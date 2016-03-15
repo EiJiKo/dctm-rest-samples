@@ -85,9 +85,9 @@ public class DocumentumRepositoryDelegate {
 		}
 	}
 
-	public ArrayList<NavigationObject> getChilderen(String folderId) {
+	public ArrayList<NavigationObject> getChildren(String folderId) {
 		try {
-			return dcAPI.getChilderen(folderId);
+			return dcAPI.getChildren(folderId);
 		} catch (Exception e) {
 			//TODO Object Not Found Exception
 			throw e;
