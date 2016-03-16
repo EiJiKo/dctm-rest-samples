@@ -13,6 +13,9 @@ import com.emc.documentum.model.JsonFeed;
 import com.emc.documentum.model.JsonObject;
 import com.emc.documentum.model.UserModel;
 
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+
 public interface DocumentumAPIWrapper {
 
 	UserModel getUserInfo(String username, String password);
@@ -39,7 +42,8 @@ public interface DocumentumAPIWrapper {
 	JsonFeed getObjects(String uri);
 	
 	Object getDocumentContentById(String documentId) throws DocumentNotFoundException;
+
+	JSONObject getChildrenForFileManager(String folderId) ;
 	
-
-
+	JSONObject getAllCabinetsForFileManager() ;
 }

@@ -19,6 +19,8 @@ import com.emc.documentum.model.JsonObject;
 import com.emc.documentum.services.rest.DCRestRepositoryController;
 import com.emc.documentum.wrappers.view.DocumentumAPIWrapper;
 
+import net.minidev.json.JSONObject;
+
 @Component
 public class DocumentumRepositoryDelegate {
 	
@@ -93,6 +95,23 @@ public class DocumentumRepositoryDelegate {
 			throw e;
 		}
 	}
+	
+	public JSONObject getChildrenForFileManager(String folderId) {
+		try {
+			return dcAPI.getChildrenForFileManager(folderId) ;
+		} catch (Exception e) {
+			throw e;
+		}
+	}
+
+	public JSONObject getAllCabinetsForFileManager() {
+		try {
+			return dcAPI.getAllCabinetsForFileManager() ;
+		} catch (Exception e) {
+			throw e;
+		}
+	}
+
 	
 	public Object getDocumentContentById(String documentId) throws DocumentNotFoundException{
 		return dcAPI.getDocumentContentById(documentId);
