@@ -255,8 +255,7 @@ public class DCRestAPIWrapper {
 
 		for (JsonEntry entry : feed.getEntries()) {
 			cabinets.add(new NavigationObject((String) entry.getContent().getProperties().get("r_object_id"), "#",
-					(String) entry.getContent().getProperties().get("object_name"), "dmcabinet",
-					new NavigationObject[1]));
+					(String) entry.getContent().getProperties().get("object_name"), "Cabinet"));
 		}
 		return cabinets;
 	}
@@ -273,18 +272,12 @@ public class DCRestAPIWrapper {
 		ArrayList<NavigationObject> children = new ArrayList<NavigationObject>();
 
 		for (JsonLink link : feed.getLinks()) {
-			if (link.getHref().endsWith("documents") || link.getHref().endsWith("objects")) {
+			if (link.getHref().endsWith("documents") || link.getHref().endsWith("folders")) {
 				String type = "";
-				String hasChildren = "";
 				if (link.getHref().endsWith("documents")) {
-					type = "dmdocument";
-					hasChildren = "false";
+					type = "Document";
 				} else if (link.getHref().endsWith("folders")) {
-					type = "dmfolder";
-					hasChildren = "true";
-				} else if (link.getHref().endsWith("objects")) {
-					type = "dmobject";
-					hasChildren = "false";
+					type = "Folder";
 				}
 				JsonFeed child = getObjects(link.getHref());
 				if (child != null && child.getEntries() != null) {
@@ -292,8 +285,7 @@ public class DCRestAPIWrapper {
 						children.add(new NavigationObject(
 								(String) getObjectByUri(entry.getContentSrc()).getProperties().get("r_object_id"),
 								folderId,
-								(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"), type,
-								new NavigationObject[1]));
+								(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"), type));
 					}
 				}
 			}

@@ -6,22 +6,12 @@ public class NavigationObject {
 	String parent;
 	String text;
 	String type;
-	NavigationObject[] children;
 	
-	public NavigationObject(String id, String parent ,String text, String type, NavigationObject[] children) {
+	public NavigationObject(String id, String parent ,String text, String type) {
 		this.id = id;
 		this.parent = parent;
 		this.text = text;
 		this.type = type;
-		this.children = children;
-	}
-
-	public NavigationObject[]  getChildren() {
-		return children;
-	}
-
-	public void setChildren(NavigationObject[]  children) {
-		this.children = children;
 	}
 
 	public String getType() {

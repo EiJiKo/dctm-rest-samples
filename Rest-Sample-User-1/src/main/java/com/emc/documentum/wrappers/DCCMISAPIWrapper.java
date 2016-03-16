@@ -81,7 +81,7 @@ public class DCCMISAPIWrapper {
 		ArrayList<NavigationObject> navigationObjects = new ArrayList<>();
 		for (CmisObject o : children) {
 			navigationObjects.add(new NavigationObject(o.getId(), FolderConstants.ROOT, o.getName(),
-					o.getType().getDisplayName(), new NavigationObject[1]));
+					o.getType().getDisplayName()));
 		}
 		return navigationObjects;
 	}
@@ -92,8 +92,7 @@ public class DCCMISAPIWrapper {
 		ItemIterable<CmisObject> children = rootFolder.getChildren();
 		ArrayList<NavigationObject> navigationObjects = new ArrayList<>();
 		for (CmisObject o : children) {
-			navigationObjects.add(new NavigationObject(o.getId(), folderId, o.getName(), o.getType().getDisplayName(),
-					new NavigationObject[1]));
+			navigationObjects.add(new NavigationObject(o.getId(), folderId, o.getName(), o.getType().getDisplayName()));
 		}
 		return navigationObjects;
 	}

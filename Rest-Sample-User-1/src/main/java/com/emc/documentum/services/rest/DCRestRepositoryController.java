@@ -67,6 +67,7 @@ public class DCRestRepositoryController {
 		
 	}
 	
+	@CrossOrigin("*")
 	@RequestMapping(value = "get/cabinet/id/{cabinetId}")
 	public DocumentumObject getCabinetById(@PathVariable(value="cabinetId") String cabinetId) throws CabinetNotFoundException{
 		try {
