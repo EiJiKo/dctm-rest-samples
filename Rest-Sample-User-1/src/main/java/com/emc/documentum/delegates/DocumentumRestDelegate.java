@@ -129,4 +129,10 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	public byte[] getDocumentContentById(String documentId) throws DocumentNotFoundException{
 		return dcAPI.getDocumentContentById(documentId);
 	}
+
+	@Override
+	public ArrayList<DocumentumObject> getObjectByName(String name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

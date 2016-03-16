@@ -29,4 +29,6 @@ public interface DocumentumDelegate {
 
 	byte[] getDocumentContentById(String documentId) throws DocumentNotFoundException;
 
+	ArrayList<DocumentumObject> getObjectByName(String name);
+	
 }

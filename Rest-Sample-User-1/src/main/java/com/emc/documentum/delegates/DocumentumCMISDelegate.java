@@ -77,4 +77,10 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 		return dcAPI.getDocumentContentById(documentId);
 	}
 
+	@Override
+	public ArrayList<DocumentumObject> getObjectByName(String name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
