@@ -24,55 +24,57 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 
 	@Autowired
 	DCCMISAPIWrapper dcAPI;
-	
+
 	public DocumentumFolder createFolder(String cabinetName, String folderName)
 			throws FolderCreationException, CabinetNotFoundException {
 		try {
-			Folder folder = dcAPI.getFolderByPath("/"+cabinetName);
+			Folder folder = dcAPI.getFolderByPath("/" + cabinetName);
 			return ObjectMapper.convertCMISFolder(dcAPI.createFolder(folder, folderName));
-			
+
 		} catch (FolderNotFoundException e) {
-			//TODO
+			// TODO
 		}
-		//TODO
+		// TODO
 		return null;
 	}
 
 	@Override
 	public DocumentumDocument createDocument(DocumentCreation docCreation) throws DocumentumException {
-		
+
 		Folder folder = dcAPI.getFolderByPath(docCreation.getFolderPath());
 		return ObjectMapper.convertCMISDocument(dcAPI.createDocument(folder, docCreation.getProperties()));
 	}
 
 	@Override
 	public DocumentumFolder getCabinetByName(String cabinetName) throws CabinetNotFoundException {
-		// TODO Auto-generated method stub
+		try {
+			Folder folder = dcAPI.getFolderByPath("/" + cabinetName);
+			return ObjectMapper.convertCMISFolder(folder);
+		} catch (FolderNotFoundException e) {
+			// TODO
+		}
 		return null;
 	}
 
 	@Override
 	public DocumentumObject getObjectById(String cabinetId) throws CabinetNotFoundException {
-		// TODO Auto-generated method stub
-		return null;
+		return ObjectMapper.convertCMISObject(dcAPI.getObjectById(cabinetId));
 	}
 
 	@Override
 	public ArrayList<NavigationObject> getAllCabinets() {
-		// TODO Auto-generated method stub
-		return null;
+
+		return dcAPI.getAllCabinets();
 	}
 
 	@Override
 	public ArrayList<NavigationObject> getChildren(String folderId) {
-		// TODO Auto-generated method stub
-		return null;
+		return dcAPI.getChildren(folderId);
 	}
 
 	@Override
 	public byte[] getDocumentContentById(String documentId) throws DocumentNotFoundException {
-		// TODO Auto-generated method stub
-		return null;
+		return dcAPI.getDocumentContentById(documentId);
 	}
 
 }

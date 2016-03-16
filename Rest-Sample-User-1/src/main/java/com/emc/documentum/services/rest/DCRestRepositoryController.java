@@ -29,8 +29,8 @@ public class DCRestRepositoryController {
 	Logger log = Logger.getLogger(DCRestRepositoryController.class.getCanonicalName());
 
 	@Autowired
-	//@Qualifier("DocumentumCMISDelegate")
-	@Qualifier("DocumentumRestDelegate")
+	@Qualifier("DocumentumCMISDelegate")
+	//@Qualifier("DocumentumRestDelegate")
 	DocumentumDelegate dcRestDelegate;
 
 	@RequestMapping("/folder/create/{cabinetName}/{folderName}")

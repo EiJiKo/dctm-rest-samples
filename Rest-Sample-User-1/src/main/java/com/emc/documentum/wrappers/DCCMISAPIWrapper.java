@@ -13,11 +13,9 @@ import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
-import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.client.api.Repository;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.client.api.SessionFactory;
-import org.apache.chemistry.opencmis.client.runtime.ObjectIdImpl;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
@@ -27,18 +25,10 @@ import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
 import com.emc.documentum.constants.FolderConstants;
-import com.emc.documentum.dtos.DocumentumDocument;
-import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.NavigationObject;
-import com.emc.documentum.exceptions.CabinetNotFoundException;
-import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
-import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
-import com.emc.documentum.model.JsonFeed;
-import com.emc.documentum.model.JsonObject;
 import com.emc.documentum.model.UserModel;
-import com.emc.documentum.transformation.ObjectMapper;
 
 @Component("DCCMISAPIWrapper")
 public class DCCMISAPIWrapper {
@@ -152,6 +142,11 @@ public class DCCMISAPIWrapper {
 		properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
 		properties.put(PropertyIds.NAME, folderName);
 		return createFolder(folder, properties);
+	}
+
+	public CmisObject getObjectById(String cabinetId) {
+		return session.getObject(cabinetId);
+		
 	}
 
 }

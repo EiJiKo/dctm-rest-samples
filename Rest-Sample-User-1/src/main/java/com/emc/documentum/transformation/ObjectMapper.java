@@ -3,6 +3,7 @@ package com.emc.documentum.transformation;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.Property;
@@ -59,6 +60,18 @@ public class ObjectMapper {
 		return folder;
 	}
 	
+	public static DocumentumObject convertCMISObject(CmisObject cmisObject) {
+		DocumentumObject object = new DocumentumObject();
+		object.setId(cmisObject.getId());
+		object.setName(cmisObject.getName());
+		HashMap<String, Object> properties = new HashMap<>();
+		for (Property<?> property : cmisObject.getProperties()) {
+			properties.put(property.getDisplayName(), property.getValue());
+		}
+		object.setProperties(properties);
+		return object;
+	}
+	
 	public static DocumentumObject convertCoreRSObject(JsonObject restObject) {
 		DocumentumObject object = new DocumentumObject();
 		object.setId((String) restObject.getPropertyByName(DocumentumProperties.OBJECT_ID));
@@ -78,4 +91,6 @@ public class ObjectMapper {
 		document.setType(restDocument.getType());
 		return document;
 	}
+
+	
 }
