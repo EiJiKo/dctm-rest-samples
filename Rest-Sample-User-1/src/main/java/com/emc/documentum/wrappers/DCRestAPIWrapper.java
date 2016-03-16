@@ -276,14 +276,12 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 		ArrayList<NavigationObject> children = new ArrayList<NavigationObject>();
 
 		for (JsonLink link : feed.getLinks()) {
-			if (link.getHref().endsWith("documents") || link.getHref().endsWith("objects")){
+			if (link.getHref().endsWith("documents") || link.getHref().endsWith("folders")){
 				String type = "";
 				if(link.getHref().endsWith("documents")){
 					type = "dmdocument";
 				}else if(link.getHref().endsWith("folders")){
 					type = "dmfolder";
-				}else if(link.getHref().endsWith("objects")){
-					type = "dmobject";
 				}
 				JsonFeed child = getObjects(link.getHref());
 				for (JsonEntry entry : child.getEntries()) {
