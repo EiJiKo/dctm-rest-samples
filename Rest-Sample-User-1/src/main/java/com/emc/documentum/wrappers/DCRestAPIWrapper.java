@@ -1,6 +1,5 @@
 package com.emc.documentum.wrappers;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
@@ -37,11 +36,10 @@ import com.emc.documentum.model.JsonLink;
 import com.emc.documentum.model.JsonObject;
 import com.emc.documentum.model.Properties;
 import com.emc.documentum.model.UserModel;
-import com.emc.documentum.wrappers.view.DocumentumAPIWrapper;
 
-@Component
+@Component("DCRestAPIWrapper")
 @PropertySource("classpath:application.properties")
-public class DCRestAPIWrapper implements DocumentumAPIWrapper {
+public class DCRestAPIWrapper {
 
 	Logger log = Logger.getLogger(this.getClass().getCanonicalName());
 	@Autowired
@@ -54,7 +52,7 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 	 * com.emc.documentum.wrappers.DocumentumAPIWrapper#getUserInfo(java.lang.
 	 * String, java.lang.String)
 	 */
-	@Override
+
 	public UserModel getUserInfo(String username, String password) {
 		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<UserModel> response = restTemplate.exchange(data.currentUserURI, HttpMethod.GET,
@@ -84,7 +82,7 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 	 * com.emc.documentum.wrappers.DocumentumAPIWrapper#createFolder(com.emc.
 	 * documentum.model.JsonObject, java.lang.String)
 	 */
-	@Override
+
 	public JsonObject createFolder(JsonObject parent, String folderName) throws FolderCreationException {
 
 		RestTemplate restTemplate = new RestTemplate();
@@ -112,7 +110,7 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 	 * com.emc.documentum.wrappers.DocumentumAPIWrapper#createDocument(com.emc.
 	 * documentum.model.JsonObject, java.util.HashMap)
 	 */
-	@Override
+
 	public JsonObject createDocument(JsonObject parent, HashMap<String, Object> properties)
 			throws DocumentCreationException {
 		RestTemplate restTemplate = new RestTemplate();
@@ -139,7 +137,7 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 	 * com.emc.documentum.wrappers.DocumentumAPIWrapper#createDocument(com.emc.
 	 * documentum.model.JsonObject, java.lang.String, java.lang.String)
 	 */
-	@Override
+
 	public JsonObject createDocument(JsonObject parent, String documentName, String documentType)
 			throws DocumentCreationException {
 
@@ -157,7 +155,7 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 	 * com.emc.documentum.wrappers.DocumentumAPIWrapper#getCabinet(java.lang.
 	 * String)
 	 */
-	@Override
+
 	public JsonObject getCabinet(String cabinetName) throws CabinetNotFoundException {
 		System.out.println("Entering Get Cabinet");
 		RestTemplate restTemplate = new RestTemplate();
@@ -183,7 +181,7 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 	 * com.emc.documentum.wrappers.DocumentumAPIWrapper#getObject(java.lang.
 	 * String)
 	 */
-	@Override
+
 	public JsonObject getObjectByUri(String uri) {
 		RestTemplate restTemplate = new RestTemplate();
 		System.out.println("Fetch Object with URI is " + uri);
@@ -201,7 +199,7 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 	 * com.emc.documentum.wrappers.DocumentumAPIWrapper#getObjectById(java.lang.
 	 * String)
 	 */
-	@Override
+
 	public JsonObject getObjectById(String id) {
 		RestTemplate restTemplate = new RestTemplate();
 		String uri = data.fetchObjectUri + "/" + id;
@@ -219,7 +217,7 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 	 * com.emc.documentum.wrappers.DocumentumAPIWrapper#getFolderByPath(java.
 	 * lang.String)
 	 */
-	@Override
+
 	public JsonObject getFolderByPath(String queryFolderPath) throws FolderNotFoundException {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = String.format(
@@ -244,7 +242,6 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 		throw new FolderNotFoundException(queryFolderPath);
 	}
 
-	@Override
 	public ArrayList<NavigationObject> getAllCabinets() {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = data.dqlQuery + "select * from dm_cabinet";
@@ -258,12 +255,12 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 
 		for (JsonEntry entry : feed.getEntries()) {
 			cabinets.add(new NavigationObject((String) entry.getContent().getProperties().get("r_object_id"), "#",
-					(String) entry.getContent().getProperties().get("object_name"), "dmcabinet", new NavigationObject[1]));
+					(String) entry.getContent().getProperties().get("object_name"), "dmcabinet",
+					new NavigationObject[1]));
 		}
 		return cabinets;
 	}
 
-	@Override
 	public ArrayList<NavigationObject> getChildren(String folderId) {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = data.fetchFolderURI + "/" + folderId;
@@ -276,30 +273,34 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 		ArrayList<NavigationObject> children = new ArrayList<NavigationObject>();
 
 		for (JsonLink link : feed.getLinks()) {
-			if (link.getHref().endsWith("documents") || link.getHref().endsWith("objects")){
+			if (link.getHref().endsWith("documents") || link.getHref().endsWith("objects")) {
 				String type = "";
 				String hasChildren = "";
-				if(link.getHref().endsWith("documents")){
+				if (link.getHref().endsWith("documents")) {
 					type = "dmdocument";
 					hasChildren = "false";
-				}else if(link.getHref().endsWith("folders")){
+				} else if (link.getHref().endsWith("folders")) {
 					type = "dmfolder";
 					hasChildren = "true";
-				}else if(link.getHref().endsWith("objects")){
+				} else if (link.getHref().endsWith("objects")) {
 					type = "dmobject";
 					hasChildren = "false";
 				}
 				JsonFeed child = getObjects(link.getHref());
-				for (JsonEntry entry : child.getEntries()) {
-					children.add(new NavigationObject((String) getObjectByUri(entry.getContentSrc()).getProperties().get("r_object_id"), folderId,
-							(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"), type, new NavigationObject[1]));
+				if (child != null && child.getEntries() != null) {
+					for (JsonEntry entry : child.getEntries()) {
+						children.add(new NavigationObject(
+								(String) getObjectByUri(entry.getContentSrc()).getProperties().get("r_object_id"),
+								folderId,
+								(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"), type,
+								new NavigationObject[1]));
+					}
 				}
 			}
 		}
 		return children;
 	}
 
-	@Override
 	public JsonFeed getObjects(String uri) {
 		RestTemplate restTemplate = new RestTemplate();
 		System.out.println("Fetch Object with URI is " + uri);
@@ -309,15 +310,14 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 		return response.getBody();
 	}
 
-	@Override
-	public Object getDocumentContentById(String documentId) throws DocumentNotFoundException {
+	public byte[] getDocumentContentById(String documentId) throws DocumentNotFoundException {
 		JsonObject document = getObjectById(documentId);
 		JsonLink link = getLink(document.getLinks(), LinkRelation.mainContent);
 		JsonObject content = getObjectByUri(link.getHref());
 		return getContentBase64Content(content);
 	}
 
-	private Object getContentBase64Content(JsonObject content) {
+	private byte[] getContentBase64Content(JsonObject content) {
 		try {
 			JsonLink link = getLink(content.getLinks(), LinkRelation.enclosure);
 			String url = link.getHref();
@@ -347,14 +347,14 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 				byte[] fileContent = IOUtils.toByteArray(docStream);
 				byte[] encodedfile = Base64.encodeBase64(fileContent);
 				return encodedfile;
-			}else{
+			} else {
 				log.fine(content.getName() + " has empty content");
 			}
-		}  catch (IOException e) {
-			log.log(Level.SEVERE,"IO Exception while reading dm_document input stream",e);
+		} catch (IOException e) {
+			log.log(Level.SEVERE, "IO Exception while reading dm_document input stream", e);
 		}
 
-		return new byte [0];
+		return new byte[0];
 	}
 
 	private JsonLink getLink(List<JsonLink> links, String linkRelation) {

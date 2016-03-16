@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
@@ -84,6 +85,15 @@ public class JsonObject {
 		}
 		
 		return "";
+	}
+	
+	@JsonIgnore
+	public Object getPropertyByName(String name){
+		if(properties != null){
+			return properties.get(name);
+		}
+		
+		return null;
 	}
 
 }

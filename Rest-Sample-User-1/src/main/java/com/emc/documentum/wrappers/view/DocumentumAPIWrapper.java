@@ -3,6 +3,8 @@ package com.emc.documentum.wrappers.view;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.emc.documentum.dtos.DocumentumDocument;
+import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.NavigationObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.DocumentCreationException;
@@ -13,6 +15,8 @@ import com.emc.documentum.model.JsonFeed;
 import com.emc.documentum.model.JsonObject;
 import com.emc.documentum.model.UserModel;
 
+
+@Deprecated
 public interface DocumentumAPIWrapper {
 
 	UserModel getUserInfo(String username, String password);
@@ -30,7 +34,7 @@ public interface DocumentumAPIWrapper {
 
 	JsonObject getObjectById(String id);
 
-	JsonObject getFolderByPath(String queryFolderPath) throws FolderNotFoundException;
+	Object getFolderByPath(String queryFolderPath) throws FolderNotFoundException;
 	
 	ArrayList<NavigationObject> getAllCabinets();
 
@@ -39,6 +43,8 @@ public interface DocumentumAPIWrapper {
 	JsonFeed getObjects(String uri);
 	
 	Object getDocumentContentById(String documentId) throws DocumentNotFoundException;
+
+	DocumentumDocument createDocument(DocumentumFolder folder, HashMap<String, Object> properties);
 	
 
 

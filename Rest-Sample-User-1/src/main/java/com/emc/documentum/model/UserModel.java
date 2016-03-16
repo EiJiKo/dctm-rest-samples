@@ -10,6 +10,10 @@ public class UserModel {
 	String definition;
 	HashMap<String,String> properties;
 	
+	public UserModel(){
+		properties = new HashMap<>();
+	}
+	
 	@Override
 	public String toString() {
 		return "UserModel [name=" + name + ", type=" + type + ", definition=" + definition + ", properties="

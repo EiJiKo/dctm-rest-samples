@@ -16,11 +16,11 @@ public class NavigationObject {
 		this.children = children;
 	}
 
-	public NavigationObject[]  getChilderen() {
+	public NavigationObject[]  getChildren() {
 		return children;
 	}
 
-	public void setChilderen(NavigationObject[]  children) {
+	public void setChildren(NavigationObject[]  children) {
 		this.children = children;
 	}
 
