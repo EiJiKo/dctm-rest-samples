@@ -21,6 +21,7 @@ import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
+import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
@@ -101,13 +102,15 @@ public class DCCMISAPIWrapper {
 		Session session = getSession("dmadmin", "password");
 		Document document = (Document) session.getObject(documentId);
 
-		String fileContent;
+		//String fileContent;
 		try {
 			System.out.println(document.getContentStreamLength());
 			System.out.println(document.getContentStream().getLength());
-			fileContent = getContentAsString(document.getContentStream());
-			System.out.println(fileContent.length());
-			byte[] encodedfile = Base64.encodeBase64(fileContent.getBytes());
+			
+			//fileContent = getContentAsString(document.getContentStream());
+			//System.out.println(fileContent.length());
+			byte[] fileContent = IOUtils.toByteArray(document.getContentStream().getStream());
+			byte[] encodedfile = Base64.encodeBase64(fileContent);
 			System.out.println(encodedfile);
 			return encodedfile;
 		} catch (IOException e) {
@@ -145,7 +148,11 @@ public class DCCMISAPIWrapper {
 
 	public CmisObject getObjectById(String cabinetId) {
 		return session.getObject(cabinetId);
-		
+	}
+	
+	public CmisObject[] getObjectsByName(String name){
+//		session.createQueryStatement("Select * from ")
+		return null;
 	}
 
 }

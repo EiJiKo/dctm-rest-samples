@@ -101,8 +101,8 @@ public class DCRestRepositoryController {
 	}
 	
 	@RequestMapping(value= "get/document/content/id/{documentId}")
-	public byte[] getDocumentContentById(@PathVariable(value="documentId")String documentId) throws DocumentNotFoundException{
-		return (byte[]) dcRestDelegate.getDocumentContentById(documentId);
+	public Object getDocumentContentById(@PathVariable(value="documentId")String documentId) throws DocumentNotFoundException{
+		return  dcRestDelegate.getDocumentContentById(documentId);
 	}
 
 }
