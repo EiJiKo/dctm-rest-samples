@@ -2,6 +2,7 @@ package com.emc.documentum.transformation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Document;
@@ -20,16 +21,23 @@ public class ObjectMapper {
 
 	}
 
+	private  static void mapProperties(DocumentumObject object , List<Property<?>> properties){
+		HashMap<String, Object> objectProperties = object.getProperties();
+		for (Property<?> property : properties) {
+//			if(property.getLocalName().startsWith("i_")){
+//				continue;
+//			}
+			objectProperties.put(property.getLocalName(), property.getValue());
+		}
+	}
+	
 	public static DocumentumFolder convertCMISFolder(Folder cmisFolder) {
 		DocumentumFolder folder = new DocumentumFolder();
 		folder.setId(cmisFolder.getId());
 		folder.setPath(cmisFolder.getPath());
 		folder.setName(cmisFolder.getDescription());
-		HashMap<String, Object> properties = new HashMap<>();
-		for (Property<?> property : cmisFolder.getProperties()) {
-			properties.put(property.getDisplayName(), property.getValue());
-		}
-		folder.setProperties(properties);
+		mapProperties(folder, cmisFolder.getProperties());
+		
 		return folder;
 	}
 
@@ -38,11 +46,7 @@ public class ObjectMapper {
 		document.setId(cmisDocument.getId());
 		document.setName(cmisDocument.getName());
 		document.setPath(cmisDocument.getPaths().get(0));
-		HashMap<String, Object> properties = new HashMap<>();
-		for (Property<?> property : cmisDocument.getProperties()) {
-			properties.put(property.getDisplayName(), property.getValue());
-		}
-		document.setProperties(properties);
+		mapProperties(document, cmisDocument.getProperties());
 		return document;
 	}
 
@@ -64,11 +68,7 @@ public class ObjectMapper {
 		DocumentumObject object = new DocumentumObject();
 		object.setId(cmisObject.getId());
 		object.setName(cmisObject.getName());
-		HashMap<String, Object> properties = new HashMap<>();
-		for (Property<?> property : cmisObject.getProperties()) {
-			properties.put(property.getDisplayName(), property.getValue());
-		}
-		object.setProperties(properties);
+		mapProperties(object, cmisObject.getProperties());
 		return object;
 	}
 	

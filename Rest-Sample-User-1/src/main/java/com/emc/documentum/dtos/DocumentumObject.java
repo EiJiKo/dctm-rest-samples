@@ -65,4 +65,7 @@ public  class DocumentumObject {
 		this.path = path;
 	}
 	
+	public DocumentumObject(){
+		properties = new HashMap<>();
+	}
 }
