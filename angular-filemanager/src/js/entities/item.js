@@ -176,13 +176,15 @@
         };
 
         Item.prototype.getUrl = function(preview) {
-            var path = this.model.fullPath();
-            var data = {
-                mode: 'download',
-                preview: preview,
-                path: path
-            };
-            return path && [fileManagerConfig.downloadFileUrl, $.param(data)].join('?');
+          /*var path = this.model.fullPath();
+          var data = {
+              //mode: 'download',
+              //preview: preview,
+              //path: path,
+              documentId: this.model.id
+          };*/
+          //return path && [fileManagerConfig.downloadFileUrl, $.param(data)].join('?');
+          return fileManagerConfig.downloadFileUrl + this.model.id;
         };
 
         Item.prototype.download = function(preview) {
