@@ -2,6 +2,7 @@ package com.emc.documentum.services.rest;
 
 import java.nio.charset.Charset;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import com.emc.documentum.delegates.DocumentumRepositoryDelegate;
+import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.model.UserModel;
 
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
-import net.minidev.json.parser.ParseException;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -124,7 +126,19 @@ public class FileManagerController {
 	}
 
 	// TODO getContentUrl
-	// TODO downloadFileUrl
+	
+	//downloadFileUrl
+	@RequestMapping(value= "/api/document/content/{documentId}")
+	public byte[] getDocumentContentById(@PathVariable(value="documentId")String documentId) throws DocumentNotFoundException{
+		try {
+			byte[] enCodedfileContent = (byte[]) dcRestDelegate.getDocumentContentById(documentId);
+			return Base64.decodeBase64(enCodedfileContent);		
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null ;
+	}	
+
 
 	String commonResponse() {
 		JSONObject resultJson = new JSONObject();
@@ -134,6 +148,5 @@ public class FileManagerController {
 
 		resultJson.put("result", json);
 		return resultJson.toJSONString();
-		// return "{ \"result\": { \"success\": true, \"error\": null } }" ;
 	}
 }
