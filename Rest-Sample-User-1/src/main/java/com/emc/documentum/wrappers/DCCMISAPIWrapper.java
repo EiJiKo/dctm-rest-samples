@@ -13,13 +13,18 @@ import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
+import org.apache.chemistry.opencmis.client.api.OperationContext;
+import org.apache.chemistry.opencmis.client.api.QueryResult;
+import org.apache.chemistry.opencmis.client.api.QueryStatement;
 import org.apache.chemistry.opencmis.client.api.Repository;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.client.api.SessionFactory;
+import org.apache.chemistry.opencmis.client.runtime.OperationContextImpl;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
+import org.apache.chemistry.opencmis.commons.data.PropertyData;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
@@ -42,7 +47,7 @@ public class DCCMISAPIWrapper {
 		Map<String, String> parameter = new HashMap<String, String>();
 		parameter.put(SessionParameter.USER, username);
 		parameter.put(SessionParameter.PASSWORD, password);
-		parameter.put(SessionParameter.ATOMPUB_URL, "http://documentum:8080/emc-cmis-1.1/atom11/");
+		parameter.put(SessionParameter.ATOMPUB_URL, "http://documentum:8080/emc-cmis/resources/");
 		parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
 		List<Repository> repositories = new ArrayList<Repository>();
 		repositories = sessionFactory.getRepositories(parameter);
@@ -81,8 +86,8 @@ public class DCCMISAPIWrapper {
 		ItemIterable<CmisObject> children = rootFolder.getChildren();
 		ArrayList<NavigationObject> navigationObjects = new ArrayList<>();
 		for (CmisObject o : children) {
-			navigationObjects.add(new NavigationObject(o.getId(), FolderConstants.ROOT, o.getName(),
-					o.getType().getDisplayName()));
+			navigationObjects.add(
+					new NavigationObject(o.getId(), FolderConstants.ROOT, o.getName(), o.getType().getDisplayName()));
 		}
 		return navigationObjects;
 	}
@@ -102,13 +107,13 @@ public class DCCMISAPIWrapper {
 		Session session = getSession("dmadmin", "password");
 		Document document = (Document) session.getObject(documentId);
 
-		//String fileContent;
+		// String fileContent;
 		try {
 			System.out.println(document.getContentStreamLength());
 			System.out.println(document.getContentStream().getLength());
-			
-			//fileContent = getContentAsString(document.getContentStream());
-			//System.out.println(fileContent.length());
+
+			// fileContent = getContentAsString(document.getContentStream());
+			// System.out.println(fileContent.length());
 			byte[] fileContent = IOUtils.toByteArray(document.getContentStream().getStream());
 			byte[] encodedfile = Base64.encodeBase64(fileContent);
 			System.out.println(encodedfile);
@@ -149,10 +154,16 @@ public class DCCMISAPIWrapper {
 	public CmisObject getObjectById(String cabinetId) {
 		return session.getObject(cabinetId);
 	}
-	
-	public CmisObject[] getObjectsByName(String name){
-//		session.createQueryStatement("Select * from ")
-		return null;
+
+	public ItemIterable<QueryResult> getObjectsByName(String name){
+		String queryString = String.format("Select * from cmis:document where cmis:name like '%s'","%" +name + "%");
+		log.info("Executing Query " + queryString);
+		QueryStatement queryStatement = session.createQueryStatement(queryString);
+		
+		OperationContext operationContext = new OperationContextImpl();
+		operationContext.setMaxItemsPerPage(20);
+		ItemIterable<QueryResult> queryResult = queryStatement.query(false, operationContext);
+		return queryResult;
 	}
 
 }

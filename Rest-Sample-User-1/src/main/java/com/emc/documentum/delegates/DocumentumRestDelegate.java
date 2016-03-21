@@ -131,8 +131,12 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getObjectByName(String name) {
-		// TODO Auto-generated method stub
-		return null;
+	public ArrayList<DocumentumObject> getDocumentByName(String name) {
+		try {
+			return ObjectMapper.convertCoreRSEntryList(dcAPI.getDocumentByName(name));
+		} catch (DocumentNotFoundException e) {
+			return new ArrayList<DocumentumObject>();
+		}
+		
 	}
 }

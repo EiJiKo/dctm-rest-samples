@@ -1,8 +1,11 @@
 package com.emc.documentum.delegates;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import org.apache.chemistry.opencmis.client.api.Folder;
+import org.apache.chemistry.opencmis.client.api.ItemIterable;
+import org.apache.chemistry.opencmis.client.api.QueryResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +24,8 @@ import com.emc.documentum.wrappers.DCCMISAPIWrapper;
 
 @Component("DocumentumCMISDelegate")
 public class DocumentumCMISDelegate implements DocumentumDelegate {
+
+	Logger log = Logger.getLogger(DocumentumCMISDelegate.class.getCanonicalName());
 
 	@Autowired
 	DCCMISAPIWrapper dcAPI;
@@ -78,9 +83,10 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getObjectByName(String name) {
-		// TODO Auto-generated method stub
-		return null;
+	public ArrayList<DocumentumObject> getDocumentByName(String name) {
+		log.info("Get Objecy By Name :" + name);
+		ItemIterable<QueryResult> documentList = dcAPI.getObjectsByName(name);
+		return ObjectMapper.convertCMISQueryResultList(documentList);
 	}
 
 }

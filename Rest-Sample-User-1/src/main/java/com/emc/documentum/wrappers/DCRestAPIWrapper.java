@@ -3,6 +3,7 @@ package com.emc.documentum.wrappers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -285,7 +286,8 @@ public class DCRestAPIWrapper {
 						children.add(new NavigationObject(
 								(String) getObjectByUri(entry.getContentSrc()).getProperties().get("r_object_id"),
 								folderId,
-								(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"), type));
+								(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"),
+								type));
 					}
 				}
 			}
@@ -349,13 +351,31 @@ public class DCRestAPIWrapper {
 		return new byte[0];
 	}
 
-	private JsonLink getLink(List<JsonLink> links, String linkRelation) {
+	public static JsonLink getLink(List<JsonLink> links, String linkRelation) {
 		for (JsonLink link : links) {
 			if (link.getRel().equals(linkRelation)) {
 				return link;
 			}
 		}
 		return null;
+
+	}
+
+	public List<JsonEntry> getDocumentByName(String name) throws DocumentNotFoundException {
+		RestTemplate restTemplate = new RestTemplate();
+		String URI = String.format(data.dqlQuery + "select * from dm_document where object_name like '%s'",
+				"%" + name + "%");
+		System.out.println("Fetch URI is " + URLEncoder.encode(URI));
+		ResponseEntity<JsonFeed> response = restTemplate.exchange(URI, HttpMethod.GET,
+				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
+
+		JsonFeed feed = response.getBody();
+		
+		if(feed == null){
+			throw new DocumentNotFoundException(name);
+		}
+		
+		return feed.getEntries();
 
 	}
 

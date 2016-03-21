@@ -105,9 +105,9 @@ public class CoreRestRepositoryController {
 	}
 	
 	@RequestMapping(value= "document/search/{name:.+}")
-	public Object searchDocumentByName(@PathVariable(value="name") String name){
+	public ArrayList<DocumentumObject> searchDocumentByName(@PathVariable(value="name") String name){
 		log.entering("searchDocumentByName", name);
-		return dcRestDelegate.getObjectByName(name);
+		return dcRestDelegate.getDocumentByName(name);
 		
 	}
 

@@ -104,5 +104,12 @@ public class DCRestRepositoryController {
 	public Object getDocumentContentById(@PathVariable(value="documentId")String documentId) throws DocumentNotFoundException{
 		return  dcRestDelegate.getDocumentContentById(documentId);
 	}
+	
+	@RequestMapping(value= "document/search/{name:.+}")
+	public ArrayList<DocumentumObject> searchDocumentByName(@PathVariable(value="name") String name){
+		log.entering("searchDocumentByName", name);
+		return dcRestDelegate.getDocumentByName(name);
+		
+	}
 
 }

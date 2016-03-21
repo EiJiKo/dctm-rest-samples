@@ -1,10 +1,11 @@
 package com.emc.documentum.dtos;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-public  class DocumentumObject {
+public  class DocumentumObject implements Serializable {
 
 	private String id;
 	private String path;
@@ -67,5 +68,6 @@ public  class DocumentumObject {
 	
 	public DocumentumObject(){
 		properties = new HashMap<>();
+		setType("Object");
 	}
 }

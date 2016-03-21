@@ -104,10 +104,10 @@ public class CMISRepositoryController {
 		return  dcRestDelegate.getDocumentContentById(documentId);
 	}
 	
-	@RequestMapping(value= "document/search/{name:.+}")
-	public Object searchDocumentByName(@PathVariable(value="name") String name){
+	@RequestMapping(value= "document/search/{name}")
+	public ArrayList<DocumentumObject> searchDocumentByName(@PathVariable(value="name") String name){
 		log.entering("searchDocumentByName", name);
-		return dcRestDelegate.getObjectByName(name);
+		return dcRestDelegate.getDocumentByName(name);
 		
 	}
 
