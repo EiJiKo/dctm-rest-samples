@@ -9,3 +9,9 @@ Rest-Sample-User-1/target
 *_BASE_*.java
 *_LOCAL_*.java
 *_REMOTE_*.java
+gs-spring-boot-master/complete/target/
+gs-spring-boot-master/complete/.classpath
+gs-spring-boot-master/complete/.project
+gs-spring-boot-master/complete/.settings/org.eclipse.core.resources.prefs
+gs-spring-boot-master/complete/.settings/org.eclipse.jdt.core.prefs
+gs-spring-boot-master/complete/.settings/org.eclipse.m2e.core.prefs
