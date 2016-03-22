@@ -7,6 +7,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 public  class DocumentumObject implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7947371281083780726L;
 	private String id;
 	private String path;
 	private String name;

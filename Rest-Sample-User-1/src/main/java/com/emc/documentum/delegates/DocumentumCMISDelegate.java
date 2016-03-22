@@ -19,7 +19,7 @@ import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
-import com.emc.documentum.transformation.ObjectMapper;
+import com.emc.documentum.transformation.CMISTransformation;
 import com.emc.documentum.wrappers.DCCMISAPIWrapper;
 
 @Component("DocumentumCMISDelegate")
@@ -34,7 +34,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 			throws FolderCreationException, CabinetNotFoundException {
 		try {
 			Folder folder = dcAPI.getFolderByPath("/" + cabinetName);
-			return ObjectMapper.convertCMISFolder(dcAPI.createFolder(folder, folderName));
+			return CMISTransformation.convertCMISFolder(dcAPI.createFolder(folder, folderName));
 
 		} catch (FolderNotFoundException e) {
 			// TODO
@@ -47,14 +47,14 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	public DocumentumDocument createDocument(DocumentCreation docCreation) throws DocumentumException {
 
 		Folder folder = dcAPI.getFolderByPath(docCreation.getFolderPath());
-		return ObjectMapper.convertCMISDocument(dcAPI.createDocument(folder, docCreation.getProperties()));
+		return CMISTransformation.convertCMISDocument(dcAPI.createDocument(folder, docCreation.getProperties()));
 	}
 
 	@Override
 	public DocumentumFolder getCabinetByName(String cabinetName) throws CabinetNotFoundException {
 		try {
 			Folder folder = dcAPI.getFolderByPath("/" + cabinetName);
-			return ObjectMapper.convertCMISFolder(folder);
+			return CMISTransformation.convertCMISFolder(folder);
 		} catch (FolderNotFoundException e) {
 			// TODO
 		}
@@ -63,7 +63,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 
 	@Override
 	public DocumentumObject getObjectById(String cabinetId) throws CabinetNotFoundException {
-		return ObjectMapper.convertCMISObject(dcAPI.getObjectById(cabinetId));
+		return CMISTransformation.convertCMISObject(dcAPI.getObjectById(cabinetId));
 	}
 
 	@Override
@@ -86,7 +86,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	public ArrayList<DocumentumObject> getDocumentByName(String name) {
 		log.info("Get Objecy By Name :" + name);
 		ItemIterable<QueryResult> documentList = dcAPI.getObjectsByName(name);
-		return ObjectMapper.convertCMISQueryResultList(documentList);
+		return CMISTransformation.convertCMISQueryResultList(documentList);
 	}
 
 }

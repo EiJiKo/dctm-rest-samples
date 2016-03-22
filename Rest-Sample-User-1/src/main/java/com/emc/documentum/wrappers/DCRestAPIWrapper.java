@@ -3,7 +3,6 @@ package com.emc.documentum.wrappers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -365,7 +364,6 @@ public class DCRestAPIWrapper {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = String.format(data.dqlQuery + "select * from dm_document where object_name like '%s'",
 				"%" + name + "%");
-		System.out.println("Fetch URI is " + URLEncoder.encode(URI));
 		ResponseEntity<JsonFeed> response = restTemplate.exchange(URI, HttpMethod.GET,
 				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
 

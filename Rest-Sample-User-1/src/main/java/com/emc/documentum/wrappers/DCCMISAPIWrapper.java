@@ -1,7 +1,6 @@
 package com.emc.documentum.wrappers;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,8 +22,6 @@ import org.apache.chemistry.opencmis.client.runtime.OperationContextImpl;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
-import org.apache.chemistry.opencmis.commons.data.ContentStream;
-import org.apache.chemistry.opencmis.commons.data.PropertyData;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
@@ -125,21 +122,6 @@ public class DCCMISAPIWrapper {
 		return new byte[0];
 	}
 
-	private static String getContentAsString(ContentStream stream) throws IOException {
-		InputStream in2 = stream.getStream();
-		StringBuffer sbuf = null;
-		sbuf = new StringBuffer(in2.available());
-		int count;
-		byte[] buf2 = new byte[100];
-		while ((count = in2.read(buf2)) != -1) {
-			for (int i = 0; i < count; i++) {
-				sbuf.append((char) buf2[i]);
-			}
-		}
-		in2.close();
-		return sbuf.toString();
-	}
-
 	public Folder createFolder(Folder folder, Map<String, ?> properties) {
 		return folder.createFolder(properties);
 	}
@@ -155,11 +137,11 @@ public class DCCMISAPIWrapper {
 		return session.getObject(cabinetId);
 	}
 
-	public ItemIterable<QueryResult> getObjectsByName(String name){
-		String queryString = String.format("Select * from cmis:document where cmis:name like '%s'","%" +name + "%");
+	public ItemIterable<QueryResult> getObjectsByName(String name) {
+		String queryString = String.format("Select * from cmis:document where cmis:name like '%s'", "%" + name + "%");
 		log.info("Executing Query " + queryString);
 		QueryStatement queryStatement = session.createQueryStatement(queryString);
-		
+
 		OperationContext operationContext = new OperationContextImpl();
 		operationContext.setMaxItemsPerPage(20);
 		ItemIterable<QueryResult> queryResult = queryStatement.query(false, operationContext);
