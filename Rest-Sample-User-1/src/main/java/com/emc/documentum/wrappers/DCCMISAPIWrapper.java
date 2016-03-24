@@ -27,8 +27,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
-import com.emc.documentum.constants.FolderConstants;
-import com.emc.documentum.dtos.NavigationObject;
+import com.emc.documentum.dtos.DocumentumFolder;
+import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
 import com.emc.documentum.model.UserModel;
@@ -77,25 +77,25 @@ public class DCCMISAPIWrapper {
 		return (Folder) session.getObjectByPath(queryFolderPath);
 	}
 
-	public ArrayList<NavigationObject> getAllCabinets() {
+	public ArrayList<DocumentumFolder> getAllCabinets() {
 		Session session = getSession("dmadmin", "password");
 		Folder rootFolder = session.getRootFolder();
 		ItemIterable<CmisObject> children = rootFolder.getChildren();
-		ArrayList<NavigationObject> navigationObjects = new ArrayList<>();
+		ArrayList<DocumentumFolder> navigationObjects = new ArrayList<>();
 		for (CmisObject o : children) {
 			navigationObjects.add(
-					new NavigationObject(o.getId(), FolderConstants.ROOT, o.getName(), o.getType().getDisplayName()));
+					new DocumentumFolder(o.getId(), o.getName(), o.getType().getDisplayName()));
 		}
 		return navigationObjects;
 	}
 
-	public ArrayList<NavigationObject> getChildren(String folderId) {
+	public ArrayList<DocumentumObject> getChildren(String folderId) {
 		Session session = getSession("dmadmin", "password");
 		Folder rootFolder = (Folder) session.getObject(folderId);
 		ItemIterable<CmisObject> children = rootFolder.getChildren();
-		ArrayList<NavigationObject> navigationObjects = new ArrayList<>();
+		ArrayList<DocumentumObject> navigationObjects = new ArrayList<>();
 		for (CmisObject o : children) {
-			navigationObjects.add(new NavigationObject(o.getId(), folderId, o.getName(), o.getType().getDisplayName()));
+			navigationObjects.add(new DocumentumObject(o.getId(), o.getName(), o.getType().getDisplayName()));
 		}
 		return navigationObjects;
 	}

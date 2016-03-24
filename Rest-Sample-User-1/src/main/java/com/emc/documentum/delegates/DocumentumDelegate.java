@@ -6,7 +6,6 @@ import com.emc.documentum.dtos.DocumentCreation;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
-import com.emc.documentum.dtos.NavigationObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
@@ -23,9 +22,9 @@ public interface DocumentumDelegate {
 
 	DocumentumObject getObjectById(String cabinetId) throws CabinetNotFoundException;
 
-	ArrayList<NavigationObject> getAllCabinets();
+	ArrayList<DocumentumFolder> getAllCabinets();
 
-	ArrayList<NavigationObject> getChildren(String folderId);
+	ArrayList<DocumentumObject> getChildren(String folderId);
 
 	byte[] getDocumentContentById(String documentId) throws DocumentNotFoundException;
 

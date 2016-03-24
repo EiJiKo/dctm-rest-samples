@@ -13,7 +13,6 @@ import com.emc.documentum.dtos.DocumentCreation;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
-import com.emc.documentum.dtos.NavigationObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
@@ -67,13 +66,13 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public ArrayList<NavigationObject> getAllCabinets() {
+	public ArrayList<DocumentumFolder> getAllCabinets() {
 
 		return dcAPI.getAllCabinets();
 	}
 
 	@Override
-	public ArrayList<NavigationObject> getChildren(String folderId) {
+	public ArrayList<DocumentumObject> getChildren(String folderId) {
 		return dcAPI.getChildren(folderId);
 	}
 

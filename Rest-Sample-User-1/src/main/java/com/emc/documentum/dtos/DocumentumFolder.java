@@ -11,4 +11,13 @@ public class DocumentumFolder extends DocumentumObject {
 		super();
 		setType("Folder");
 	}
+	
+	public DocumentumFolder(String id ,String name, String type) {
+		super(id, name, type);
+	}
+	
+	public DocumentumFolder(String id ,String name) {
+		super(id, name);
+		setType("Folder");
+	}
 }

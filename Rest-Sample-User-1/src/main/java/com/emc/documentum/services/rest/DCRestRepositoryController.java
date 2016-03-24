@@ -17,7 +17,6 @@ import com.emc.documentum.dtos.DocumentCreation;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
-import com.emc.documentum.dtos.NavigationObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
@@ -80,7 +79,7 @@ public class DCRestRepositoryController {
 	
 	@CrossOrigin("*")
 	@RequestMapping(value = "get/cabinets")
-	public ArrayList<NavigationObject> getAllCabinets(){
+	public ArrayList<DocumentumFolder> getAllCabinets(){
 		try {
 			return dcRestDelegate.getAllCabinets();
 		} catch (Exception e) {
@@ -91,7 +90,7 @@ public class DCRestRepositoryController {
 	
 	@CrossOrigin("*")
 	@RequestMapping(value = "get/{folderId}/children")
-	public ArrayList<NavigationObject> getChildren(@PathVariable(value="folderId") String folderId){
+	public ArrayList<DocumentumObject> getChildren(@PathVariable(value="folderId") String folderId){
 		try {
 			return dcRestDelegate.getChildren(folderId);
 		} catch (Exception e) {

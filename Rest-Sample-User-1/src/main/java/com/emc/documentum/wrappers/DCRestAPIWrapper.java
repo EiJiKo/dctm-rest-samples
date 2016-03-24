@@ -24,7 +24,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.emc.documentum.constants.DCRestAPIWrapperData;
 import com.emc.documentum.constants.LinkRelation;
-import com.emc.documentum.dtos.NavigationObject;
+import com.emc.documentum.dtos.DocumentumFolder;
+import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
@@ -242,7 +243,7 @@ public class DCRestAPIWrapper {
 		throw new FolderNotFoundException(queryFolderPath);
 	}
 
-	public ArrayList<NavigationObject> getAllCabinets() {
+	public ArrayList<DocumentumFolder> getAllCabinets() {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = data.dqlQuery + "select * from dm_cabinet";
 		System.out.println("Fetch Cabinets URI is " + URI);
@@ -251,16 +252,16 @@ public class DCRestAPIWrapper {
 
 		JsonFeed feed = response.getBody();
 
-		ArrayList<NavigationObject> cabinets = new ArrayList<NavigationObject>();
+		ArrayList<DocumentumFolder> cabinets = new ArrayList<>();
 
 		for (JsonEntry entry : feed.getEntries()) {
-			cabinets.add(new NavigationObject((String) entry.getContent().getProperties().get("r_object_id"), "#",
+			cabinets.add(new DocumentumFolder((String) entry.getContent().getProperties().get("r_object_id"),
 					(String) entry.getContent().getProperties().get("object_name"), "Cabinet"));
 		}
 		return cabinets;
 	}
 
-	public ArrayList<NavigationObject> getChildren(String folderId) {
+	public ArrayList<DocumentumObject> getChildren(String folderId) {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = data.fetchFolderURI + "/" + folderId;
 		System.out.println("Fetch Folder URI is " + URI);
@@ -269,7 +270,7 @@ public class DCRestAPIWrapper {
 
 		JsonObject feed = response.getBody();
 
-		ArrayList<NavigationObject> children = new ArrayList<NavigationObject>();
+		ArrayList<DocumentumObject> children = new ArrayList<>();
 
 		for (JsonLink link : feed.getLinks()) {
 			if (link.getHref().endsWith("documents") || link.getHref().endsWith("folders")) {
@@ -282,9 +283,8 @@ public class DCRestAPIWrapper {
 				JsonFeed child = getObjects(link.getHref());
 				if (child != null && child.getEntries() != null) {
 					for (JsonEntry entry : child.getEntries()) {
-						children.add(new NavigationObject(
+						children.add(new DocumentumObject(
 								(String) getObjectByUri(entry.getContentSrc()).getProperties().get("r_object_id"),
-								folderId,
 								(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"),
 								type));
 					}

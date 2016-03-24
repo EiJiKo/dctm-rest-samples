@@ -74,4 +74,17 @@ public  class DocumentumObject implements Serializable {
 		properties = new HashMap<>();
 		setType("Object");
 	}
+	
+	public DocumentumObject(String id ,String name, String type) {
+		this();
+		this.id = id;
+		this.name = name;
+		this.type = type;
+	}
+
+	public DocumentumObject(String id , String name) {
+		this();
+		this.id = id;
+		this.name = name;
+	}
 }
