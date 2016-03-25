@@ -287,6 +287,7 @@ public class DCRestAPIWrapper {
 								(String) getObjectByUri(entry.getContentSrc()).getProperties().get("r_object_id"),
 								(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"),
 								type));
+						//TODO add properties
 					}
 				}
 			}
@@ -332,7 +333,6 @@ public class DCRestAPIWrapper {
 
 				System.out.println("Response Headers: " + resource.getHeaders());
 				System.out.println("Response status: " + resource.getStatusCode());
-
 			}
 
 			if (resource.getBody() != null) {
@@ -377,4 +377,30 @@ public class DCRestAPIWrapper {
 
 	}
 
+	
+	
+	public JsonFeed getPaginatedResult(String folderId , int startIndex , int pageSize) {
+		//TODO check count first and check it against page size		
+		String query = String.format("select * from dm_folder where folder(id('%s')) ENABLE(RETURN_RANGE 1 1 'r_creation_date ASC' ) ", folderId);
+		ResponseEntity<JsonFeed> response = executeDQL(query) ;				
+		return response.getBody();
+	}
+	
+	private ResponseEntity<JsonFeed> executeDQL(String query)
+	{
+		RestTemplate restTemplate = new RestTemplate();
+		//log.log(level, msg, thrown);
+		String URI = data.dqlQuery + query ;
+		ResponseEntity<JsonFeed> response = restTemplate.exchange(URI, HttpMethod.GET,new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
+		return response ;
+	}
+	
+	private ResponseEntity<JsonObject> executeDQLObject(String query)
+	{
+		RestTemplate restTemplate = new RestTemplate();
+		//log.log(level, msg, thrown);
+		String URI = data.dqlQuery + query ;
+		ResponseEntity<JsonObject> response = restTemplate.exchange(URI, HttpMethod.GET,new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonObject.class);
+		return response ;
+	}
 }

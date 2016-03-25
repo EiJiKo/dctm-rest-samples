@@ -4,8 +4,13 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.ws.rs.HttpMethod;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import com.emc.documentum.dtos.DocumentCreation;
 import com.emc.documentum.dtos.DocumentumDocument;
@@ -17,6 +22,7 @@ import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
+import com.emc.documentum.model.JsonFeed;
 import com.emc.documentum.model.JsonObject;
 import com.emc.documentum.services.rest.DCRestRepositoryController;
 import com.emc.documentum.transformation.CoreRestTransformation;
@@ -33,8 +39,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	 * @see com.emc.documentum.delegates.DocumentumDelegate#createFolder(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public DocumentumFolder createFolder( String cabinetName,
-			String folderName) throws FolderCreationException,CabinetNotFoundException {
+	public DocumentumFolder createFolder(String cabinetName , String folderName) throws FolderCreationException,CabinetNotFoundException {
 		log.entering(DCRestRepositoryController.class.getSimpleName(), "CreateFolder");
 		JsonObject cabinet;
 		JsonObject folder;
@@ -46,8 +51,23 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			throw e;
 		} 
-		
-
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.emc.documentum.delegates.DocumentumDelegate#createFolder(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public DocumentumFolder createFolderByParentId(String ParentId , String folderName) throws FolderCreationException {
+		log.entering(DCRestRepositoryController.class.getSimpleName(), "CreateFolder");
+		JsonObject parent = dcAPI.getObjectById(ParentId) ;
+		JsonObject folder;
+		try {
+			folder = dcAPI.createFolder(parent, folderName);
+			return CoreRestTransformation.convertCoreRSFolder(folder);
+		} catch (FolderCreationException e) {
+			log.log(Level.SEVERE, e.getMessage(), e);
+			throw e;
+		} 
 	}
 	
 	/* (non-Javadoc)
@@ -96,6 +116,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		}
 	}
 
+	
 	/* (non-Javadoc)
 	 * @see com.emc.documentum.delegates.DocumentumDelegate#getAllCabinets()
 	 */
@@ -138,4 +159,12 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		}
 		
 	}
+	
+
+	@Override
+	public JsonFeed getPaginatedResult(String folderId , int startIndex , int pageSize)
+	{
+			return dcAPI.getPaginatedResult(folderId, startIndex, pageSize) ;
+	}
+
 }

@@ -18,6 +18,7 @@ import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
+import com.emc.documentum.model.JsonFeed;
 import com.emc.documentum.transformation.CMISTransformation;
 import com.emc.documentum.wrappers.DCCMISAPIWrapper;
 
@@ -86,6 +87,18 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 		log.info("Get Objecy By Name :" + name);
 		ItemIterable<QueryResult> documentList = dcAPI.getObjectsByName(name);
 		return CMISTransformation.convertCMISQueryResultList(documentList);
+	}
+
+	@Override
+	public JsonFeed getPaginatedResult(String folderId, int startIndex, int pageSize) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DocumentumFolder createFolderByParentId(String ParentId, String folderName) throws FolderCreationException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

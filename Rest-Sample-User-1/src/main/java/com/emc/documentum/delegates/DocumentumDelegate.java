@@ -10,6 +10,8 @@ import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
+import com.emc.documentum.model.JsonFeed;
+import com.emc.documentum.model.JsonObject;
 
 public interface DocumentumDelegate {
 
@@ -30,4 +32,8 @@ public interface DocumentumDelegate {
 
 	ArrayList<DocumentumObject> getDocumentByName(String name);
 	
+	JsonFeed getPaginatedResult(String folderId , int startIndex , int pageSize);
+
+	DocumentumFolder createFolderByParentId(String ParentId, String folderName)
+			throws FolderCreationException;
 }
