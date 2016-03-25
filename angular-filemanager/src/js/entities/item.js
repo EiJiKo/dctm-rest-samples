@@ -3,11 +3,6 @@
     angular.module('FileManagerApp').factory('item', ['$http', '$q', '$translate', 'fileManagerConfig', 'chmod', function($http, $q, $translate, fileManagerConfig, Chmod) {
 
         var Item = function(model, path) {
-            //console.log("hoppa :" + model);
-            /*if(model != undefined)
-            {
-                console.log("model is defined and id is :" + model.id);
-            }*/
 
             var rawModel = {
                 //added id
@@ -75,8 +70,11 @@
             var data = {params: {
                 mode: 'addfolder',
                 path: self.tempModel.path.join('/'),
-                name: self.tempModel.name
+                name: self.tempModel.name,
+                parentFolderId: self.tempModel.id
             }};
+
+            //console.log("parent folder id --" + self.tempModel.id);
 
             self.inprocess = true;
             self.error = '';

@@ -2,7 +2,6 @@ package com.emc.documentum.services.rest;
 
 import java.nio.charset.Charset;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -19,10 +18,13 @@ import org.springframework.web.client.RestTemplate;
 
 import com.emc.documentum.delegates.DocumentumRepositoryDelegate;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
+import com.emc.documentum.exceptions.FolderCreationException;
+import com.emc.documentum.model.JsonObject;
 import com.emc.documentum.model.UserModel;
 
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
+import net.minidev.json.parser.ParseException;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -34,9 +36,7 @@ public class FileManagerController {
 	@RequestMapping("/Hello")
 	public String indexTwo() {
 		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<UserModel> result = restTemplate.exchange(
-				"http://192.168.210.128:8080/dctm-rest/repositories/MyRepo/currentuser", HttpMethod.GET,
-				new HttpEntity<String>(createHeaders("dmadmin", "password")), UserModel.class);
+		ResponseEntity<UserModel> result = restTemplate.exchange("http://192.168.210.128:8080/dctm-rest/repositories/MyRepo/currentuser", HttpMethod.GET,new HttpEntity<String>(createHeaders("dmadmin", "password")), UserModel.class);
 		System.out.println(result.getBody());
 		System.out.println(result.getBody().getName());
 		return result.getBody().getName();
@@ -56,7 +56,6 @@ public class FileManagerController {
 	@RequestMapping(value = "/api/listUrl", method = RequestMethod.POST, headers = "Content-Type=application/json;charset=UTF-8")
 	public String listURL(@RequestBody String jsonString) {
 
-
 		JSONObject jsonRequest = null;
 		JSONObject jsonRequestParams = null;
 		JSONObject resultJson = null ;
@@ -69,7 +68,6 @@ public class FileManagerController {
 			System.out.println("folder id " + folderId);
 			
 			if (folderId == null || folderId.equals("")) {
-				//folderId = "0c0007c280000130";
 				System.out.println("-----getting cabinets : " + folderId);
 				resultJson = dcRestDelegate.getAllCabinetsForFileManager();
 			}
@@ -77,6 +75,7 @@ public class FileManagerController {
 			{
 				System.out.println("-----getting children for folder ID : " + folderId);
 				resultJson = dcRestDelegate.getChildrenForFileManager(folderId);
+				//resultJson = dcRestDelegate.getPaginatedResult(folderId, 0, 0);
 			}
 			return resultJson.toJSONString();
 		} catch (Exception e) {
@@ -106,8 +105,25 @@ public class FileManagerController {
 	}
 
 	@RequestMapping(value = "/api/createFolderUrl", method = RequestMethod.POST)
-	public String createFolderUrl() {
-		return commonResponse();
+	public String createFolderUrl(@RequestBody String jsonString) {
+		
+		JSONObject jsonRequest = null;
+		JSONObject jsonRequestParams = null;
+		JsonObject resultJson = null ;
+		try {
+			jsonRequest = (JSONObject) JSONValue.parseWithException(jsonString);
+			jsonRequestParams = (JSONObject) jsonRequest.get("params");
+			String parentFolderId = (String) jsonRequestParams.get("parentFolderId");
+			String folderName = (String) jsonRequestParams.get("name");
+			System.out.println(jsonRequestParams);
+			System.out.println("parent Folder  id " + parentFolderId);
+			//
+			resultJson = dcRestDelegate.createFolderForFileManager(parentFolderId, folderName) ;
+			return commonResponse();
+		} catch (FolderCreationException | ParseException e) {
+			e.printStackTrace();
+			return errorResponse("can't create folder");
+		}		
 	}
 
 	@RequestMapping(value = "/api/permissionsUrl", method = RequestMethod.POST)
@@ -124,11 +140,8 @@ public class FileManagerController {
 	public String uploadUrl() {
 		return commonResponse();
 	}
-
-	// TODO getContentUrl
 	
-	//downloadFileUrl
-	@RequestMapping(value= "/api/document/content/{documentId}")
+	@RequestMapping(value= "/api/document/content/{documentId}" , produces = "application/pdf")
 	public byte[] getDocumentContentById(@PathVariable(value="documentId")String documentId) throws DocumentNotFoundException{
 		try {
 			byte[] enCodedfileContent = (byte[]) dcRestDelegate.getDocumentContentById(documentId);
@@ -137,14 +150,52 @@ public class FileManagerController {
 			e.printStackTrace();
 		}
 		return null ;
+	}
+	
+	@RequestMapping(value= "/api/document/open/{documentId}" )
+	public JSONObject openDocumentById(@PathVariable(value="documentId")String documentId) throws DocumentNotFoundException{
+		try {
+			byte[] enCodedfileContent = (byte[]) dcRestDelegate.getDocumentContentById(documentId);
+			byte[] decoded = Base64.decodeBase64(enCodedfileContent);		
+			JSONObject json = new JSONObject();
+			json.put("data", decoded);
+			return json ;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null ;
+	}
+
+	// TODO getContentUrl
+	
+	@RequestMapping(value= "/api/folder/content/{folderId}/startIndex/pageSize")
+	public String paginationService(@PathVariable(value="folderId")String folderId , @PathVariable(value="startIndex")String startIndex , @PathVariable(value="pageSize")String pageSize){		
+		//TODO to be implemented
+		JSONObject resultJson = null ;
+		try {
+			resultJson = dcRestDelegate.getPaginatedResult(folderId, 0, 0);
+		} catch (DocumentNotFoundException e) {
+			e.printStackTrace();
+		}
+		return resultJson.toJSONString() ;
 	}	
-
-
+	
 	String commonResponse() {
 		JSONObject resultJson = new JSONObject();
 		JSONObject json = new JSONObject();
 		json.put("success", true);
 		json.put("error", null);
+
+		resultJson.put("result", json);
+		return resultJson.toJSONString();
+	}
+	
+	
+	String errorResponse(String error) {
+		JSONObject resultJson = new JSONObject();
+		JSONObject json = new JSONObject();
+		json.put("success", false);
+		json.put("error", error);
 
 		resultJson.put("result", json);
 		return resultJson.toJSONString();

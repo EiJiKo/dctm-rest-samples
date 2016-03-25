@@ -46,4 +46,8 @@ public interface DocumentumAPIWrapper {
 	JSONObject getChildrenForFileManager(String folderId) ;
 	
 	JSONObject getAllCabinetsForFileManager() ;
+	
+	JSONObject getPaginatedResult(String folderId , int startIndex , int pageSize) ;
+	
+	JsonObject createFolderForFileManager(String parentFolderId , String folderName) throws FolderCreationException  ;
 }

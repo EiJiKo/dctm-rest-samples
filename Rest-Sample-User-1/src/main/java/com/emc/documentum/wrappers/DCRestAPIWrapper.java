@@ -108,6 +108,7 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 
 	}
 
+		
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -351,16 +352,13 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 	@Override
 	public JSONObject getAllCabinetsForFileManager() {
 		RestTemplate restTemplate = new RestTemplate();
-		String URI = data.dqlQuery + "select * from dm_cabinet";
+		String URI = data.dqlQuery + "select * from dm_cabinet ";
 		System.out.println("Fetch Cabinets URI is " + URI);
-		ResponseEntity<JsonFeed> response = restTemplate.exchange(URI, HttpMethod.GET,
-				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
-
+		ResponseEntity<JsonFeed> response = restTemplate.exchange(URI, HttpMethod.GET,new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
 		JsonFeed feed = response.getBody();
 		JSONArray children = new JSONArray() ;
-
 		
-		for (JsonEntry entry : feed.getEntries()) {			
+		for (JsonEntry entry : feed.getEntries()) {	
 			JSONObject json = new JSONObject() ;
 			json.put("id", (String) entry.getContent().getProperties().get("r_object_id")) ;
 			json.put("name", (String) entry.getContent().getProperties().get("object_name")) ;
@@ -371,13 +369,33 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 			json.put("date", dateString.toString()) ;
 			json.put("type", "dir") ;
 			children.add(json) ;
-		}
-		
+		}		
 		JSONObject returnJson = new JSONObject() ;
 		returnJson.put("result", children) ;
 		return returnJson ;
-
 	}
+	
+	//TODO should be removed ....
+	@Override
+	public JsonObject createFolderForFileManager(String parentFolderId , String folderName) throws FolderCreationException {
+
+		JsonObject parent = getObjectById(parentFolderId) ;
+		RestTemplate restTemplate = new RestTemplate();
+		String folderUri = parent.getHref(LinkRelation.folder);
+		Properties creationProperties = new Properties();
+		creationProperties.addProperty("object_name", folderName);
+		HttpHeaders httpHeader = createHeaders(data.username, data.password);
+		httpHeader.add("Content-Type", "application/vnd.emc.documentum+json");
+		ResponseEntity<JsonObject> response;
+		try {
+			response = restTemplate.exchange(folderUri, HttpMethod.POST,new HttpEntity<Object>(creationProperties, httpHeader), JsonObject.class);
+			return response.getBody();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new FolderCreationException(folderName);
+		}
+	}
+
 	
 	
 	@Override
@@ -448,4 +466,64 @@ public class DCRestAPIWrapper implements DocumentumAPIWrapper {
 
 	}
 
+	
+	//TODO still a try ....
+	@Override
+	public JSONObject getPaginatedResult(String folderId , int startIndex , int pageSize) {
+
+		RestTemplate restTemplate = new RestTemplate();
+		//TODO all queries will be separated in a file ... 
+		//TODO check count first and check it against page size
+		String URI = String.format(data.dqlQuery + "select * from dm_folder where folder(id('%s')) ENABLE(RETURN_RANGE 1 1 'r_creation_date ASC' ) ", folderId);
+		System.out.println("Fetch Folder URI is " + URI);
+		ResponseEntity<JsonFeed> response = restTemplate.exchange(URI, HttpMethod.GET,new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);				
+		JsonFeed feed = response.getBody();
+		JSONArray children = new JSONArray() ;
+		
+				
+		for (JsonEntry entry : feed.getEntries()) {			
+			JSONObject json = new JSONObject() ;
+			
+			String type = (String) entry.getContent().getProperties().get("r_object_type") ;
+			if(type.contains("folder"))
+			{
+				
+			}
+			json.put("id", (String) entry.getContent().getProperties().get("r_object_id")) ;
+			json.put("name", (String) entry.getContent().getProperties().get("object_name")) ;
+			json.put("rights", "drwxr-xr-x") ;
+			json.put("size", "4096") ;
+			StringBuffer dateString = new StringBuffer((String) entry.getContent().getProperties().get("r_creation_date")) ;
+			dateString.replace(10, 11, " ").delete(18,28) ;
+			json.put("date", dateString.toString()) ;
+			json.put("type", "dir") ;
+			children.add(json) ;
+		}
+		
+		JSONObject returnJson = new JSONObject() ;
+		returnJson.put("result", children) ;
+		return returnJson ;		
+	}
+
+	
+	//TODO should be removed ....
+	public JsonObject deleteFolderForFileManager(String parentFolderId , String folderName) throws FolderCreationException {
+
+		JsonObject parent = getObjectById(parentFolderId) ;
+		RestTemplate restTemplate = new RestTemplate();
+		String folderUri = parent.getHref(LinkRelation.folder);
+		Properties creationProperties = new Properties();
+		creationProperties.addProperty("object_name", folderName);
+		HttpHeaders httpHeader = createHeaders(data.username, data.password);
+		httpHeader.add("Content-Type", "application/vnd.emc.documentum+json");
+		ResponseEntity<JsonObject> response;
+		try {
+			response = restTemplate.exchange(folderUri, HttpMethod.POST,new HttpEntity<Object>(creationProperties, httpHeader), JsonObject.class);
+			return response.getBody();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new FolderCreationException(folderName);
+		}
+	}
+	
 }

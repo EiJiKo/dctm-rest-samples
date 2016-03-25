@@ -8,7 +8,7 @@
 
         $scope.config = fileManagerConfig;
         $scope.reverse = false;
-        $scope.predicate = ['model.type', 'model.name'];        
+        $scope.predicate = ['model.type', 'model.name'];
         $scope.order = function(predicate) {
             $scope.reverse = ($scope.predicate[1] === predicate) ? !$scope.reverse : false;
             $scope.predicate[1] = predicate;
@@ -47,7 +47,7 @@
             if (item.isImage()) {
                 if ($scope.config.previewImagesInModal) {
                     return $scope.openImagePreview(item);
-                } 
+                }
                 return item.download(true);
             }
             if (item.isEditable()) {
@@ -154,6 +154,9 @@
             var name = item.tempModel.name && item.tempModel.name.trim();
             item.tempModel.type = 'dir';
             item.tempModel.path = $scope.fileNavigator.currentPath;
+            //added
+            item.tempModel.id = $scope.fileNavigator.folderId ;
+
             if (name && !$scope.fileNavigator.fileNameExists(name)) {
                 item.createFolder().then(function() {
                     $scope.fileNavigator.refresh();

@@ -112,8 +112,16 @@ public class DocumentumRepositoryDelegate {
 		}
 	}
 
+	public JsonObject createFolderForFileManager(String parentFolderId , String folderName) throws FolderCreationException {
+		return dcAPI.createFolderForFileManager(parentFolderId, folderName) ;
+	}
 	
 	public Object getDocumentContentById(String documentId) throws DocumentNotFoundException{
 		return dcAPI.getDocumentContentById(documentId);
+	}
+	
+	
+	public JSONObject getPaginatedResult(String folderId , int startIndex , int pageSize) throws DocumentNotFoundException{
+		return dcAPI.getPaginatedResult(folderId,startIndex,pageSize);
 	}
 }
