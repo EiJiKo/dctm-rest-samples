@@ -10,24 +10,25 @@ import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
+import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 
 public interface DocumentumDelegate {
 
 	DocumentumFolder createFolder(String cabinetName, String folderName)
-			throws FolderCreationException, CabinetNotFoundException;
+			throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException;
 
-	DocumentumDocument createDocument(DocumentCreation docCreation) throws DocumentumException;
+	DocumentumDocument createDocument(DocumentCreation docCreation) throws DocumentumException , RepositoryNotAvailableException;
 
-	DocumentumFolder getCabinetByName(String cabinetName) throws CabinetNotFoundException;
+	DocumentumFolder getCabinetByName(String cabinetName) throws CabinetNotFoundException , RepositoryNotAvailableException;
 
-	DocumentumObject getObjectById(String cabinetId) throws CabinetNotFoundException;
+	DocumentumObject getObjectById(String cabinetId) throws CabinetNotFoundException, RepositoryNotAvailableException;
 
-	ArrayList<DocumentumFolder> getAllCabinets();
+	ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException;
 
-	ArrayList<DocumentumObject> getChildren(String folderId);
+	ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException;
 
-	byte[] getDocumentContentById(String documentId) throws DocumentNotFoundException;
+	byte[] getDocumentContentById(String documentId) throws DocumentNotFoundException , RepositoryNotAvailableException;
 
-	ArrayList<DocumentumObject> getDocumentByName(String name);
+	ArrayList<DocumentumObject> getDocumentByName(String name) throws RepositoryNotAvailableException;
 	
 }

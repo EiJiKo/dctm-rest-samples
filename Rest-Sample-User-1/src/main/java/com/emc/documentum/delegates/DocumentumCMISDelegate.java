@@ -18,6 +18,7 @@ import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
+import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.transformation.CMISTransformation;
 import com.emc.documentum.wrappers.DCCMISAPIWrapper;
 
@@ -30,7 +31,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	DCCMISAPIWrapper dcAPI;
 
 	public DocumentumFolder createFolder(String cabinetName, String folderName)
-			throws FolderCreationException, CabinetNotFoundException {
+			throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException {
 		try {
 			Folder folder = dcAPI.getFolderByPath("/" + cabinetName);
 			return CMISTransformation.convertCMISFolder(dcAPI.createFolder(folder, folderName));
@@ -50,7 +51,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public DocumentumFolder getCabinetByName(String cabinetName) throws CabinetNotFoundException {
+	public DocumentumFolder getCabinetByName(String cabinetName) throws CabinetNotFoundException, RepositoryNotAvailableException {
 		try {
 			Folder folder = dcAPI.getFolderByPath("/" + cabinetName);
 			return CMISTransformation.convertCMISFolder(folder);
@@ -61,28 +62,28 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public DocumentumObject getObjectById(String cabinetId) throws CabinetNotFoundException {
+	public DocumentumObject getObjectById(String cabinetId) throws CabinetNotFoundException, RepositoryNotAvailableException {
 		return CMISTransformation.convertCMISObject(dcAPI.getObjectById(cabinetId));
 	}
 
 	@Override
-	public ArrayList<DocumentumFolder> getAllCabinets() {
+	public ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException {
 
 		return dcAPI.getAllCabinets();
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getChildren(String folderId) {
+	public ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException {
 		return dcAPI.getChildren(folderId);
 	}
 
 	@Override
-	public byte[] getDocumentContentById(String documentId) throws DocumentNotFoundException {
+	public byte[] getDocumentContentById(String documentId) throws DocumentNotFoundException, RepositoryNotAvailableException {
 		return dcAPI.getDocumentContentById(documentId);
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getDocumentByName(String name) {
+	public ArrayList<DocumentumObject> getDocumentByName(String name) throws RepositoryNotAvailableException {
 		log.info("Get Objecy By Name :" + name);
 		ItemIterable<QueryResult> documentList = dcAPI.getObjectsByName(name);
 		return CMISTransformation.convertCMISQueryResultList(documentList);

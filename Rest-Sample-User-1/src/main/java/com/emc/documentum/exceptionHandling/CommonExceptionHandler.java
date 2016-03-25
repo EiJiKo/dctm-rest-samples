@@ -16,67 +16,77 @@ import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
+import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 
 @ControllerAdvice
 public class CommonExceptionHandler {
 	@ExceptionHandler(DocumentumException.class)
 	//TODO  @ResponseStatus(HttpStatus.NOT_FOUND)
-	public void docuemntumException(DocumentumException e)
+	public DocumentumException docuemntumException(DocumentumException e)
 	{
 		Logger log = Logger.getAnonymousLogger();
 		log.severe("documentum exception");
+		return e;
 	}
 	
 	@ExceptionHandler(DocumentNotFoundException.class)
 	@ResponseStatus(value=HttpStatus.NOT_FOUND,reason="Document Not Found")
-	public void documentNotFoundException(DocumentNotFoundException e,HttpServletRequest res)
+	public DocumentNotFoundException documentNotFoundException(DocumentNotFoundException e,HttpServletRequest res)
 	{
 		Logger log = Logger.getAnonymousLogger();
 		log.severe("document not found exception");
-		
+		return e;
 	}
 	
 	@ExceptionHandler(CabinetNotFoundException.class)
 	//TODO  @ResponseStatus(HttpStatus.NOT_FOUND)
-	public void cabinetNotFoundException(CabinetNotFoundException e)
+	public CabinetNotFoundException cabinetNotFoundException(CabinetNotFoundException e)
 	{
-		           
+		return e;     
 	}
 	
 	@ExceptionHandler(FolderNotFoundException.class)
 	//TODO  @ResponseStatus(HttpStatus.NOT_FOUND)
-	public void folderNotFoundException(FolderNotFoundException e)
+	public FolderNotFoundException folderNotFoundException(FolderNotFoundException e)
 	{
-		           
+		return e;      
 	}
 	
 	@ExceptionHandler(FolderCreationException.class)
 	//TODO  @ResponseStatus(HttpStatus.NOT_FOUND)
-	public void folderCreationException(FolderCreationException e)
+	public FolderCreationException folderCreationException(FolderCreationException e)
 	{
-		           
+		return e;       
 	}
 	
 	@ExceptionHandler(DocumentCreationException.class)
 	//TODO  @ResponseStatus(HttpStatus.NOT_FOUND)
-	public void documentCreationException(DocumentCreationException e)
+	public DocumentCreationException documentCreationException(DocumentCreationException e)
 	{
-		           
+		return e;      
 	}
 	
 	
 	@ExceptionHandler(CreationException.class)
 	//TODO  @ResponseStatus(HttpStatus.NOT_FOUND)
-	public void creationException(CreationException e)
+	public CreationException creationException(CreationException e)
 	{
-		
+		return e;
+	}
+	
+	@ExceptionHandler(RepositoryNotAvailableException.class)
+	@ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+	public RepositoryNotAvailableException repositroyNotAvailableException(RepositoryNotAvailableException e)
+	{
+		System.out.println("Repository Exception");
+		return e;
 	}
 	
 	@ExceptionHandler(Exception.class)
 	//TODO  @ResponseStatus(HttpStatus.NOT_FOUND)
-	public void generalException(Exception e)
+	public Exception generalException(Exception e)
 	{
-		
+		return e;
 	}
 	
 	

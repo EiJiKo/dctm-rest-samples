@@ -14,6 +14,7 @@ import com.emc.documentum.delegates.DocumentumDelegate;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.FolderCreationException;
+import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 
 @Controller
 public class DCRepositoryController {
@@ -26,7 +27,7 @@ public class DCRepositoryController {
 
 	@RequestMapping("/folder/create/{cabinetName}/{folderName}")
 	public String createFolder(@PathVariable(value = "cabinetName") String cabinetName,
-			@PathVariable(value = "folderName") String folderName, Model model) {
+			@PathVariable(value = "folderName") String folderName, Model model) throws RepositoryNotAvailableException {
 		log.entering(DCRepositoryController.class.getSimpleName(), "CreateFolder");
 		
 		
