@@ -24,16 +24,21 @@ import com.emc.documentum.wrappers.DCRestAPIWrapper;
 
 @Component("DocumentumRestDelegate")
 public class DocumentumRestDelegate implements DocumentumDelegate {
-	
+
 	Logger log = Logger.getLogger(DCRestRepositoryController.class.getCanonicalName());
 	@Autowired
 	DCRestAPIWrapper dcAPI;
-	
-	/* (non-Javadoc)
-	 * @see com.emc.documentum.delegates.DocumentumDelegate#createFolder(java.lang.String, java.lang.String)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.emc.documentum.delegates.DocumentumDelegate#createFolder(java.lang.
+	 * String, java.lang.String)
 	 */
 	@Override
-	public DocumentumFolder createFolder(String cabinetName , String folderName) throws FolderCreationException,CabinetNotFoundException {
+	public DocumentumFolder createFolder(String cabinetName, String folderName)
+			throws FolderCreationException, CabinetNotFoundException {
 		log.entering(DCRestRepositoryController.class.getSimpleName(), "CreateFolder");
 		JsonObject cabinet;
 		JsonObject folder;
@@ -41,19 +46,23 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 			cabinet = dcAPI.getCabinet(cabinetName);
 			folder = dcAPI.createFolder(cabinet, folderName);
 			return CoreRestTransformation.convertCoreRSFolder(folder);
-		} catch (CabinetNotFoundException  | FolderCreationException e) {
+		} catch (CabinetNotFoundException | FolderCreationException e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			throw e;
-		} 
+		}
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.emc.documentum.delegates.DocumentumDelegate#createFolder(java.lang.String, java.lang.String)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.emc.documentum.delegates.DocumentumDelegate#createFolder(java.lang.
+	 * String, java.lang.String)
 	 */
 	@Override
-	public DocumentumFolder createFolderByParentId(String ParentId , String folderName) throws FolderCreationException {
+	public DocumentumFolder createFolderByParentId(String ParentId, String folderName) throws FolderCreationException {
 		log.entering(DCRestRepositoryController.class.getSimpleName(), "CreateFolder");
-		JsonObject parent = dcAPI.getObjectById(ParentId) ;
+		JsonObject parent = dcAPI.getObjectById(ParentId);
 		JsonObject folder;
 		try {
 			folder = dcAPI.createFolder(parent, folderName);
@@ -61,86 +70,107 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		} catch (FolderCreationException e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			throw e;
-		} 
+		}
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.emc.documentum.delegates.DocumentumDelegate#createDocument(com.emc.documentum.dtos.DocumentCreation)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.emc.documentum.delegates.DocumentumDelegate#createDocument(com.emc.
+	 * documentum.dtos.DocumentCreation)
 	 */
 	@Override
-	public DocumentumDocument createDocument(DocumentCreation docCreation) throws DocumentumException{
+	public DocumentumDocument createDocument(DocumentCreation docCreation) throws DocumentumException {
 		log.entering(DCRestRepositoryController.class.getSimpleName(), "createDocument");
 		JsonObject document;
 		JsonObject folder;
 		try {
-			folder =  dcAPI.getFolderByPath(docCreation.getFolderPath());
+			folder = dcAPI.getFolderByPath(docCreation.getFolderPath());
 			document = dcAPI.createDocument(folder, docCreation.getProperties());
 			return CoreRestTransformation.convertCoreRSDocument(document);
-		} catch (FolderNotFoundException | DocumentCreationException e ) {
+		} catch (FolderNotFoundException | DocumentCreationException e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
-			throw e;
-		} 
-	}
-
-	/* (non-Javadoc)
-	 * @see com.emc.documentum.delegates.DocumentumDelegate#getCabinetByName(java.lang.String)
-	 */
-	@Override
-	public DocumentumFolder getCabinetByName(String cabinetName) throws CabinetNotFoundException {
-		
-		try {
-			return CoreRestTransformation.convertCoreRSFolder(dcAPI.getCabinet(cabinetName));
-		} catch (CabinetNotFoundException e) {
-			log.log(Level.SEVERE,e.getMessage(),e);
 			throw e;
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see com.emc.documentum.delegates.DocumentumDelegate#getObjectById(java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.emc.documentum.delegates.DocumentumDelegate#getCabinetByName(java.
+	 * lang.String)
+	 */
+	@Override
+	public DocumentumFolder getCabinetByName(String cabinetName) throws CabinetNotFoundException {
+
+		try {
+			return CoreRestTransformation.convertCoreRSFolder(dcAPI.getCabinet(cabinetName));
+		} catch (CabinetNotFoundException e) {
+			log.log(Level.SEVERE, e.getMessage(), e);
+			throw e;
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.emc.documentum.delegates.DocumentumDelegate#getObjectById(java.lang.
+	 * String)
 	 */
 	@Override
 	public DocumentumObject getObjectById(String cabinetId) throws CabinetNotFoundException {
 		try {
 			return CoreRestTransformation.convertCoreRSObject(dcAPI.getObjectById(cabinetId));
 		} catch (Exception e) {
-			log.log(Level.SEVERE,e.getMessage(),e);
-			//TODO Object Not Found Exception
+			log.log(Level.SEVERE, e.getMessage(), e);
+			// TODO Object Not Found Exception
 			throw new CabinetNotFoundException(cabinetId);
 		}
 	}
 
-	
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.emc.documentum.delegates.DocumentumDelegate#getAllCabinets()
 	 */
 	@Override
 	public ArrayList<DocumentumFolder> getAllCabinets() {
 		try {
-			return dcAPI.getAllCabinets();
+			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getAllCabinets(),DocumentumFolder.class);
 		} catch (Exception e) {
 			throw e;
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see com.emc.documentum.delegates.DocumentumDelegate#getChildren(java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.emc.documentum.delegates.DocumentumDelegate#getChildren(java.lang.
+	 * String)
 	 */
 	@Override
 	public ArrayList<DocumentumObject> getChildren(String folderId) {
 		try {
 			return dcAPI.getChildren(folderId);
 		} catch (Exception e) {
-			//TODO Object Not Found Exception
+			// TODO Object Not Found Exception
 			throw e;
 		}
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.emc.documentum.delegates.DocumentumDelegate#getDocumentContentById(java.lang.String)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.emc.documentum.delegates.DocumentumDelegate#getDocumentContentById(
+	 * java.lang.String)
 	 */
 	@Override
-	public byte[] getDocumentContentById(String documentId) throws DocumentNotFoundException{
+	public byte[] getDocumentContentById(String documentId) throws DocumentNotFoundException {
 		return dcAPI.getDocumentContentById(documentId);
 	}
 
@@ -151,23 +181,22 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		} catch (DocumentNotFoundException e) {
 			return new ArrayList<DocumentumObject>();
 		}
-		
+
 	}
+
 	@Override
-	public DocumentumDocument checkoutDocument(String documentId)
-	{
-			return CoreRestTransformation.convertCoreRSDocument(dcAPI.checkOutDocument(documentId));
+	public DocumentumDocument checkoutDocument(String documentId) {
+		return CoreRestTransformation.convertCoreRSDocument(dcAPI.checkOutDocument(documentId));
 	}
+
 	@Override
 	public DocumentumDocument checkinDocument(String documentId, byte[] content) {
 		return CoreRestTransformation.convertCoreRSDocument(dcAPI.checkinDocument(documentId, content));
 	}
-	
 
 	@Override
-	public ArrayList<DocumentumFolder> getPaginatedResult(String folderId , int startIndex , int pageSize)
-	{
-			return dcAPI.getPaginatedResult(folderId, startIndex, pageSize) ;
+	public ArrayList<DocumentumFolder> getPaginatedResult(String folderId, int startIndex, int pageSize) {
+		return dcAPI.getPaginatedResult(folderId, startIndex, pageSize);
 	}
 
 }
