@@ -76,10 +76,7 @@ public class CoreRestTransformation {
 		String[] linkParts = linkUrl.split("/");
 		String baseType = linkParts[linkParts.length - 2];
 		DocumentumObject documentumObject = createDocumentumObject(baseType);
-
-		documentumObject.setId(content.getPropertyByName("r_object_id").toString());
-		documentumObject.setName(content.getPropertyByName("object_name").toString());
-		documentumObject.setProperties(content.getProperties());
+		convertCoreRSContent(content, documentumObject);
 		return documentumObject;
 	}
 
@@ -104,7 +101,7 @@ public class CoreRestTransformation {
 		return (ArrayList<T>) documentumObjectList;
 	}
 
-	private static <T extends DocumentumObject> T ConvertCoreRSJsonEntry(JsonEntry jsonEntry, Class<T> type) {
+	private static <T extends DocumentumObject> T convertCoreRSJsonEntry(JsonEntry jsonEntry, Class<T> type) {
 		Content content = jsonEntry.getContent();
 		String linkUrl = DCRestAPIWrapper.getLink(content.getLinks(), "self").getHref();
 		String[] linkParts = linkUrl.split("/");
@@ -113,9 +110,7 @@ public class CoreRestTransformation {
 		try {
 			documentumObject = type.newInstance();
 			documentumObject.setType(baseType);
-			documentumObject.setId(content.getPropertyByName("r_object_id").toString());
-			documentumObject.setName(content.getPropertyByName("object_name").toString());
-			documentumObject.setProperties(content.getProperties());
+			convertCoreRSContent(content, documentumObject);
 			return (T) documentumObject;
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
@@ -126,6 +121,13 @@ public class CoreRestTransformation {
 		}
 
 		return null;
+	}
+
+	private static void convertCoreRSContent(Content content, DocumentumObject documentumObject) {
+
+		documentumObject.setId(content.getPropertyByName("r_object_id").toString());
+		documentumObject.setName(content.getPropertyByName("object_name").toString());
+		documentumObject.setProperties(content.getProperties());
 	}
 
 }
