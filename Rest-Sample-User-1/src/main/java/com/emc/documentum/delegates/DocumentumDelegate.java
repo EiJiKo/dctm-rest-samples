@@ -14,6 +14,8 @@ import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 
 public interface DocumentumDelegate {
 
+	String getIdentifier();
+	
 	DocumentumFolder createFolder(String cabinetName, String folderName)
 			throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException;
 

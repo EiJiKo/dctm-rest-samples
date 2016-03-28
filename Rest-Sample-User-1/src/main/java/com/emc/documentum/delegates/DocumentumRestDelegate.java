@@ -18,14 +18,13 @@ import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
 import com.emc.documentum.model.JsonObject;
-import com.emc.documentum.services.rest.DCRestRepositoryController;
 import com.emc.documentum.transformation.CoreRestTransformation;
 import com.emc.documentum.wrappers.DCRestAPIWrapper;
 
 @Component("DocumentumRestDelegate")
 public class DocumentumRestDelegate implements DocumentumDelegate {
 
-	Logger log = Logger.getLogger(DCRestRepositoryController.class.getCanonicalName());
+	Logger log = Logger.getLogger(DocumentumRestDelegate.class.getCanonicalName());
 	@Autowired
 	DCRestAPIWrapper dcAPI;
 
@@ -39,7 +38,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	@Override
 	public DocumentumFolder createFolder(String cabinetName, String folderName)
 			throws FolderCreationException, CabinetNotFoundException {
-		log.entering(DCRestRepositoryController.class.getSimpleName(), "CreateFolder");
+		log.entering(DocumentumRestDelegate.class.getSimpleName(), "CreateFolder");
 		JsonObject cabinet;
 		JsonObject folder;
 		try {
@@ -61,7 +60,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	 */
 	@Override
 	public DocumentumFolder createFolderByParentId(String ParentId, String folderName) throws FolderCreationException {
-		log.entering(DCRestRepositoryController.class.getSimpleName(), "CreateFolder");
+		log.entering(DocumentumRestDelegate.class.getSimpleName(), "CreateFolder");
 		JsonObject parent = dcAPI.getObjectById(ParentId);
 		JsonObject folder;
 		try {
@@ -82,7 +81,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	 */
 	@Override
 	public DocumentumDocument createDocument(DocumentCreation docCreation) throws DocumentumException {
-		log.entering(DCRestRepositoryController.class.getSimpleName(), "createDocument");
+		log.entering(DocumentumRestDelegate.class.getSimpleName(), "createDocument");
 		JsonObject document;
 		JsonObject folder;
 		try {
@@ -197,6 +196,11 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	@Override
 	public ArrayList<DocumentumFolder> getPaginatedResult(String folderId, int startIndex, int pageSize) {
 		return dcAPI.getPaginatedResult(folderId, startIndex, pageSize);
+	}
+
+	@Override
+	public String getIdentifier() {
+		return "corerest";
 	}
 
 }

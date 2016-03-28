@@ -118,4 +118,9 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 		return null;
 	}
 
+	@Override
+	public String getIdentifier() {
+		return "cmis";
+	}
+
 }

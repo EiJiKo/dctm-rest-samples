@@ -22,8 +22,9 @@ import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 
-@RestController
+//@RestController
 @RequestMapping("corerest/services")
+@Deprecated
 public class CoreRestRepositoryController {
 
 	Logger log = Logger.getLogger(CoreRestRepositoryController.class.getCanonicalName());

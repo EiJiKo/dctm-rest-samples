@@ -22,8 +22,9 @@ import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 
-@RestController
-@RequestMapping("/services")
+//@RestController
+@RequestMapping("services")
+@Deprecated
 public class DCRestRepositoryController {
 
 	Logger log = Logger.getLogger(DCRestRepositoryController.class.getCanonicalName());
@@ -100,4 +101,5 @@ public class DCRestRepositoryController {
 		log.entering("checkin document ", documentId);
 		return dcRestDelegate.checkinDocument(documentId, content);
 	}
+	
 }
