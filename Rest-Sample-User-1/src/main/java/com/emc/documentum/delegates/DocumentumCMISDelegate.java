@@ -19,7 +19,6 @@ import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
-import com.emc.documentum.model.JsonFeed;
 import com.emc.documentum.transformation.CMISTransformation;
 import com.emc.documentum.wrappers.DCCMISAPIWrapper;
 

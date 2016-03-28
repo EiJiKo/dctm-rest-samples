@@ -17,7 +17,6 @@ import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
-import com.emc.documentum.model.JsonFeed;
 import com.emc.documentum.model.JsonObject;
 import com.emc.documentum.services.rest.DCRestRepositoryController;
 import com.emc.documentum.transformation.CoreRestTransformation;

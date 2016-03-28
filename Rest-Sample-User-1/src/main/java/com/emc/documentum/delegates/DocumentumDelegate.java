@@ -11,7 +11,6 @@ import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
-import com.emc.documentum.model.JsonFeed;
 
 public interface DocumentumDelegate {
 
