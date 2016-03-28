@@ -24,7 +24,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import com.emc.documentum.constants.DCRestAPIWrapperData;
+import com.emc.documentum.constants.DCCoreRestConstants;
 import com.emc.documentum.constants.LinkRelation;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
@@ -46,7 +46,7 @@ public class DCRestAPIWrapper {
 
 	Logger log = Logger.getLogger(this.getClass().getCanonicalName());
 	@Autowired
-	DCRestAPIWrapperData data;
+	DCCoreRestConstants data;
 
 	/*
 	 * (non-Javadoc)
