@@ -15,3 +15,6 @@ gs-spring-boot-master/complete/.project
 gs-spring-boot-master/complete/.settings/org.eclipse.core.resources.prefs
 gs-spring-boot-master/complete/.settings/org.eclipse.jdt.core.prefs
 gs-spring-boot-master/complete/.settings/org.eclipse.m2e.core.prefs
+angular-filemanager/node_modules/
+angular-filemanager/bower_components/
+angular-filemanager/dist/
