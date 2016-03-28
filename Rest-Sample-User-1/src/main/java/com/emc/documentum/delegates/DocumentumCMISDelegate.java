@@ -109,7 +109,12 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 
 	@Override
 	public DocumentumFolder createFolderByParentId(String ParentId, String folderName) throws FolderCreationException {
-		// TODO Auto-generated method stub
+		try {
+			Folder parentFolder = (Folder) dcAPI.getObjectById(ParentId) ;
+			return CMISTransformation.convertCMISFolder(dcAPI.createFolder(parentFolder, folderName));
+		} catch (RepositoryNotAvailableException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
