@@ -70,16 +70,6 @@ public class CoreRestTransformation {
 		return documentumObject;
 	}
 
-	public static ArrayList<DocumentumObject> convertCoreRSEntryList(List<JsonEntry> jsonEntryFeed) {
-		ArrayList<DocumentumObject> documentumObjectList = new ArrayList<>();
-		if (jsonEntryFeed != null) {
-			for (JsonEntry jsonEntry : jsonEntryFeed) {
-				documentumObjectList.add(ConvertCoreRSJsonEntry(jsonEntry));
-			}
-		}
-		return documentumObjectList;
-	}
-
 	private static DocumentumObject ConvertCoreRSJsonEntry(JsonEntry jsonEntry) {
 		Content content = jsonEntry.getContent();
 		String linkUrl = DCRestAPIWrapper.getLink(content.getLinks(), "self").getHref();
@@ -93,4 +83,49 @@ public class CoreRestTransformation {
 		return documentumObject;
 	}
 
+	public static ArrayList<DocumentumObject> convertCoreRSEntryList(List<JsonEntry> jsonEntryFeed) {
+		ArrayList<DocumentumObject> documentumObjectList = new ArrayList<>();
+		if (jsonEntryFeed != null) {
+			for (JsonEntry jsonEntry : jsonEntryFeed) {
+				documentumObjectList.add(ConvertCoreRSJsonEntry(jsonEntry));
+			}
+		}
+		return documentumObjectList;
+	}
+
+	public static <T extends DocumentumObject> ArrayList<T> convertCoreRSEntryList(List<JsonEntry> jsonEntryFeed,
+			Class<T> responseType) {
+		ArrayList<DocumentumObject> documentumObjectList = new ArrayList<>();
+		if (jsonEntryFeed != null) {
+			for (JsonEntry jsonEntry : jsonEntryFeed) {
+				documentumObjectList.add(ConvertCoreRSJsonEntry(jsonEntry));
+			}
+		}
+		return (ArrayList<T>) documentumObjectList;
+	}
+
+	private static <T extends DocumentumObject> T ConvertCoreRSJsonEntry(JsonEntry jsonEntry, Class<T> type) {
+		Content content = jsonEntry.getContent();
+		String linkUrl = DCRestAPIWrapper.getLink(content.getLinks(), "self").getHref();
+		String[] linkParts = linkUrl.split("/");
+		String baseType = linkParts[linkParts.length - 2];
+		DocumentumObject documentumObject;
+		try {
+			documentumObject = type.newInstance();
+
+			documentumObject.setId(content.getPropertyByName("r_object_id").toString());
+			documentumObject.setName(content.getPropertyByName("object_name").toString());
+			documentumObject.setProperties(content.getProperties());
+			return (T) documentumObject;
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
 }
