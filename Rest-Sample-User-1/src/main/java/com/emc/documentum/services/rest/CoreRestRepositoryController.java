@@ -99,5 +99,6 @@ public class CoreRestRepositoryController {
 		return dcRestDelegate.getDocumentByName(name);
 
 	}
+	
 
 }

@@ -1,5 +1,6 @@
 package com.emc.documentum.wrappers;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import org.apache.chemistry.opencmis.client.runtime.OperationContextImpl;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
+import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConnectionException;
 import org.apache.commons.io.IOUtils;
@@ -181,5 +183,21 @@ public class DCCMISAPIWrapper {
 			throw new RepositoryNotAvailableException("CMIS", e);
 		}
 	}
-
+	public Document checkoutDocument(String documentId)
+	{
+		Session session = getSession("dmadmin", "password");
+		Document document = (Document) session.getObject(documentId);
+		Document checkoutDocument = (Document) session.getObject(document.checkOut());
+		return checkoutDocument;
+	}
+	public Document checkinDocument(String documentId,byte[] content)
+	{
+		Session session = getSession("dmadmin", "password");
+		Document document = (Document) session.getObject(documentId);
+		ContentStream contentStream = session.getObjectFactory().createContentStream(
+				document.getContentStream().getFileName(), content.length,
+				document.getContentStream().getMimeType(), new ByteArrayInputStream(content));
+		document.checkIn(false, null, contentStream, "minor version");
+		return document;
+	}
 }

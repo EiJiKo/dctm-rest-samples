@@ -32,6 +32,9 @@ public interface DocumentumDelegate {
 
 	ArrayList<DocumentumObject> getDocumentByName(String name) throws RepositoryNotAvailableException;
 	
+	DocumentumDocument checkoutDocument(String documentId);
+	
+	DocumentumDocument checkinDocument(String documentId,byte[]content);
 	JsonFeed getPaginatedResult(String folderId , int startIndex , int pageSize);
 
 	DocumentumFolder createFolderByParentId(String ParentId, String folderName)

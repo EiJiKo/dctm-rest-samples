@@ -91,6 +91,18 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
+	public DocumentumDocument checkoutDocument(String documentId) {
+		log.info("checkout document" + documentId);
+		return CMISTransformation.convertCMISDocument(dcAPI.checkoutDocument(documentId));
+		
+	}
+	@Override
+	public DocumentumDocument checkinDocument(String documentId,byte[] content)
+	{
+		return CMISTransformation.convertCMISDocument(dcAPI.checkinDocument(documentId, content));
+	}
+
+	@Override
 	public JsonFeed getPaginatedResult(String folderId, int startIndex, int pageSize) {
 		// TODO Auto-generated method stub
 		return null;

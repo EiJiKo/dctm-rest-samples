@@ -20,6 +20,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import com.emc.documentum.constants.DCRestAPIWrapperData;
@@ -310,7 +312,21 @@ public class DCRestAPIWrapper {
 		JsonObject content = getObjectByUri(link.getHref());
 		return getContentBase64Content(content);
 	}
+	public JsonObject checkOutDocument(String documentId)
+	{
+		JsonObject document = getObjectById(documentId);
+		JsonLink link = getLink(document.getLinks(), LinkRelation.checkOutDocument);
+		RestTemplate restTemplate = new RestTemplate();
+		List<MediaType> mediaTypes = new ArrayList<MediaType>();
+		mediaTypes.add(MediaType.ALL);
+		HttpHeaders httpHeader = createHeaders(data.username, data.password);
+		httpHeader.setAccept(mediaTypes);
+		ResponseEntity<JsonObject> jsonDocuemnt;
 
+		jsonDocuemnt = restTemplate.exchange(link.getHref(), HttpMethod.PUT,
+				new HttpEntity<Object>(httpHeader), JsonObject.class);
+		return jsonDocuemnt.getBody();
+	}
 	private byte[] getContentBase64Content(JsonObject content) {
 		try {
 			JsonLink link = getLink(content.getLinks(), LinkRelation.enclosure);
@@ -375,6 +391,28 @@ public class DCRestAPIWrapper {
 		
 		return feed.getEntries();
 
+	}
+	
+	public JsonObject checkinDocument(String documentId,byte[]content)
+	{
+		JsonObject document = getObjectById(documentId);
+		JsonLink link = getLink(document.getLinks(), LinkRelation.checkInNextMajor);
+		Properties creationProperties = new Properties();
+		HashMap<String, Object> properties = new HashMap<>();
+//		properties.put("object_name", "Sample Name");
+//		properties.put("title", "Sample Type");
+		creationProperties.setProperties(properties);
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
+		HttpHeaders httpHeader = createHeaders(data.username, data.password);
+		httpHeader.add("Content-Type", "multipart/form-data");
+		HttpHeaders firstPartHeader = new HttpHeaders();
+		firstPartHeader.set("Content-Type", "application/vnd.emc.documentum+json");
+		parts.add("metadata", new HttpEntity<Object>(creationProperties,firstPartHeader));
+		parts.add("binary", content);
+		RestTemplate template = new RestTemplate();
+		ResponseEntity<JsonObject> response = template.exchange(link.getHref(), HttpMethod.POST, new HttpEntity<Object>(parts, httpHeader), JsonObject.class);
+		response.getHeaders();
+		return response.getBody();
 	}
 
 	
