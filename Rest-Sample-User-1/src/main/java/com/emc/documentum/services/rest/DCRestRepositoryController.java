@@ -29,8 +29,8 @@ public class DCRestRepositoryController {
 	Logger log = Logger.getLogger(DCRestRepositoryController.class.getCanonicalName());
 
 	@Autowired
-	@Qualifier("DocumentumCMISDelegate")
-	//@Qualifier("DocumentumRestDelegate")
+//	@Qualifier("DocumentumCMISDelegate")
+	@Qualifier("DocumentumRestDelegate")
 	DocumentumDelegate dcRestDelegate;
 
 	@RequestMapping("/folder/create/{cabinetName}/{folderName}")
@@ -111,5 +111,16 @@ public class DCRestRepositoryController {
 		return dcRestDelegate.getDocumentByName(name);
 		
 	}
-
+	@RequestMapping(value = "get/document/checkout/id/{documentId}")
+	public DocumentumDocument checkoutDocuement(@PathVariable(value="documentId") String documentId)
+	{
+		log.entering("checkout document ", documentId);
+		return dcRestDelegate.checkoutDocument(documentId);
+	}
+	@RequestMapping(value = "get/document/checkin/id/{documentId}",method=RequestMethod.POST)
+	public DocumentumDocument checkinDocuement(@PathVariable(value="documentId") String documentId,@RequestBody byte[]content)
+	{
+		log.entering("checkin document ", documentId);
+		return dcRestDelegate.checkinDocument(documentId, content);
+	}
 }

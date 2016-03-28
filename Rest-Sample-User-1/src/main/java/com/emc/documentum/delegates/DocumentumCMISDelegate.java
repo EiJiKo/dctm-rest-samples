@@ -89,4 +89,16 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 		return CMISTransformation.convertCMISQueryResultList(documentList);
 	}
 
+	@Override
+	public DocumentumDocument checkoutDocument(String documentId) {
+		log.info("checkout document" + documentId);
+		return CMISTransformation.convertCMISDocument(dcAPI.checkoutDocument(documentId));
+		
+	}
+	@Override
+	public DocumentumDocument checkinDocument(String documentId,byte[] content)
+	{
+		return CMISTransformation.convertCMISDocument(dcAPI.checkinDocument(documentId, content));
+	}
+
 }

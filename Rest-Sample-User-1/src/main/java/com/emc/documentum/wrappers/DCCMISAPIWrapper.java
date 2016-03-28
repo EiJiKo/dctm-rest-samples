@@ -1,5 +1,6 @@
 package com.emc.documentum.wrappers;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.logging.Logger;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Document;
+import org.apache.chemistry.opencmis.client.api.DocumentType;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
 import org.apache.chemistry.opencmis.client.api.OperationContext;
@@ -22,6 +24,7 @@ import org.apache.chemistry.opencmis.client.runtime.OperationContextImpl;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
+import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
@@ -44,7 +47,7 @@ public class DCCMISAPIWrapper {
 		Map<String, String> parameter = new HashMap<String, String>();
 		parameter.put(SessionParameter.USER, username);
 		parameter.put(SessionParameter.PASSWORD, password);
-		parameter.put(SessionParameter.ATOMPUB_URL, "http://documentum:8080/emc-cmis/resources/");
+		parameter.put(SessionParameter.ATOMPUB_URL, "http://documentum:8080/emc-cmis/resources10");
 		parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
 		List<Repository> repositories = new ArrayList<Repository>();
 		repositories = sessionFactory.getRepositories(parameter);
@@ -147,5 +150,21 @@ public class DCCMISAPIWrapper {
 		ItemIterable<QueryResult> queryResult = queryStatement.query(false, operationContext);
 		return queryResult;
 	}
-
+	public Document checkoutDocument(String documentId)
+	{
+		Session session = getSession("dmadmin", "password");
+		Document document = (Document) session.getObject(documentId);
+		Document checkoutDocument = (Document) session.getObject(document.checkOut());
+		return checkoutDocument;
+	}
+	public Document checkinDocument(String documentId,byte[] content)
+	{
+		Session session = getSession("dmadmin", "password");
+		Document document = (Document) session.getObject(documentId);
+		ContentStream contentStream = session.getObjectFactory().createContentStream(
+				document.getContentStream().getFileName(), content.length,
+				document.getContentStream().getMimeType(), new ByteArrayInputStream(content));
+		document.checkIn(false, null, contentStream, "minor version");
+		return document;
+	}
 }

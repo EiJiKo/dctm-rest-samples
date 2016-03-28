@@ -139,4 +139,13 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		}
 		
 	}
+	@Override
+	public DocumentumDocument checkoutDocument(String documentId)
+	{
+			return CoreRestTransformation.convertCoreRSDocument(dcAPI.checkOutDocument(documentId));
+	}
+	@Override
+	public DocumentumDocument checkinDocument(String documentId, byte[] content) {
+		return CoreRestTransformation.convertCoreRSDocument(dcAPI.checkinDocument(documentId, content));
+	}
 }

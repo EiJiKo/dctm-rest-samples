@@ -31,4 +31,7 @@ public interface DocumentumDelegate {
 
 	ArrayList<DocumentumObject> getDocumentByName(String name);
 	
+	DocumentumDocument checkoutDocument(String documentId);
+	
+	DocumentumDocument checkinDocument(String documentId,byte[]content);
 }
