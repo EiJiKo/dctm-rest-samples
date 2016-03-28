@@ -10,9 +10,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.emc.documentum.delegate.provider.DelegateProvider;
 import com.emc.documentum.delegates.DocumentumDelegate;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
+import com.emc.documentum.exceptions.DelegateNotFoundException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.model.JsonEntry;
@@ -25,15 +28,26 @@ import net.minidev.json.parser.ParseException;
 
 @CrossOrigin(origins = "*")
 @RestController
-public class FileManagerController {
+public class FileManagerController extends BaseController{
 
+	DocumentumDelegate dcDelegate;
+	
 	@Autowired
-	@Qualifier("DocumentumRestDelegate")
-	DocumentumDelegate dcRestDelegate;
-
+	DelegateProvider delegateProvider ;
+	
 	@RequestMapping(value = "/api/listUrl", method = RequestMethod.POST, headers = "Content-Type=application/json;charset=UTF-8")
 	public String listURL(@RequestBody String jsonString) {
 
+		
+		String delegateKey = "CMIS" ;
+		try {
+			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
+		} catch (DelegateNotFoundException e1) {
+			//TODO the exception handling should be done by the common exception handler with error code and error message
+			e1.printStackTrace();
+			return errorResponse(delegateKey + " Repo is not available ") ;
+		}
+		
 		JSONObject jsonRequest = null;
 		JSONObject jsonRequestParams = null;
 		JSONObject resultJson = null ;
@@ -46,14 +60,14 @@ public class FileManagerController {
 			System.out.println("folder id " + folderId);
 			
 			if (folderId == null || folderId.equals("")) {
-				System.out.println("-----getting cabinets : " + folderId);
-				ArrayList<DocumentumFolder> cabinets = dcRestDelegate.getAllCabinets() ;
+				System.out.println("-----getting cabinets : " + folderId);				
+				ArrayList<DocumentumFolder> cabinets = dcDelegate.getAllCabinets() ;
 				resultJson = transformFoldersToJson(cabinets) ;
 			}
 			else
 			{
 				System.out.println("-----getting children for folder ID : " + folderId);
-				ArrayList<DocumentumObject> folders = dcRestDelegate.getChildren(folderId);
+				ArrayList<DocumentumObject> folders = dcDelegate.getChildren(folderId);
 				resultJson = transformChildrenFromDocumentumObjects(folders) ;
 				//JsonFeed feed = dcRestDelegate.getPaginatedResult(folderId, 0, 0);
 				//resultJson = transformJsonFeedToJson(feed) ;
@@ -88,6 +102,17 @@ public class FileManagerController {
 	@RequestMapping(value = "/api/createFolderUrl", method = RequestMethod.POST)
 	public String createFolderUrl(@RequestBody String jsonString) {
 		
+		
+		String delegateKey = "CMIS" ;
+		try {
+			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
+		} catch (DelegateNotFoundException e1) {
+			//TODO the exception handling should be done by the common exception handler with error code and error message
+			e1.printStackTrace();
+			return errorResponse(delegateKey + " Repo is not available ") ;
+		}
+		
+		
 		JSONObject jsonRequest = null;
 		JsonObject resultJson = null ;
 		try {
@@ -96,7 +121,7 @@ public class FileManagerController {
 			String folderName = (String) jsonRequest.get("name");
 			System.out.println(jsonRequest);
 			System.out.println("parent Folder  id " + parentFolderId);
-			DocumentumFolder folder = dcRestDelegate.createFolderByParentId(parentFolderId, folderName) ;
+			DocumentumFolder folder = dcDelegate.createFolderByParentId(parentFolderId, folderName) ;
 			return commonResponse();
 		} catch (FolderCreationException | ParseException e) {
 			e.printStackTrace();
@@ -122,8 +147,18 @@ public class FileManagerController {
 
 	@RequestMapping(value= "/api/document/content/{documentId}" , produces = "application/pdf")
 	public byte[] getDocumentContentById(@PathVariable(value="documentId")String documentId) throws DocumentNotFoundException{
+		
+		String delegateKey = "CMIS" ;
 		try {
-			byte[] enCodedfileContent = (byte[]) dcRestDelegate.getDocumentContentById(documentId);
+			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
+		} catch (DelegateNotFoundException e1) {
+			//TODO to be implemented the handling methodology
+			e1.printStackTrace();
+		}
+		
+		
+		try {
+			byte[] enCodedfileContent = (byte[]) dcDelegate.getDocumentContentById(documentId);
 			return Base64.decodeBase64(enCodedfileContent);		
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -133,9 +168,19 @@ public class FileManagerController {
 	
 	@RequestMapping(value= "/api/document/open/{documentId}" )
 	public JSONObject openDocumentById(@PathVariable(value="documentId")String documentId) throws DocumentNotFoundException{
+		
+		String delegateKey = "CMIS" ;
 		try {
-			byte[] enCodedfileContent = (byte[]) dcRestDelegate.getDocumentContentById(documentId);
-			byte[] decoded = Base64.decodeBase64(enCodedfileContent);		
+			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
+		} catch (DelegateNotFoundException e1) {
+			//TODO to be implemented the handling methodology
+			e1.printStackTrace();
+		}
+		
+		
+		try {
+			byte[] enCodedfileContent = (byte[]) dcDelegate.getDocumentContentById(documentId);
+			byte[] decoded = Base64.decodeBase64(enCodedfileContent);
 			JSONObject json = new JSONObject();
 			json.put("data", decoded);
 			return json ;
@@ -151,30 +196,9 @@ public class FileManagerController {
 	public String paginationService(@PathVariable(value="folderId")String folderId , @PathVariable(value="startIndex")String startIndex , @PathVariable(value="pageSize")String pageSize){		
 		//TODO to be implemented
 		JSONObject resultJson = null ;
-		ArrayList<DocumentumFolder> folders = dcRestDelegate.getPaginatedResult(folderId, 0, 0);
+		ArrayList<DocumentumFolder> folders = dcDelegate.getPaginatedResult(folderId, 0, 0);
 		resultJson = transformFoldersToJson(folders) ;
 		return resultJson.toJSONString() ;
-	}	
-	
-	String commonResponse() {
-		JSONObject resultJson = new JSONObject();
-		JSONObject json = new JSONObject();
-		json.put("success", true);
-		json.put("error", null);
-
-		resultJson.put("result", json);
-		return resultJson.toJSONString();
-	}
-	
-	
-	String errorResponse(String error) {
-		JSONObject resultJson = new JSONObject();
-		JSONObject json = new JSONObject();
-		json.put("success", false);
-		json.put("error", error);
-
-		resultJson.put("result", json);
-		return resultJson.toJSONString();
 	}
 	
 	
@@ -234,31 +258,4 @@ public class FileManagerController {
 		return returnJson ;
 	}
 	
-	
-	private JSONObject transformJsonFeedToJson(JsonFeed feed)
-	{
-		JSONArray children = new JSONArray() ;
-		for (JsonEntry entry : feed.getEntries()) {			
-			JSONObject json = new JSONObject() ;
-			
-			String type = (String) entry.getContent().getProperties().get("r_object_type") ;
-			if(type.contains("folder"))
-			{
-				
-			}
-			json.put("id", (String) entry.getContent().getProperties().get("r_object_id")) ;
-			json.put("name", (String) entry.getContent().getProperties().get("object_name")) ;
-			json.put("rights", "drwxr-xr-x") ;
-			json.put("size", "4096") ;
-			StringBuffer dateString = new StringBuffer((String) entry.getContent().getProperties().get("r_creation_date")) ;
-			dateString.replace(10, 11, " ").delete(18,28) ;
-			json.put("date", dateString.toString()) ;
-			json.put("type", "dir") ;
-			children.add(json) ;
-		}
-		
-		JSONObject returnJson = new JSONObject() ;
-		returnJson.put("result", children) ;
-		return returnJson ;	
-	}
 }
