@@ -26,9 +26,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.emc.documentum.constants.DCRestAPIWrapperData;
 import com.emc.documentum.constants.LinkRelation;
-import com.emc.documentum.dtos.DocumentumDocument;
+import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
-import com.emc.documentum.dtos.NavigationObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
@@ -246,7 +245,7 @@ public class DCRestAPIWrapper {
 		throw new FolderNotFoundException(queryFolderPath);
 	}
 
-	public ArrayList<NavigationObject> getAllCabinets() {
+	public ArrayList<DocumentumFolder> getAllCabinets() {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = data.dqlQuery + "select * from dm_cabinet";
 		System.out.println("Fetch Cabinets URI is " + URI);
@@ -255,16 +254,16 @@ public class DCRestAPIWrapper {
 
 		JsonFeed feed = response.getBody();
 
-		ArrayList<NavigationObject> cabinets = new ArrayList<NavigationObject>();
+		ArrayList<DocumentumFolder> cabinets = new ArrayList<>();
 
 		for (JsonEntry entry : feed.getEntries()) {
-			cabinets.add(new NavigationObject((String) entry.getContent().getProperties().get("r_object_id"), "#",
+			cabinets.add(new DocumentumFolder((String) entry.getContent().getProperties().get("r_object_id"),
 					(String) entry.getContent().getProperties().get("object_name"), "Cabinet"));
 		}
 		return cabinets;
 	}
 
-	public ArrayList<NavigationObject> getChildren(String folderId) {
+	public ArrayList<DocumentumObject> getChildren(String folderId) {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = data.fetchFolderURI + "/" + folderId;
 		System.out.println("Fetch Folder URI is " + URI);
@@ -273,7 +272,7 @@ public class DCRestAPIWrapper {
 
 		JsonObject feed = response.getBody();
 
-		ArrayList<NavigationObject> children = new ArrayList<NavigationObject>();
+		ArrayList<DocumentumObject> children = new ArrayList<>();
 
 		for (JsonLink link : feed.getLinks()) {
 			if (link.getHref().endsWith("documents") || link.getHref().endsWith("folders")) {
@@ -286,11 +285,11 @@ public class DCRestAPIWrapper {
 				JsonFeed child = getObjects(link.getHref());
 				if (child != null && child.getEntries() != null) {
 					for (JsonEntry entry : child.getEntries()) {
-						children.add(new NavigationObject(
+						children.add(new DocumentumObject(
 								(String) getObjectByUri(entry.getContentSrc()).getProperties().get("r_object_id"),
-								folderId,
 								(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"),
 								type));
+						//TODO add properties
 					}
 				}
 			}
@@ -350,7 +349,6 @@ public class DCRestAPIWrapper {
 
 				System.out.println("Response Headers: " + resource.getHeaders());
 				System.out.println("Response status: " + resource.getStatusCode());
-
 			}
 
 			if (resource.getBody() != null) {
@@ -417,4 +415,30 @@ public class DCRestAPIWrapper {
 		return response.getBody();
 	}
 
+	
+	
+	public JsonFeed getPaginatedResult(String folderId , int startIndex , int pageSize) {
+		//TODO check count first and check it against page size		
+		String query = String.format("select * from dm_folder where folder(id('%s')) ENABLE(RETURN_RANGE 1 1 'r_creation_date ASC' ) ", folderId);
+		ResponseEntity<JsonFeed> response = executeDQL(query) ;				
+		return response.getBody();
+	}
+	
+	private ResponseEntity<JsonFeed> executeDQL(String query)
+	{
+		RestTemplate restTemplate = new RestTemplate();
+		//log.log(level, msg, thrown);
+		String URI = data.dqlQuery + query ;
+		ResponseEntity<JsonFeed> response = restTemplate.exchange(URI, HttpMethod.GET,new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
+		return response ;
+	}
+	
+	private ResponseEntity<JsonObject> executeDQLObject(String query)
+	{
+		RestTemplate restTemplate = new RestTemplate();
+		//log.log(level, msg, thrown);
+		String URI = data.dqlQuery + query ;
+		ResponseEntity<JsonObject> response = restTemplate.exchange(URI, HttpMethod.GET,new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonObject.class);
+		return response ;
+	}
 }

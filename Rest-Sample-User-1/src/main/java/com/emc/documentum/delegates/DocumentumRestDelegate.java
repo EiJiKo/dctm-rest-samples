@@ -11,13 +11,13 @@ import com.emc.documentum.dtos.DocumentCreation;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
-import com.emc.documentum.dtos.NavigationObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
+import com.emc.documentum.model.JsonFeed;
 import com.emc.documentum.model.JsonObject;
 import com.emc.documentum.services.rest.DCRestRepositoryController;
 import com.emc.documentum.transformation.CoreRestTransformation;
@@ -34,8 +34,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	 * @see com.emc.documentum.delegates.DocumentumDelegate#createFolder(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public DocumentumFolder createFolder( String cabinetName,
-			String folderName) throws FolderCreationException,CabinetNotFoundException {
+	public DocumentumFolder createFolder(String cabinetName , String folderName) throws FolderCreationException,CabinetNotFoundException {
 		log.entering(DCRestRepositoryController.class.getSimpleName(), "CreateFolder");
 		JsonObject cabinet;
 		JsonObject folder;
@@ -47,8 +46,23 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			throw e;
 		} 
-		
-
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.emc.documentum.delegates.DocumentumDelegate#createFolder(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public DocumentumFolder createFolderByParentId(String ParentId , String folderName) throws FolderCreationException {
+		log.entering(DCRestRepositoryController.class.getSimpleName(), "CreateFolder");
+		JsonObject parent = dcAPI.getObjectById(ParentId) ;
+		JsonObject folder;
+		try {
+			folder = dcAPI.createFolder(parent, folderName);
+			return CoreRestTransformation.convertCoreRSFolder(folder);
+		} catch (FolderCreationException e) {
+			log.log(Level.SEVERE, e.getMessage(), e);
+			throw e;
+		} 
 	}
 	
 	/* (non-Javadoc)
@@ -97,11 +111,12 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		}
 	}
 
+	
 	/* (non-Javadoc)
 	 * @see com.emc.documentum.delegates.DocumentumDelegate#getAllCabinets()
 	 */
 	@Override
-	public ArrayList<NavigationObject> getAllCabinets() {
+	public ArrayList<DocumentumFolder> getAllCabinets() {
 		try {
 			return dcAPI.getAllCabinets();
 		} catch (Exception e) {
@@ -113,7 +128,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	 * @see com.emc.documentum.delegates.DocumentumDelegate#getChildren(java.lang.String)
 	 */
 	@Override
-	public ArrayList<NavigationObject> getChildren(String folderId) {
+	public ArrayList<DocumentumObject> getChildren(String folderId) {
 		try {
 			return dcAPI.getChildren(folderId);
 		} catch (Exception e) {
@@ -148,4 +163,12 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	public DocumentumDocument checkinDocument(String documentId, byte[] content) {
 		return CoreRestTransformation.convertCoreRSDocument(dcAPI.checkinDocument(documentId, content));
 	}
+	
+
+	@Override
+	public JsonFeed getPaginatedResult(String folderId , int startIndex , int pageSize)
+	{
+			return dcAPI.getPaginatedResult(folderId, startIndex, pageSize) ;
+	}
+
 }
