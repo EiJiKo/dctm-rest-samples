@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,7 +15,6 @@ import org.apache.chemistry.opencmis.client.api.ItemIterable;
 import org.apache.chemistry.opencmis.client.api.OperationContext;
 import org.apache.chemistry.opencmis.client.api.QueryResult;
 import org.apache.chemistry.opencmis.client.api.QueryStatement;
-import org.apache.chemistry.opencmis.client.api.Repository;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.client.api.SessionFactory;
 import org.apache.chemistry.opencmis.client.runtime.OperationContextImpl;
@@ -28,10 +26,10 @@ import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConnectionException;
 import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.emc.documentum.dtos.DocumentumFolder;
-import com.emc.documentum.dtos.DocumentumObject;
+import com.emc.documentum.constants.DCCMISConstants;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
@@ -42,30 +40,26 @@ public class DCCMISAPIWrapper {
 
 	Logger log = Logger.getLogger(this.getClass().getCanonicalName());
 
-	private Session getSession(String username, String password) {
-			SessionFactory sessionFactory = SessionFactoryImpl.newInstance();
-			Map<String, String> parameter = new HashMap<String, String>();
-			parameter.put(SessionParameter.USER, username);
-			parameter.put(SessionParameter.PASSWORD, password);
-			parameter.put(SessionParameter.ATOMPUB_URL, "http://documentum:8080/emc-cmis/resources");
-			parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
-			List<Repository> repositories = new ArrayList<Repository>();
-			repositories = sessionFactory.getRepositories(parameter);
-			for (Repository r : repositories) {
-				System.out.println("Found repository: " + r.getName());
-			}
+	@Autowired
+	DCCMISConstants data;
 
-			// create session with the first (and only) repository
-			Repository repository = repositories.get(0);
-			parameter.put(SessionParameter.REPOSITORY_ID, repository.getId());
-			Session session = sessionFactory.createSession(parameter);
-			return session;
+	private Session getSession(String username, String password, String repo) {
+		SessionFactory sessionFactory = SessionFactoryImpl.newInstance();
+		Map<String, String> parameter = new HashMap<String, String>();
+		parameter.put(SessionParameter.USER, username);
+		parameter.put(SessionParameter.PASSWORD, password);
+		parameter.put(SessionParameter.ATOMPUB_URL, "http://" + data.host + ":" + data.port + "/emc-cmis/resources");
+		System.out.println(parameter.get(SessionParameter.ATOMPUB_URL));
+		parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
+		parameter.put(SessionParameter.REPOSITORY_ID, repo);
+		Session session = sessionFactory.createSession(parameter);
+		return session;
 	}
 
 	public UserModel getUserInfo(String username, String password) {
 		UserModel user = new UserModel();
 
-		if (getSession(username, password) != null) {
+		if (getSession(username, password, data.repo) != null) {
 			user.setName(username);
 		}
 
@@ -84,20 +78,20 @@ public class DCCMISAPIWrapper {
 	public Folder getFolderByPath(String queryFolderPath)
 			throws FolderNotFoundException, RepositoryNotAvailableException {
 		try {
-			return (Folder) (getSession("dmadmin", "password")).getObjectByPath(queryFolderPath);
+			return (Folder) (getSession(data.username, data.password, data.repo)).getObjectByPath(queryFolderPath);
 		} catch (CmisConnectionException e) {
 			throw new RepositoryNotAvailableException("CMIS", e);
 		}
 	}
 
-	public ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException {
+	public ArrayList<CmisObject> getAllCabinets() throws RepositoryNotAvailableException {
 		try {
-			Session session = getSession("dmadmin", "password");
+			Session session = getSession(data.username, data.password, data.repo);
 			Folder rootFolder = session.getRootFolder();
 			ItemIterable<CmisObject> children = rootFolder.getChildren();
-			ArrayList<DocumentumFolder> navigationObjects = new ArrayList<>();
+			ArrayList<CmisObject> navigationObjects = new ArrayList<>();
 			for (CmisObject o : children) {
-				navigationObjects.add(new DocumentumFolder(o.getId(), o.getName(), o.getType().getDisplayName()));
+				navigationObjects.add(o);
 			}
 			return navigationObjects;
 		} catch (CmisConnectionException e) {
@@ -105,14 +99,14 @@ public class DCCMISAPIWrapper {
 		}
 	}
 
-	public ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException {
+	public ArrayList<CmisObject> getChildren(String folderId) throws RepositoryNotAvailableException {
 		try {
-			Session session = getSession("dmadmin", "password");
+			Session session = getSession(data.username, data.password, data.repo);
 			Folder rootFolder = (Folder) session.getObject(folderId);
 			ItemIterable<CmisObject> children = rootFolder.getChildren();
-			ArrayList<DocumentumObject> navigationObjects = new ArrayList<>();
+			ArrayList<CmisObject> navigationObjects = new ArrayList<>();
 			for (CmisObject o : children) {
-				navigationObjects.add(new DocumentumObject(o.getId(), o.getName(), o.getType().getDisplayName()));
+				navigationObjects.add(o);
 			}
 			return navigationObjects;
 		} catch (CmisConnectionException e) {
@@ -123,7 +117,7 @@ public class DCCMISAPIWrapper {
 	public byte[] getDocumentContentById(String documentId)
 			throws DocumentNotFoundException, RepositoryNotAvailableException {
 		try {
-			Session session = getSession("dmadmin", "password");
+			Session session = getSession(data.username, data.password, data.repo);
 			Document document = (Document) session.getObject(documentId);
 
 			System.out.println(document.getContentStreamLength());
@@ -162,7 +156,7 @@ public class DCCMISAPIWrapper {
 
 	public CmisObject getObjectById(String cabinetId) throws RepositoryNotAvailableException {
 		try {
-			return getSession("dmadmin", "password").getObject(cabinetId);
+			return getSession(data.username, data.password, data.repo).getObject(cabinetId);
 		} catch (CmisConnectionException e) {
 			throw new RepositoryNotAvailableException("CMIS", e);
 		}
@@ -173,7 +167,8 @@ public class DCCMISAPIWrapper {
 			String queryString = String.format("Select * from cmis:document where cmis:name like '%s'",
 					"%" + name + "%");
 			log.info("Executing Query " + queryString);
-			QueryStatement queryStatement = getSession("dmadmin", "password").createQueryStatement(queryString);
+			QueryStatement queryStatement = getSession(data.username, data.password, data.repo)
+					.createQueryStatement(queryString);
 
 			OperationContext operationContext = new OperationContextImpl();
 			operationContext.setMaxItemsPerPage(20);
@@ -183,20 +178,20 @@ public class DCCMISAPIWrapper {
 			throw new RepositoryNotAvailableException("CMIS", e);
 		}
 	}
-	public Document checkoutDocument(String documentId)
-	{
-		Session session = getSession("dmadmin", "password");
+
+	public Document checkoutDocument(String documentId) {
+		Session session = getSession(data.username, data.password, data.repo);
 		Document document = (Document) session.getObject(documentId);
 		Document checkoutDocument = (Document) session.getObject(document.checkOut());
 		return checkoutDocument;
 	}
-	public Document checkinDocument(String documentId,byte[] content)
-	{
-		Session session = getSession("dmadmin", "password");
+
+	public Document checkinDocument(String documentId, byte[] content) {
+		Session session = getSession(data.username, data.password, data.repo);
 		Document document = (Document) session.getObject(documentId);
 		ContentStream contentStream = session.getObjectFactory().createContentStream(
-				document.getContentStream().getFileName(), content.length,
-				document.getContentStream().getMimeType(), new ByteArrayInputStream(content));
+				document.getContentStream().getFileName(), content.length, document.getContentStream().getMimeType(),
+				new ByteArrayInputStream(content));
 		document.checkIn(false, null, contentStream, "minor version");
 		return document;
 	}

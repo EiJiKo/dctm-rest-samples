@@ -70,6 +70,16 @@ public class CoreRestTransformation {
 		return documentumObject;
 	}
 
+	private static DocumentumObject ConvertCoreRSJsonEntry(JsonEntry jsonEntry) {
+		Content content = jsonEntry.getContent();
+		String linkUrl = DCRestAPIWrapper.getLink(content.getLinks(), "self").getHref();
+		String[] linkParts = linkUrl.split("/");
+		String baseType = linkParts[linkParts.length - 2];
+		DocumentumObject documentumObject = createDocumentumObject(baseType);
+		convertCoreRSContent(content, documentumObject);
+		return documentumObject;
+	}
+
 	public static ArrayList<DocumentumObject> convertCoreRSEntryList(List<JsonEntry> jsonEntryFeed) {
 		ArrayList<DocumentumObject> documentumObjectList = new ArrayList<>();
 		if (jsonEntryFeed != null) {
@@ -80,17 +90,44 @@ public class CoreRestTransformation {
 		return documentumObjectList;
 	}
 
-	private static DocumentumObject ConvertCoreRSJsonEntry(JsonEntry jsonEntry) {
+	public static <T extends DocumentumObject> ArrayList<T> convertCoreRSEntryList(List<JsonEntry> jsonEntryFeed,
+			Class<T> responseType) {
+		ArrayList<DocumentumObject> documentumObjectList = new ArrayList<>();
+		if (jsonEntryFeed != null) {
+			for (JsonEntry jsonEntry : jsonEntryFeed) {
+				documentumObjectList.add(ConvertCoreRSJsonEntry(jsonEntry));
+			}
+		}
+		return (ArrayList<T>) documentumObjectList;
+	}
+
+	private static <T extends DocumentumObject> T convertCoreRSJsonEntry(JsonEntry jsonEntry, Class<T> type) {
 		Content content = jsonEntry.getContent();
 		String linkUrl = DCRestAPIWrapper.getLink(content.getLinks(), "self").getHref();
 		String[] linkParts = linkUrl.split("/");
 		String baseType = linkParts[linkParts.length - 2];
-		DocumentumObject documentumObject = createDocumentumObject(baseType);
+		DocumentumObject documentumObject;
+		try {
+			documentumObject = type.newInstance();
+			documentumObject.setType(baseType);
+			convertCoreRSContent(content, documentumObject);
+			return (T) documentumObject;
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	private static void convertCoreRSContent(Content content, DocumentumObject documentumObject) {
 
 		documentumObject.setId(content.getPropertyByName("r_object_id").toString());
 		documentumObject.setName(content.getPropertyByName("object_name").toString());
 		documentumObject.setProperties(content.getProperties());
-		return documentumObject;
 	}
 
 }

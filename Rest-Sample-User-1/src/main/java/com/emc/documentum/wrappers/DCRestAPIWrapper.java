@@ -24,7 +24,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import com.emc.documentum.constants.DCRestAPIWrapperData;
+import com.emc.documentum.constants.DCCoreRestConstants;
 import com.emc.documentum.constants.LinkRelation;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
@@ -46,7 +46,7 @@ public class DCRestAPIWrapper {
 
 	Logger log = Logger.getLogger(this.getClass().getCanonicalName());
 	@Autowired
-	DCRestAPIWrapperData data;
+	DCCoreRestConstants data;
 
 	/*
 	 * (non-Javadoc)
@@ -245,7 +245,7 @@ public class DCRestAPIWrapper {
 		throw new FolderNotFoundException(queryFolderPath);
 	}
 
-	public ArrayList<DocumentumFolder> getAllCabinets() {
+	public List<JsonEntry> getAllCabinets() {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = data.dqlQuery + "select * from dm_cabinet";
 		System.out.println("Fetch Cabinets URI is " + URI);
@@ -254,15 +254,14 @@ public class DCRestAPIWrapper {
 
 		JsonFeed feed = response.getBody();
 
-		ArrayList<DocumentumFolder> cabinets = new ArrayList<>();
-
-		for (JsonEntry entry : feed.getEntries()) {
-			cabinets.add(new DocumentumFolder((String) entry.getContent().getProperties().get("r_object_id"),
-					(String) entry.getContent().getProperties().get("object_name"), "Cabinet"));
-		}
-		return cabinets;
+		return feed.getEntries();
 	}
 
+	/**
+	 * TODO Reimplement using DQL
+	 * @param folderId
+	 * @return
+	 */
 	public ArrayList<DocumentumObject> getChildren(String folderId) {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = data.fetchFolderURI + "/" + folderId;

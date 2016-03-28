@@ -69,12 +69,12 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	@Override
 	public ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException {
 
-		return dcAPI.getAllCabinets();
+		return CMISTransformation.convertCmisObjectList(dcAPI.getAllCabinets(),DocumentumFolder.class);
 	}
 
 	@Override
 	public ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException {
-		return dcAPI.getChildren(folderId);
+		return CMISTransformation.convertCmisObjectList(dcAPI.getChildren(folderId),DocumentumObject.class);
 	}
 
 	@Override
