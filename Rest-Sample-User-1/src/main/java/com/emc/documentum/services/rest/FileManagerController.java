@@ -89,14 +89,12 @@ public class FileManagerController {
 	public String createFolderUrl(@RequestBody String jsonString) {
 		
 		JSONObject jsonRequest = null;
-		JSONObject jsonRequestParams = null;
 		JsonObject resultJson = null ;
 		try {
 			jsonRequest = (JSONObject) JSONValue.parseWithException(jsonString);
-			jsonRequestParams = (JSONObject) jsonRequest.get("params");
-			String parentFolderId = (String) jsonRequestParams.get("parentFolderId");
-			String folderName = (String) jsonRequestParams.get("name");
-			System.out.println(jsonRequestParams);
+			String parentFolderId = (String) jsonRequest.get("parentFolderId");
+			String folderName = (String) jsonRequest.get("name");
+			System.out.println(jsonRequest);
 			System.out.println("parent Folder  id " + parentFolderId);
 			DocumentumFolder folder = dcRestDelegate.createFolderByParentId(parentFolderId, folderName) ;
 			return commonResponse();
@@ -121,6 +119,7 @@ public class FileManagerController {
 		return commonResponse();
 	}
 	
+
 	@RequestMapping(value= "/api/document/content/{documentId}" , produces = "application/pdf")
 	public byte[] getDocumentContentById(@PathVariable(value="documentId")String documentId) throws DocumentNotFoundException{
 		try {
