@@ -166,7 +166,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	
 
 	@Override
-	public JsonFeed getPaginatedResult(String folderId , int startIndex , int pageSize)
+	public ArrayList<DocumentumFolder> getPaginatedResult(String folderId , int startIndex , int pageSize)
 	{
 			return dcAPI.getPaginatedResult(folderId, startIndex, pageSize) ;
 	}

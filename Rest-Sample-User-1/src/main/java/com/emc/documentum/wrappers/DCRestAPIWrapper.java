@@ -417,11 +417,18 @@ public class DCRestAPIWrapper {
 
 	
 	
-	public JsonFeed getPaginatedResult(String folderId , int startIndex , int pageSize) {
+	public ArrayList<DocumentumFolder> getPaginatedResult(String folderId , int startIndex , int pageSize) {
 		//TODO check count first and check it against page size		
 		String query = String.format("select * from dm_folder where folder(id('%s')) ENABLE(RETURN_RANGE 1 1 'r_creation_date ASC' ) ", folderId);
 		ResponseEntity<JsonFeed> response = executeDQL(query) ;				
-		return response.getBody();
+		JsonFeed feed = response.getBody();
+		
+		ArrayList<DocumentumFolder> folders = new ArrayList<>();
+		for (JsonEntry entry : feed.getEntries()) {
+			folders.add(new DocumentumFolder((String) entry.getContent().getProperties().get("r_object_id"),
+					(String) entry.getContent().getProperties().get("object_name"), "Cabinet"));
+		}
+		return folders;
 	}
 	
 	private ResponseEntity<JsonFeed> executeDQL(String query)

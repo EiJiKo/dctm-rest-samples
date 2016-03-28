@@ -103,7 +103,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public JsonFeed getPaginatedResult(String folderId, int startIndex, int pageSize) {
+	public ArrayList<DocumentumFolder> getPaginatedResult(String folderId, int startIndex, int pageSize) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -152,8 +152,8 @@ public class FileManagerController {
 	public String paginationService(@PathVariable(value="folderId")String folderId , @PathVariable(value="startIndex")String startIndex , @PathVariable(value="pageSize")String pageSize){		
 		//TODO to be implemented
 		JSONObject resultJson = null ;
-		JsonFeed feed = dcRestDelegate.getPaginatedResult(folderId, 0, 0);
-		resultJson = transformJsonFeedToJson(feed) ;
+		ArrayList<DocumentumFolder> folders = dcRestDelegate.getPaginatedResult(folderId, 0, 0);
+		resultJson = transformFoldersToJson(folders) ;
 		return resultJson.toJSONString() ;
 	}	
 	

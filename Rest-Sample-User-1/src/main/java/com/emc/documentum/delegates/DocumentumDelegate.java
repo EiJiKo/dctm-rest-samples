@@ -35,7 +35,7 @@ public interface DocumentumDelegate {
 	DocumentumDocument checkoutDocument(String documentId);
 	
 	DocumentumDocument checkinDocument(String documentId,byte[]content);
-	JsonFeed getPaginatedResult(String folderId , int startIndex , int pageSize);
+	ArrayList<DocumentumFolder> getPaginatedResult(String folderId , int startIndex , int pageSize);
 
 	DocumentumFolder createFolderByParentId(String ParentId, String folderName)
 			throws FolderCreationException;
