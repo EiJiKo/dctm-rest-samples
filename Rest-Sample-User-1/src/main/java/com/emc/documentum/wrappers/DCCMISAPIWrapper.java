@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,7 +15,6 @@ import org.apache.chemistry.opencmis.client.api.ItemIterable;
 import org.apache.chemistry.opencmis.client.api.OperationContext;
 import org.apache.chemistry.opencmis.client.api.QueryResult;
 import org.apache.chemistry.opencmis.client.api.QueryStatement;
-import org.apache.chemistry.opencmis.client.api.Repository;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.client.api.SessionFactory;
 import org.apache.chemistry.opencmis.client.runtime.OperationContextImpl;
@@ -32,8 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.emc.documentum.constants.DCCMISConstants;
-import com.emc.documentum.dtos.DocumentumFolder;
-import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
@@ -44,7 +40,6 @@ public class DCCMISAPIWrapper {
 
 	Logger log = Logger.getLogger(this.getClass().getCanonicalName());
 
-			SessionFactory sessionFactory = SessionFactoryImpl.newInstance();
 	@Autowired
 	DCCMISConstants data;
 
@@ -89,14 +84,14 @@ public class DCCMISAPIWrapper {
 		}
 	}
 
-	public ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException {
+	public ArrayList<CmisObject> getAllCabinets() throws RepositoryNotAvailableException {
 		try {
 			Session session = getSession(data.username, data.password, data.repo);
 			Folder rootFolder = session.getRootFolder();
 			ItemIterable<CmisObject> children = rootFolder.getChildren();
-			ArrayList<DocumentumFolder> navigationObjects = new ArrayList<>();
+			ArrayList<CmisObject> navigationObjects = new ArrayList<>();
 			for (CmisObject o : children) {
-				navigationObjects.add(new DocumentumFolder(o.getId(), o.getName(), o.getType().getDisplayName()));
+				navigationObjects.add(o);
 			}
 			return navigationObjects;
 		} catch (CmisConnectionException e) {
@@ -104,14 +99,14 @@ public class DCCMISAPIWrapper {
 		}
 	}
 
-	public ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException {
+	public ArrayList<CmisObject> getChildren(String folderId) throws RepositoryNotAvailableException {
 		try {
 			Session session = getSession(data.username, data.password, data.repo);
 			Folder rootFolder = (Folder) session.getObject(folderId);
 			ItemIterable<CmisObject> children = rootFolder.getChildren();
-			ArrayList<DocumentumObject> navigationObjects = new ArrayList<>();
+			ArrayList<CmisObject> navigationObjects = new ArrayList<>();
 			for (CmisObject o : children) {
-				navigationObjects.add(new DocumentumObject(o.getId(), o.getName(), o.getType().getDisplayName()));
+				navigationObjects.add(o);
 			}
 			return navigationObjects;
 		} catch (CmisConnectionException e) {

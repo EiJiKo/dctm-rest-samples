@@ -245,7 +245,7 @@ public class DCRestAPIWrapper {
 		throw new FolderNotFoundException(queryFolderPath);
 	}
 
-	public ArrayList<DocumentumFolder> getAllCabinets() {
+	public List<JsonEntry> getAllCabinets() {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = data.dqlQuery + "select * from dm_cabinet";
 		System.out.println("Fetch Cabinets URI is " + URI);
@@ -254,15 +254,14 @@ public class DCRestAPIWrapper {
 
 		JsonFeed feed = response.getBody();
 
-		ArrayList<DocumentumFolder> cabinets = new ArrayList<>();
-
-		for (JsonEntry entry : feed.getEntries()) {
-			cabinets.add(new DocumentumFolder((String) entry.getContent().getProperties().get("r_object_id"),
-					(String) entry.getContent().getProperties().get("object_name"), "Cabinet"));
-		}
-		return cabinets;
+		return feed.getEntries();
 	}
 
+	/**
+	 * TODO Reimplement using DQL
+	 * @param folderId
+	 * @return
+	 */
 	public ArrayList<DocumentumObject> getChildren(String folderId) {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = data.fetchFolderURI + "/" + folderId;

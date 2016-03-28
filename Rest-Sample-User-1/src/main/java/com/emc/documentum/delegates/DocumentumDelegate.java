@@ -38,4 +38,5 @@ public interface DocumentumDelegate {
 
 	DocumentumFolder createFolderByParentId(String ParentId, String folderName)
 			throws FolderCreationException;
+	
 }

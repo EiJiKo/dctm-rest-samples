@@ -17,7 +17,7 @@ import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 
 public class CMISTransformation {
-	
+
 	private static DocumentumObject createDocumentumObject(String baseTypeId) {
 		DocumentumObject documentumObject;
 		switch (baseTypeId) {
@@ -35,7 +35,7 @@ public class CMISTransformation {
 		}
 		return documentumObject;
 	}
-	
+
 	public static ArrayList<DocumentumObject> convertCMISQueryResultList(ItemIterable<QueryResult> documentList) {
 		ArrayList<DocumentumObject> documentumObjectList = new ArrayList<>();
 		for (QueryResult queryResult : documentList) {
@@ -43,7 +43,7 @@ public class CMISTransformation {
 		}
 		return documentumObjectList;
 	}
-	
+
 	public static DocumentumObject convertCMISQueryResult(QueryResult queryResult) {
 		String baseType = queryResult.getPropertyById("cmis:baseTypeId").getFirstValue().toString();
 		DocumentumObject documentumObject = createDocumentumObject(baseType);
@@ -52,7 +52,7 @@ public class CMISTransformation {
 		mapPropertyDataList(documentumObject, queryResult.getProperties());
 		return documentumObject;
 	}
-	
+
 	public static DocumentumObject convertCMISObject(CmisObject cmisObject) {
 		DocumentumObject object = createDocumentumObject(cmisObject.getPropertyValue("cmis:baseTypeId").toString());
 		object.setId(cmisObject.getId());
@@ -60,7 +60,7 @@ public class CMISTransformation {
 		mapPropertyList(object, cmisObject.getProperties());
 		return object;
 	}
-	
+
 	public static DocumentumDocument convertCMISDocument(Document cmisDocument) {
 		DocumentumDocument document = new DocumentumDocument();
 		document.setId(cmisDocument.getId());
@@ -69,7 +69,7 @@ public class CMISTransformation {
 		mapPropertyList(document, cmisDocument.getProperties());
 		return document;
 	}
-	
+
 	public static DocumentumFolder convertCMISFolder(Folder cmisFolder) {
 		DocumentumFolder folder = new DocumentumFolder();
 		folder.setId(cmisFolder.getId());
@@ -79,7 +79,7 @@ public class CMISTransformation {
 
 		return folder;
 	}
-	
+
 	private static void mapPropertyList(DocumentumObject object, List<Property<?>> properties) {
 		HashMap<String, Object> objectProperties = object.getProperties();
 		for (Property<?> property : properties) {
@@ -90,7 +90,7 @@ public class CMISTransformation {
 			objectProperties.put(property.getId(), property.getValue());
 		}
 	}
-	
+
 	private static void mapPropertyDataList(DocumentumObject documentumObject, List<PropertyData<?>> properties) {
 		HashMap<String, Object> objectProperties = documentumObject.getProperties();
 		for (PropertyData<?> property : properties) {
@@ -100,5 +100,15 @@ public class CMISTransformation {
 			objectProperties.put(property.getId(), property.getValues());
 		}
 
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends DocumentumObject> ArrayList<T> convertCmisObjectList(ArrayList<CmisObject> cmisObjects,
+			Class<T> class1) {
+		ArrayList<T> documentumObject = new ArrayList<T>();
+		for (CmisObject cmisObject : cmisObjects) {
+			documentumObject.add((T) convertCMISObject(cmisObject));
+		}
+		return documentumObject;
 	}
 }
