@@ -154,7 +154,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	@Override
 	public ArrayList<DocumentumObject> getChildren(String folderId) {
 		try {
-			return dcAPI.getChildren(folderId);
+			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getChildren(folderId));
 		} catch (Exception e) {
 			// TODO Object Not Found Exception
 			throw e;

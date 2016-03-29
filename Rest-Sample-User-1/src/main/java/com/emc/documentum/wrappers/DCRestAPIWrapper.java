@@ -27,7 +27,6 @@ import org.springframework.web.client.RestTemplate;
 import com.emc.documentum.constants.DCCoreRestConstants;
 import com.emc.documentum.constants.LinkRelation;
 import com.emc.documentum.dtos.DocumentumFolder;
-import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
@@ -258,42 +257,19 @@ public class DCRestAPIWrapper {
 	}
 
 	/**
-	 * TODO Reimplement using DQL
 	 * @param folderId
 	 * @return
 	 */
-	public ArrayList<DocumentumObject> getChildren(String folderId) {
+	public List<JsonEntry> getChildren(String folderId) {
 		RestTemplate restTemplate = new RestTemplate();
-		String URI = data.fetchFolderURI + "/" + folderId;
-		System.out.println("Fetch Folder URI is " + URI);
-		ResponseEntity<JsonObject> response = restTemplate.exchange(URI, HttpMethod.GET,
-				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonObject.class);
+		String URI = data.dqlQuery + "select *,r_lock_owner from dm_folder where  FOLDER(ID('"+folderId + "')) union select *,r_lock_owner from dm_document where FOLDER(ID('" +folderId  + "'))";
+		System.out.println("Fetch Children of Folder URI is " + URI);
+		ResponseEntity<JsonFeed> response = restTemplate.exchange(URI, HttpMethod.GET,
+				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
 
-		JsonObject feed = response.getBody();
+		JsonFeed feed = response.getBody();
 
-		ArrayList<DocumentumObject> children = new ArrayList<>();
-
-		for (JsonLink link : feed.getLinks()) {
-			if (link.getHref().endsWith("documents") || link.getHref().endsWith("folders")) {
-				String type = "";
-				if (link.getHref().endsWith("documents")) {
-					type = "Document";
-				} else if (link.getHref().endsWith("folders")) {
-					type = "Folder";
-				}
-				JsonFeed child = getObjects(link.getHref());
-				if (child != null && child.getEntries() != null) {
-					for (JsonEntry entry : child.getEntries()) {
-						children.add(new DocumentumObject(
-								(String) getObjectByUri(entry.getContentSrc()).getProperties().get("r_object_id"),
-								(String) getObjectByUri(entry.getContentSrc()).getProperties().get("object_name"),
-								type));
-						//TODO add properties
-					}
-				}
-			}
-		}
-		return children;
+		return feed.getEntries();
 	}
 
 	public JsonFeed getObjects(String uri) {

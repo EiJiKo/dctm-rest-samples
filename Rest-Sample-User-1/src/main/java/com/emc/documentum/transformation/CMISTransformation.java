@@ -49,6 +49,11 @@ public class CMISTransformation {
 		DocumentumObject documentumObject = createDocumentumObject(baseType);
 		documentumObject.setId(queryResult.getPropertyById("cmis:objectId").getFirstValue().toString());
 		documentumObject.setName(queryResult.getPropertyById("cmis:name").getFirstValue().toString());
+		PropertyData<Boolean> checkedOut = queryResult.getPropertyById("cmis:isVersionSeriesCheckedOut");
+		if(checkedOut != null){
+			documentumObject.setCheckedOut(checkedOut.getFirstValue());
+			documentumObject.setLockUser(queryResult.getPropertyById("cmis:versionSeriesCheckedOutBy").getFirstValue().toString());
+		}
 		mapPropertyDataList(documentumObject, queryResult.getProperties());
 		return documentumObject;
 	}
@@ -57,6 +62,11 @@ public class CMISTransformation {
 		DocumentumObject object = createDocumentumObject(cmisObject.getPropertyValue("cmis:baseTypeId").toString());
 		object.setId(cmisObject.getId());
 		object.setName(cmisObject.getName());
+		Property<Boolean> checkedOut = cmisObject.getProperty("cmis:isVersionSeriesCheckedOut");
+		if(checkedOut != null){
+			object.setCheckedOut(checkedOut.getValue());
+			object.setLockUser(cmisObject.getProperty("cmis:versionSeriesCheckedOutBy").getValueAsString());
+		}
 		mapPropertyList(object, cmisObject.getProperties());
 		return object;
 	}
@@ -66,6 +76,11 @@ public class CMISTransformation {
 		document.setId(cmisDocument.getId());
 		document.setName(cmisDocument.getName());
 		document.setPath(cmisDocument.getPaths().get(0));
+		Property<Boolean> checkedOut = cmisDocument.getProperty("cmis:isVersionSeriesCheckedOut");
+		if(checkedOut != null){
+			document.setCheckedOut(checkedOut.getValue());
+			document.setLockUser(cmisDocument.getProperty("cmis:versionSeriesCheckedOutBy").getValueAsString());
+		}
 		mapPropertyList(document, cmisDocument.getProperties());
 		return document;
 	}
