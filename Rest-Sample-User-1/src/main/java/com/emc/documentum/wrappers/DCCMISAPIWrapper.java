@@ -84,13 +84,13 @@ public class DCCMISAPIWrapper {
 		}
 	}
 
-	public ArrayList<CmisObject> getAllCabinets() throws RepositoryNotAvailableException {
+	public ArrayList<CmisObject> getAllCabinets(int pageNumber, int pageSize) throws RepositoryNotAvailableException {
 		try {
 			Session session = getSession(data.username, data.password, data.repo);
 			Folder rootFolder = session.getRootFolder();
 			ItemIterable<CmisObject> children = rootFolder.getChildren();
 			ArrayList<CmisObject> navigationObjects = new ArrayList<>();
-			for (CmisObject o : children) {
+			for (CmisObject o : children.skipTo(--pageNumber * pageSize).getPage(pageSize)) {
 				navigationObjects.add(o);
 			}
 			return navigationObjects;
@@ -99,13 +99,13 @@ public class DCCMISAPIWrapper {
 		}
 	}
 
-	public ArrayList<CmisObject> getChildren(String folderId) throws RepositoryNotAvailableException {
+	public ArrayList<CmisObject> getChildren(String folderId, int pageNumber, int pageSize) throws RepositoryNotAvailableException {
 		try {
-			Session session = getSession(data.username, data.password, data.repo);
+			Session session = getSession(data.username, data.password, data.repo);			
 			Folder rootFolder = (Folder) session.getObject(folderId);
 			ItemIterable<CmisObject> children = rootFolder.getChildren();
 			ArrayList<CmisObject> navigationObjects = new ArrayList<>();
-			for (CmisObject o : children) {
+			for (CmisObject o : children.skipTo(--pageNumber * pageSize).getPage(pageSize)) {
 				navigationObjects.add(o);
 			}
 			return navigationObjects;

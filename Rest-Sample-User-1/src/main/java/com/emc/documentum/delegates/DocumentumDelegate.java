@@ -25,8 +25,21 @@ public interface DocumentumDelegate {
 
 	DocumentumObject getObjectById(String cabinetId) throws CabinetNotFoundException, RepositoryNotAvailableException;
 
+	@Deprecated
+	/**
+	 * Use the paginated version getAllCabinets(pageNumber,pageSize)
+	 * @return
+	 * @throws RepositoryNotAvailableException
+	 */
 	ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException;
 
+	@Deprecated
+	/**
+	 * Use the paginated version getChildren(folderId,pageNumber,pageSize)
+	 * @param folderId
+	 * @return
+	 * @throws RepositoryNotAvailableException
+	 */
 	ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException;
 	
 	ArrayList<DocumentumObject> getChildren(String folderId, int pageNumber, int pageSize) throws RepositoryNotAvailableException;
@@ -43,5 +56,7 @@ public interface DocumentumDelegate {
 
 	DocumentumFolder createFolderByParentId(String ParentId, String folderName)
 			throws FolderCreationException, RepositoryNotAvailableException;
+
+	ArrayList<DocumentumFolder> getAllCabinets(int pageNumber, int pageSize) throws RepositoryNotAvailableException;
 	
 }
