@@ -1,16 +1,16 @@
 package com.emc.documentum.services.rest;
 
 import java.util.ArrayList;
+
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.emc.documentum.delegate.provider.DelegateProvider;
 import com.emc.documentum.delegates.DocumentumDelegate;
 import com.emc.documentum.dtos.DocumentumFolder;
@@ -18,8 +18,6 @@ import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.DelegateNotFoundException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.FolderCreationException;
-import com.emc.documentum.model.JsonEntry;
-import com.emc.documentum.model.JsonFeed;
 import com.emc.documentum.model.JsonObject;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -36,16 +34,12 @@ public class FileManagerController extends BaseController{
 	DelegateProvider delegateProvider ;
 	
 	@RequestMapping(value = "/api/listUrl", method = RequestMethod.POST, headers = "Content-Type=application/json;charset=UTF-8")
-	public String listURL(@RequestBody String jsonString) {
-
-		
-		String delegateKey = "CMIS" ;
+	public String listURL(@RequestBody String jsonString , @RequestHeader(value="API_BASE", defaultValue="Rest") String delegateKey) {
 		try {
 			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
 		} catch (DelegateNotFoundException e1) {
-			//TODO the exception handling should be done by the common exception handler with error code and error message
 			e1.printStackTrace();
-			return errorResponse(delegateKey + " Repo is not available ") ;
+			return errorResponse(delegateKey + " Repository is not available ") ;
 		}
 		
 		JSONObject jsonRequest = null;
@@ -100,18 +94,13 @@ public class FileManagerController extends BaseController{
 	}
 
 	@RequestMapping(value = "/api/createFolderUrl", method = RequestMethod.POST)
-	public String createFolderUrl(@RequestBody String jsonString) {
-		
-		
-		String delegateKey = "CMIS" ;
+	public String createFolderUrl(@RequestBody String jsonString , @RequestHeader(value="API_BASE", defaultValue="Rest") String delegateKey) {
 		try {
 			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
 		} catch (DelegateNotFoundException e1) {
-			//TODO the exception handling should be done by the common exception handler with error code and error message
 			e1.printStackTrace();
-			return errorResponse(delegateKey + " Repo is not available ") ;
+			return errorResponse(delegateKey + " Repository is not available ") ;
 		}
-		
 		
 		JSONObject jsonRequest = null;
 		JsonObject resultJson = null ;
@@ -146,16 +135,12 @@ public class FileManagerController extends BaseController{
 	
 
 	@RequestMapping(value= "/api/document/content/{documentId}" , produces = "application/pdf")
-	public byte[] getDocumentContentById(@PathVariable(value="documentId")String documentId) throws DocumentNotFoundException{
-		
-		String delegateKey = "CMIS" ;
+	public byte[] getDocumentContentById(@PathVariable(value="documentId")String documentId , @RequestHeader(value="API_BASE", defaultValue="Rest") String delegateKey) throws DocumentNotFoundException{
 		try {
 			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
 		} catch (DelegateNotFoundException e1) {
-			//TODO to be implemented the handling methodology
 			e1.printStackTrace();
 		}
-		
 		
 		try {
 			byte[] enCodedfileContent = (byte[]) dcDelegate.getDocumentContentById(documentId);
@@ -167,16 +152,12 @@ public class FileManagerController extends BaseController{
 	}
 	
 	@RequestMapping(value= "/api/document/open/{documentId}" )
-	public JSONObject openDocumentById(@PathVariable(value="documentId")String documentId) throws DocumentNotFoundException{
-		
-		String delegateKey = "CMIS" ;
+	public JSONObject openDocumentById(@PathVariable(value="documentId")String documentId , @RequestHeader(value="API_BASE", defaultValue="Rest") String delegateKey) throws DocumentNotFoundException{
 		try {
 			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
 		} catch (DelegateNotFoundException e1) {
-			//TODO to be implemented the handling methodology
 			e1.printStackTrace();
 		}
-		
 		
 		try {
 			byte[] enCodedfileContent = (byte[]) dcDelegate.getDocumentContentById(documentId);
@@ -190,7 +171,6 @@ public class FileManagerController extends BaseController{
 		return null ;
 	}
 
-	// TODO getContentUrl
 	
 	@RequestMapping(value= "/api/folder/content/{folderId}/startIndex/pageSize")
 	public String paginationService(@PathVariable(value="folderId")String folderId , @PathVariable(value="startIndex")String startIndex , @PathVariable(value="pageSize")String pageSize){		
