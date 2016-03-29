@@ -7,8 +7,10 @@ public class DocumentumDocument extends DocumentumObject {
 	 */
 	private static final long serialVersionUID = 5044253470687907717L;
 
-	public DocumentumDocument(){
+	public DocumentumDocument() {
 		super();
 		setType("Document");
 	}
+
+	
 }
