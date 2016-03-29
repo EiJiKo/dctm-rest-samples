@@ -39,9 +39,10 @@ public class CoreRestTransformation {
 		object.setProperties(restObject.getProperties());
 		object.setDefinition(restObject.getDefinition());
 		object.setType(restObject.getType());
-		if(restObject.getPropertyByName("r_lock_owner") != null){
+		Object lockUser = restObject.getPropertyByName("r_lock_owner");
+		if(lockUser != null && lockUser.toString().length() > 0){
 			object.setCheckedOut(true);
-			object.setLockUser(restObject.getPropertyByName("r_lock_owner").toString());
+			object.setLockUser(lockUser.toString());
 		}
 		return object;
 	}
@@ -53,9 +54,10 @@ public class CoreRestTransformation {
 		document.setProperties(restDocument.getProperties());
 		document.setDefinition(restDocument.getDefinition());
 		document.setType(restDocument.getType());
-		if(restDocument.getPropertyByName("r_lock_owner") != null){
+		Object lockUser = restDocument.getPropertyByName("r_lock_owner");
+		if(lockUser != null && lockUser.toString().length() > 0){
 			document.setCheckedOut(true);
-			document.setLockUser(restDocument.getPropertyByName("r_lock_owner").toString());
+			document.setLockUser(lockUser.toString());
 		}
 		return document;
 	}
@@ -136,9 +138,10 @@ public class CoreRestTransformation {
 		documentumObject.setId(content.getPropertyByName("r_object_id").toString());
 		documentumObject.setName(content.getPropertyByName("object_name").toString());
 		documentumObject.setProperties(content.getProperties());
-		if(content.getPropertyByName("r_lock_owner") != null){
+		Object lockUser = content.getPropertyByName("r_lock_owner");
+		if(lockUser != null && lockUser.toString().length() > 0){
 			documentumObject.setCheckedOut(true);
-			documentumObject.setLockUser(content.getPropertyByName("r_lock_owner").toString());
+			documentumObject.setLockUser(lockUser.toString());
 		}
 	}
 
