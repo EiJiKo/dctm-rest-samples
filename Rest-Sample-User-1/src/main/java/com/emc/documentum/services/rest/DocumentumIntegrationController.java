@@ -24,6 +24,7 @@ import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 
 @RestController
 @RequestMapping("{api}/services")
+@CrossOrigin("*")
 public class DocumentumIntegrationController {
 
 	Logger log = Logger.getLogger(DocumentumIntegrationController.class.getCanonicalName());
@@ -69,7 +70,6 @@ public class DocumentumIntegrationController {
 
 	}
 
-	@CrossOrigin("*")
 	@RequestMapping(value = "get/cabinet/id/{cabinetId}")
 	public DocumentumObject getCabinetById(@PathVariable(value = "api") String api,
 			@PathVariable(value = "cabinetId") String cabinetId)
@@ -78,14 +78,12 @@ public class DocumentumIntegrationController {
 
 	}
 
-	@CrossOrigin("*")
 	@RequestMapping(value = "get/cabinets")
 	public ArrayList<DocumentumFolder> getAllCabinets(@PathVariable(value = "api") String api)
 			throws RepositoryNotAvailableException, DelegateNotFoundException {
 		return (delegateProvider.getDelegate(api)).getAllCabinets();
 	}
 
-	@CrossOrigin("*")
 	@RequestMapping(value = "get/{folderId}/children")
 	public ArrayList<DocumentumObject> getChildren(@PathVariable(value = "api") String api,
 			@PathVariable(value = "folderId") String folderId) throws Exception {
