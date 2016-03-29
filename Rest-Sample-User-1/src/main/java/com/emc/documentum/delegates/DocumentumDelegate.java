@@ -28,17 +28,20 @@ public interface DocumentumDelegate {
 	ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException;
 
 	ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException;
+	
+	ArrayList<DocumentumObject> getChildren(String folderId, int pageNumber, int pageSize) throws RepositoryNotAvailableException;
+	
 
 	byte[] getDocumentContentById(String documentId) throws DocumentNotFoundException, RepositoryNotAvailableException;
 
 	ArrayList<DocumentumObject> getDocumentByName(String name) throws RepositoryNotAvailableException;
 	
-	DocumentumDocument checkoutDocument(String documentId);
+	DocumentumDocument checkoutDocument(String documentId) throws RepositoryNotAvailableException;
 	
-	DocumentumDocument checkinDocument(String documentId,byte[]content);
-	ArrayList<DocumentumFolder> getPaginatedResult(String folderId , int startIndex , int pageSize);
+	DocumentumDocument checkinDocument(String documentId,byte[]content) throws RepositoryNotAvailableException;
+	ArrayList<DocumentumFolder> getPaginatedResult(String folderId , int startIndex , int pageSize) throws RepositoryNotAvailableException;
 
 	DocumentumFolder createFolderByParentId(String ParentId, String folderName)
-			throws FolderCreationException;
+			throws FolderCreationException, RepositoryNotAvailableException;
 	
 }

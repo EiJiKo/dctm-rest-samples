@@ -123,4 +123,11 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 		return "cmis";
 	}
 
+	@Override
+	public ArrayList<DocumentumObject> getChildren(String folderId, int pageNumber, int pageSize)
+			throws RepositoryNotAvailableException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

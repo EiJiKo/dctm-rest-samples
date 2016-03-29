@@ -107,7 +107,7 @@ public class DocumentumIntegrationController {
 
 	@RequestMapping(value = "get/document/checkout/id/{documentId}")
 	public DocumentumDocument checkoutDocuement(@PathVariable(value = "api") String api,
-			@PathVariable(value = "documentId") String documentId) throws DelegateNotFoundException {
+			@PathVariable(value = "documentId") String documentId) throws DelegateNotFoundException, RepositoryNotAvailableException {
 		log.entering("checkout document ", documentId);
 		return (delegateProvider.getDelegate(api)).checkoutDocument(documentId);
 	}
@@ -115,7 +115,7 @@ public class DocumentumIntegrationController {
 	@RequestMapping(value = "get/document/checkin/id/{documentId}", method = RequestMethod.POST)
 	public DocumentumDocument checkinDocuement(@PathVariable(value = "api") String api,
 			@PathVariable(value = "documentId") String documentId, @RequestBody byte[] content)
-			throws DelegateNotFoundException {
+			throws DelegateNotFoundException, RepositoryNotAvailableException {
 		log.entering("checkin document ", documentId);
 		return (delegateProvider.getDelegate(api)).checkinDocument(documentId, content);
 	}

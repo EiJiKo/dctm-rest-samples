@@ -18,6 +18,7 @@ import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.DelegateNotFoundException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.FolderCreationException;
+import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.model.JsonObject;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -115,6 +116,10 @@ public class FileManagerController extends BaseController{
 		} catch (FolderCreationException | ParseException e) {
 			e.printStackTrace();
 			return errorResponse("can't create folder");
+		} catch (RepositoryNotAvailableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return "";
 		}		
 	}
 
@@ -176,9 +181,17 @@ public class FileManagerController extends BaseController{
 	public String paginationService(@PathVariable(value="folderId")String folderId , @PathVariable(value="startIndex")String startIndex , @PathVariable(value="pageSize")String pageSize){		
 		//TODO to be implemented
 		JSONObject resultJson = null ;
-		ArrayList<DocumentumFolder> folders = dcDelegate.getPaginatedResult(folderId, 0, 0);
-		resultJson = transformFoldersToJson(folders) ;
-		return resultJson.toJSONString() ;
+		ArrayList<DocumentumFolder> folders;
+		try {
+			folders = dcDelegate.getPaginatedResult(folderId, 0, 0);
+			resultJson = transformFoldersToJson(folders) ;
+			return resultJson.toJSONString() ;
+		} catch (RepositoryNotAvailableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return "";
+		}
+		
 	}
 	
 	
