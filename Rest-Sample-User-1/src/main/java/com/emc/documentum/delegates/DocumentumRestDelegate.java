@@ -153,7 +153,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	@Override
 	public ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException {
 		try {
-			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getAllCabinets(), DocumentumFolder.class);
+			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getAllCabinets(1,20), DocumentumFolder.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		} catch (Exception e) {
@@ -171,7 +171,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	@Override
 	public ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException {
 		try {
-			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getChildren(folderId));
+			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getChildren(folderId,1,20));
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		} catch (Exception e) {
@@ -230,7 +230,8 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public ArrayList<DocumentumFolder> getPaginatedResult(String folderId, int startIndex, int pageSize) throws RepositoryNotAvailableException {
+	public ArrayList<DocumentumFolder> getPaginatedResult(String folderId, int startIndex, int pageSize)
+			throws RepositoryNotAvailableException {
 		try {
 			return dcAPI.getPaginatedResult(folderId, startIndex, pageSize);
 		} catch (ResourceAccessException e) {
@@ -246,8 +247,26 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	@Override
 	public ArrayList<DocumentumObject> getChildren(String folderId, int pageNumber, int pageSize)
 			throws RepositoryNotAvailableException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getChildren(folderId,pageNumber,pageSize));
+		} catch (ResourceAccessException e) {
+			throw new RepositoryNotAvailableException("CoreRest");
+		} catch (Exception e) {
+			// TODO Object Not Found Exception
+			throw e;
+		}
+	}
+
+	@Override
+	public ArrayList<DocumentumFolder> getAllCabinets(int pageNumber, int pageSize)
+			throws RepositoryNotAvailableException {
+		try {
+			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getAllCabinets(pageNumber,pageSize), DocumentumFolder.class);
+		} catch (ResourceAccessException e) {
+			throw new RepositoryNotAvailableException("CoreRest");
+		} catch (Exception e) {
+			throw e;
+		}
 	}
 
 }

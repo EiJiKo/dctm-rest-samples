@@ -23,6 +23,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.emc.documentum.constants.DCCoreRestConstants;
 import com.emc.documentum.constants.LinkRelation;
@@ -244,11 +246,16 @@ public class DCRestAPIWrapper {
 		throw new FolderNotFoundException(queryFolderPath);
 	}
 
-	public List<JsonEntry> getAllCabinets() {
+	public List<JsonEntry> getAllCabinets(int pageNumber, int pageSize) {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = data.dqlQuery + "select * from dm_cabinet";
-		System.out.println("Fetch Cabinets URI is " + URI);
-		ResponseEntity<JsonFeed> response = restTemplate.exchange(URI, HttpMethod.GET,
+		
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		params.add("page", ""+ pageNumber);
+		params.add("items-per-page", ""+pageSize);
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(URI).queryParams(params).build();
+		System.out.println("Fetch Cabinets URI is " + uriComponents.toUriString());
+		ResponseEntity<JsonFeed> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET,
 				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
 
 		JsonFeed feed = response.getBody();
@@ -258,13 +265,20 @@ public class DCRestAPIWrapper {
 
 	/**
 	 * @param folderId
+	 * @param pageSize 
+	 * @param pageNumber 
 	 * @return
 	 */
-	public List<JsonEntry> getChildren(String folderId) {
+	public List<JsonEntry> getChildren(String folderId, int pageNumber, int pageSize) {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = data.dqlQuery + "select *,r_lock_owner from dm_folder where  FOLDER(ID('"+folderId + "')) union select *,r_lock_owner from dm_document where FOLDER(ID('" +folderId  + "'))";
-		System.out.println("Fetch Children of Folder URI is " + URI);
-		ResponseEntity<JsonFeed> response = restTemplate.exchange(URI, HttpMethod.GET,
+		
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		params.add("page", ""+ pageNumber);
+		params.add("items-per-page", ""+pageSize);
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(URI).queryParams(params).build();
+		System.out.println("Fetch Children of Folder URI is " + uriComponents.toUriString());
+		ResponseEntity<JsonFeed> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET,
 				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
 
 		JsonFeed feed = response.getBody();

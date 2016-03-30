@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.emc.documentum.delegate.provider.APIDelegateProvider;
@@ -79,15 +80,16 @@ public class DocumentumIntegrationController {
 	}
 
 	@RequestMapping(value = "get/cabinets")
-	public ArrayList<DocumentumFolder> getAllCabinets(@PathVariable(value = "api") String api)
+	public ArrayList<DocumentumFolder> getAllCabinets(@PathVariable(value = "api") String api,@RequestParam(name="pageNumber",defaultValue="1") int pageNumber , @RequestParam(name="pageSize",defaultValue="20") int pageSize)
 			throws RepositoryNotAvailableException, DelegateNotFoundException {
-		return (delegateProvider.getDelegate(api)).getAllCabinets();
+		return (delegateProvider.getDelegate(api)).getAllCabinets(pageNumber,pageSize);
 	}
 
 	@RequestMapping(value = "get/{folderId}/children")
 	public ArrayList<DocumentumObject> getChildren(@PathVariable(value = "api") String api,
-			@PathVariable(value = "folderId") String folderId) throws Exception {
-		return (delegateProvider.getDelegate(api)).getChildren(folderId);
+			@PathVariable(value = "folderId") String folderId ,@RequestParam(name="pageNumber",defaultValue="1") int pageNumber , @RequestParam(name="pageSize",defaultValue="20") int pageSize) throws Exception {
+		System.out.println("Page Number: " + pageNumber + " Page Size: " + pageSize);
+		return (delegateProvider.getDelegate(api)).getChildren(folderId,pageNumber,pageSize);
 	}
 
 	@RequestMapping(value = "get/document/content/id/{documentId}")
