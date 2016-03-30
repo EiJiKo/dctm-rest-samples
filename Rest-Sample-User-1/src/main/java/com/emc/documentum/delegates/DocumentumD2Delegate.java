@@ -109,14 +109,14 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	public ArrayList<DocumentumObject> getChildren(String folderId, int pageNumber, int pageSize)
 			throws RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
-		return null;
+		return DCD2Transformation.convertD2ObjectList(dcAPI.getChildren(folderId,pageNumber,pageSize), DocumentumObject.class);
 	}
 
 	@Override
 	public ArrayList<DocumentumFolder> getAllCabinets(int pageNumber, int pageSize)
 			throws RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
-		return null;
+		return DCD2Transformation.convertD2ObjectList(dcAPI.getAllCabinets(),DocumentumFolder.class);
 	}
 
 }

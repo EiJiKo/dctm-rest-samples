@@ -1,8 +1,11 @@
 package com.emc.documentum.transformation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.emc.d2fs.models.attribute.Attribute;
 import com.emc.d2fs.models.node.Node;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
@@ -19,6 +22,10 @@ public class DCD2Transformation {
 		object.setType(d2Object.getType());
 		return object;
 	}
+	
+	
+	
+
 	@SuppressWarnings("unchecked")
 	public static <T extends DocumentumObject> ArrayList<T> convertD2ObjectList(List<Node> list,
 			Class<T> class1) {
@@ -28,4 +35,14 @@ public class DCD2Transformation {
 		}
 		return documentumObject;
 	}
+	public static Map<String,Object> convertD2Properties(List<Attribute> attributes)
+	{
+		Map<String, Object> properties = new HashMap<String, Object>();
+		for(Attribute attribute:attributes)
+		{
+			properties.put(attribute.getName(), attribute.getValue());
+		}
+		return properties;
+	}
+	
 }

@@ -8,9 +8,17 @@ import com.emc.d2fs.schemas.models.ModelPort;
 import com.emc.d2fs.schemas.models.ModelPortService;
 import com.emc.d2fs.services.browser_service.GetBrowserContentRequest;
 import com.emc.d2fs.services.browser_service.GetBrowserContentResponse;
+import com.emc.d2fs.services.content_service.GetContentRequest;
+import com.emc.d2fs.services.content_service.GetContentResponse;
+import com.emc.d2fs.services.download_service.GetDownloadFileDetailsRequest;
+import com.emc.d2fs.services.download_service.GetDownloadUrlsRequest;
+import com.emc.d2fs.services.download_service.GetDownloadUrlsResponse;
+import com.emc.d2fs.services.property_service.GetPropertiesRequest;
+import com.emc.d2fs.services.property_service.GetPropertiesResponse;
 import com.emc.d2fs.services.repository_service.CheckLoginRequest;
 import com.emc.d2fs.services.repository_service.CheckLoginResponse;
 import com.emc.d2fs.services.repository_service.GetRepositoryRequest;
+import com.emc.d2fs.services.x3config_service.GetDownloadLocationsRequest;
 
 public class Main {
 	static ModelPortService service = new ModelPortService();
@@ -47,6 +55,15 @@ public class Main {
 			CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
 			if (!checkLoginResponse.isResult())
 				System.out.println("login failed");
+//			GetDQLContentRequest request = new GetDQLContentRequest();
+//			request.setContext(context);
+//			request.setDql("select * from dm_folder");
+//			GetDQLContentResponse respons = port.getDQLContent(request);
+//			for (Item item :respons.getDocItems().getItems())
+//			{
+//				System.out.println(item.getId());
+//			}
+			
 			GetBrowserContentRequest getBrowserContentRequest = new GetBrowserContentRequest();
 			getBrowserContentRequest.setContext(context);
 //			getBrowserContentRequest.setContentTypeName(D2fsConstants.ROOT);
@@ -55,23 +72,45 @@ public class Main {
 //			for (Node node : response.getNode().getNodes()) {
 //				System.out.printf(" id:%s type:%s label:%s\n", node.getId(), node.getType(), node.getLabel());
 //			}
-			// Get cabinets in the repository
+//			 Get cabinets in the repository
+			
+			
+			
 			getBrowserContentRequest.setContext(context);
-			getBrowserContentRequest.setId("0b00000180067f58");
+			getBrowserContentRequest.setId("090000018005b59e");
 			getBrowserContentRequest.setContentTypeName(D2fsConstants.FOLDER);
+			//getBrowserContentRequest.setCheckChildren(D2fsConstants.CHECK_FOLDER_DOCUMENT);
 			GetBrowserContentResponse response = port.getBrowserContent(getBrowserContentRequest);
 			System.out.println("cabinets in repository " + repositoryId + ":");
 			for (Node node : response.getNode().getNodes()) {
 				System.out.printf(" id:%s type:%s label:%s\n", node.getId(), node.getType(), node.getLabel());
 			}
+			
+			
+			
+			
+			
+			GetPropertiesRequest req = new GetPropertiesRequest();
+			req.setContext(context);
+			req.setId("0b0000018003f457");
+			GetPropertiesResponse res = port.getProperties(req);
+			res.getAttributes();
+			
+			GetContentRequest req1 = new GetContentRequest();
+			req1.setContext(context);
+			req1.setContentTypeName(D2fsConstants.NODE_CHECKOUT);
+			req1.setId("0900000180042dff");
+			GetContentResponse res1 = port.getContent(req1);
+			res1.getDocItems();
 			// Get contents of the user home cabinet
-//			String homeId = null;
+			String homeId = "0c0007c280000130";
 //			for (Node node : response.getNode().getNodes()) {
 //				if (node.getLabel().equals("Concordant Policies")) {
 //					homeId = node.getId();
 //					break;
 //				}
 //			}
+		
 //			if (homeId != null) {
 //				getBrowserContentRequest.setContext(context);
 //				getBrowserContentRequest.setId(homeId);
