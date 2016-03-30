@@ -1,0 +1,161 @@
+package com.emc.d2fs.constants;
+
+
+public interface D2fsConstants {
+	// ContentTypeName
+	public final static String REPOSITORY = "Repository";
+	public final static String FOLDER = "Folder";
+	public final static String VD = "vd";
+	public final static String NODE_FAVORITES = "node_favorites";
+	public final static String ROOT = "Root";
+	public final static String SPACE_CABINET = "space_cabinet";
+	public final static String DMC_ROOM = "dmc_room";
+	public final static String DISTRIBUTION_REPORT = "distribution_report";
+	public final static String NODE_SEARCH = "node_search";
+	public final static String NODE_CHECKOUT = "node_checkout";
+	public final static String NODE_LAST_SEARCH = "node_last_search";
+	public final static String NODE_SAVED_SEARCHES = "node_saved_searches";
+	public final static String NODE_SAVED_PUBLIC_SEARCHES = "node_saved_public_searches";
+	public final static String NODE_FACET_VALUE = "d2_facet_value";
+	public final static String NODE_FACET_DEFINITION = "d2_facet_definition";
+	public final static String NODE_ASYNC_SEARCHES = "node_async_searches";
+	public final static String NODE_INBOX_TASKS = "node_inbox_tasks";
+	public final static String NODE_INBOX_NOTIFICATIONS = "node_inbox_notifications";
+	public final static String NODE_ADMIN_USERS = "node_admin_users";
+	public final static String NODE_ADMIN_GROUPS = "node_admin_groups";
+	public final static String NODE_ADMIN_DICTIONARIES = "node_admin_dictionaries";
+	public final static String NODE_ADMIN_TAXONOMIES = "node_admin_taxonomies";
+	public final static String D2C_QUERY = "d2c_query";
+	public final static String D2C_QUERY_WIZARD = "d2c_query_wizard";
+	public final static String D2C_QUERY_FORM = "d2c_query_form";
+	public final static String D2_QUERY_FORM_CONFIG = "d2_queryform_config";
+	public final static String D2C_QUERY_CATEGORY = "d2c_query_category";
+	public final static String DMC_RPS_RETENTION_POLICY = "dmc_rps_retention_policy";
+	public final static String DMC_RPS_RETENTION_MARKUP = "dmc_rps_retention_markup";
+	public static final String NODE_DISTRIBUTION = "node_distribution";
+	// ViewMode
+	public final static String VIEW_MODE_DETAILS = "details";
+	public final static String VIEW_MODE_THUMBNAILS = "thumbnails";
+	// CheckChildren
+	public final static String CHECK_GROUP = "group";
+	public final static String CHECK_FOLDER = "folder";
+	public final static String CHECK_FOLDER_DOCUMENT = "folderOrDocument";
+	public final static String CHECK_FOLDER_VD = "folderOrVD";
+	// DetailTypeName
+	public final static String AUDITS = "Audits";
+	public final static String LOCATIONS = "Locations";
+	public final static String RELATIONS = "Relations";
+	public final static String RENDITIONS = "Renditions";
+	public final static String SNAPSHOTS = "Snapshots";
+	public final static String VERSIONS = "Versions";
+	public final static String RETENTIONS = "Retentions";
+	public final static String MARKUPS = "Markups";
+	public final static String WORKFLOW_DETAILS = "WorkflowDetails";
+	public final static String WORKFLOW_NOTES = "WorkflowNotes";
+	public final static String WORKFLOW_PERFORMERS = "WorkflowPerformers";
+	// ColTypeName
+	public final static String NODE_CABINETS = "node_cabinets";
+	public final static String DETAIL_AUDITS = "detail_audits";
+	public final static String DETAIL_AUDITS_EXTENDED = "detail_audits_extended";
+	public final static String DETAIL_LOCATIONS = "detail_locations";
+	public final static String DETAIL_RELATIONS = "detail_relations";
+	public final static String DETAIL_RENDITIONS = "detail_renditions";
+	public final static String DETAIL_RETENTIONS = "detail_retentions";
+	public final static String DETAIL_MARKUPS = "detail_markups";
+	public final static String SEARCH = "search";
+	public final static String DEFAULT = "default";
+	public final static String DETAIL_VERSIONS = "detail_versions";
+	public final static String DETAIL_WORKFLOWS = "detail_workflows";
+	public final static String DETAIL_WORKFLOW_NOTES = "detail_workflow_notes";
+	public final static String DETAIL_WORKFLOW_PERFORMERS = "detail_workflow_performers";
+	public final static String DETAIL_WORKFLOW_RELATIONS = "detail_workflow_relations";
+	public static final String DETAIL_WORKFLOW_OVERVIEW = "detail_workflow_overview";
+	public final static String DETAIL_WORKFLOW_ATTACHMENTS = "detail_workflow_attachments";
+	// DialogType
+	public final static String DIALOG_TYPE_DIALOG = "dialog";
+	public final static String DIALOG_TYPE_MESSAGE = "message";
+	public final static String DIALOG_TYPE_RESULT = "result";
+	public final static String DIALOG_TYPE_SILENT = "silent";
+	// MenuTypeName
+	public final static String MENU_PORTAL = "MenuPortal";
+	public final static String MENU_CTX_MULTISEARCH = "MenuContextMultiSearch";
+	public final static String MENU_CTX = "MenuContext";
+	public final static String MENU_CTX_VD = "MenuContextVD";
+	public final static String MENU_CTX_DETAIL_LOCATIONS = "MenuContextDetailLocations";
+	public final static String MENU_CTX_DETAIL_RELATIONS = "MenuContextDetailRelations";
+	public final static String MENU_CTX_DETAIL_RENDITIONS = "MenuContextDetailRenditions";
+	public final static String MENU_CTX_DETAIL_VERSIONS = "MenuContextDetailVersions";
+	public final static String MENU_CTX_DETAIL_WORKFLOWS = "MenuContextDetailWorkflows";
+	public final static String MENU_CTX_DETAIL_WORKFLOWS_OVERVIEW = "MenuContextWorkflowOverview";
+	public final static String MENU_CTX_TASKS_LIST = "MenuContextTasksList";
+	public final static String MENU_CTX_DETAIL_WORKFLOW_DETAILS = "MenuContextDetailWorkflowDetails";
+	public final static String MENU_CTX_ADMIN_USERS = "MenuContextAdminUsers";
+	public final static String MENU_CTX_ADMIN_GROUPS = "MenuContextAdminGroups";
+	public final static String MENU_CTX_ADMIN_DICTIONARIES = "MenuContextAdminDictionaries";
+	public final static String MENU_CTX_ADMIN_TAXONOMIES = "MenuContextAdminTaxonomies";
+	public final static String MENU_CTX_TREE_NODE_TASK = "MenuContextTreeNodeInboxTasks";
+	public final static String MENU_CTX_TREE_NODE_SEARCH = "MenuContextTreeNodeSearch";
+	public final static String MENU_CTX_SAVE_SEARCH_DIALOG = "MenuContextSaveSearchDialog";
+	public final static String PARAM_WIDGET_TYPE = "widgetType";
+	public final static String PARAM_CONTENT_PATH_ID = "contentPathId";
+	// ExportType
+	public final static String EXPORT_EXCEL = "Excel";
+	// // DfType / Attribute Typer
+	// public final static final int DF_BOOLEAN = 0;
+	// public final static final int DF_INTEGER = 1;
+	// public final static final int DF_STRING = 2;
+	// public final static final int DF_ID = 3;
+	// public final static final int DF_TIME = 4;
+	// public final static final int DF_DOUBLE = 5;
+	// public final static final int DF_UNDEFINED = 6;
+	// DialogName
+	public final static String IMPORT = "ImportDialog";
+	public final static String MULTI_IMPORT = "MultiImportDialog";
+	public final static String IMPORT_RENDITION = "ImportRenditionDialog";
+	public final static String CREATE = "CreateDialog";
+	public final static String IMPORT_ATTACHMENT = "ImportAttachmentDialog";
+	public final static String PROPERTIES = "PropertiesDialog";
+	public final static String D2WORKFLOW_LAUNCH = "D2WorkflowLaunchDialog";
+	public final static String D2WORKFLOW_NOTE = "D2WorkflowNoteDialog";
+	public final static String DISTRIBUTION_DIALOG = "DistributionDialog";
+	public final static String TASK = "TaskDialog";
+	public final static String TASK_PROPERTY = "TaskPropertyPageDialog";
+	public final static String TASK_DELEGATE = "TaskDelegateDialog";
+	public final static String SIGN_OFF = "SignOffDialog";
+	public final static String QUERY_FORM = "QueryFormDialog";
+	public final static String PREFERENCES = "PreferencesDialog";
+	public final static String CHOOSE_TYPE = "ChooseTypeDialog";
+	public final static String DESTROY = "DestroyDialog";
+	public final static String CHANGE_STATE = "ChangeStateDialog";
+	public final static String CHECKIN = "CheckinDialog";
+	public final static String PERMISSIONS = "PermissionsDialog";
+	public final static String CHANGE_PERMISSIONS = "ChangePermissionsDialog";
+	public final static String PRINT = "PrintDialog";
+	public final static String COMMENT = "CommentDialog";
+	public final static String ANNOTATION_CONTROL = "AnnotationControlDialog";
+	public final static String ADVANCED_SEARCH = "AdvancedSearchDialog";
+	public final static String SAVE_SEARCH = "SaveSearchDialog";
+	public static final String DM_USER = "DmUserDialog";
+	public static final String DM_GROUP = "DmGroupDialog";
+	public final static String ADMIN_DICTIONARY = "AdminDictionaryDialog";
+	public final static String EXPORT_DICTIONARY = "ExportDictionaryDialog";
+	public final static String IMPORT_DICTIONARY = "ImportDictionaryDialog";
+	public final static String SAVE_VERSION_DICTIONARY = "SaveVersionDictionaryDialog";
+	public final static String LOAD_VERSION_DICTIONARY = "LoadVersionDictionaryDialog";
+	public final static String SYNCPLICITY = "SyncplicityDialog";
+	public final static String EXPORT_TAXONOMY = "ExportTaxonomyDialog";
+	public final static String IMPORT_TAXONOMY = "ImportTaxonomyDialog";
+	public final static String SAVE_VERSION_TAXONOMY = "SaveVersionTaxonomyDialog";
+	public final static String LOAD_VERSION_TAXONOMY = "LoadVersionTaxonomyDialog";
+	public final static String RELATION_CREATE = "RelationCreateDialog";
+	public final static String MASS_UPDATE_DIALOG = "MassUpdateDialog";
+	public final static String MASS_UPDATE_MODE_DIALOG = "MassUpdateModeDialog";
+	public final static String SET_CHILD_BINDING_VERSIONS = "SetVDChildBindingVersionDialog";
+	public final static String VD_INHERITED_TEMPLATES = "VdTemplateDialog";
+	public final static String EXPORT_VALUES = "ExportValuesDialog";
+	public final static String IMPORT_VALUES = "ImportValuesDialog";
+	public final static String QUERY_CATEGORY = "QueryCategoryDialog";
+	// Documentum type
+	public final static String DM_FOLDER = "dm_folder";
+	public final static String FORMATS_PSEUDO_DIALOG = "FormatsPseudoDialog";
+}

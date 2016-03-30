@@ -33,11 +33,10 @@ public class DCD2APIWrapper {
 	@Autowired
 	DCD2Constants data;
 
-	//ModelPortService service = new ModelPortService();
+	ModelPortService service = new ModelPortService();
 
 	public List<Node> getAllCabinets() throws RepositoryNotAvailableException {
 		try {
-			ModelPortService service = new ModelPortService();
 			ModelPort port = service.getModelPortSoap11();
 			System.out.println("Invoking operation on the port.");
 			// Get the repository information from the docbroker
@@ -73,5 +72,43 @@ public class DCD2APIWrapper {
 		}
 
 	}
+	
+	public List<Node> getChildren(String folderId)
+	{
+		try {
+			ModelPort port = service.getModelPortSoap11();
+			System.out.println("Invoking operation on the port.");
+			// Get the repository information from the docbroker
+			String host = data.host + ":" + data.port + "/D2";
+			GetRepositoryRequest repoReq = new GetRepositoryRequest();
+			repoReq.setId(data.repo);
+			Repository repo = port.getRepository(repoReq).getRepository();
+			if (repo == null)
+				System.out.println("could not connect to repository: " + data.repo);
+			Context context = new Context();
+			context.setRepository(repo);
+			context.setLogin(data.username);
+			context.setPassword(data.password);
+			context.setUid(data.UID);
+			context.setWebAppURL(host);
+			// Validate user credentials
+			CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
+			checkLoginRequest.setContext(context);
+			CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
+			if (!checkLoginResponse.isResult())
+				System.out.println("login failed");
+			GetBrowserContentRequest request = new GetBrowserContentRequest();
+			request.setContext(context);
+			request.setContentTypeName(D2fsConstants.FOLDER);
+			request.setId(folderId);
+			GetBrowserContentResponse response = port.getBrowserContent(request);
+			return response.getNode().getNodes();
+			
 
+		} catch (Exception e) {
+			
+		}
+
+	}
+	
 }

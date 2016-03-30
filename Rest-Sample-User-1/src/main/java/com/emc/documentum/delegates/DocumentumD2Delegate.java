@@ -59,7 +59,7 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 
 	@Override
 	public ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
@@ -108,6 +108,13 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 
 	@Override
 	public ArrayList<DocumentumObject> getChildren(String folderId, int pageNumber, int pageSize)
+			throws RepositoryNotAvailableException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ArrayList<DocumentumFolder> getAllCabinets(int pageNumber, int pageSize)
 			throws RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
 		return null;
