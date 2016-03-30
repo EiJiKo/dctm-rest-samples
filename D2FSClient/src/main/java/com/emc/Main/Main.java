@@ -23,7 +23,7 @@ import com.emc.d2fs.services.x3config_service.GetDownloadLocationsRequest;
 public class Main {
 	static ModelPortService service = new ModelPortService();
 
-	public static void main(String[] args) {
+	public void main(String[] args) {
 		
 		try {
 			doWsSample("repo1", "dmadmin", "d3m04doc", "some unique session identifier", "http://10.76.133.134:8080/D2");

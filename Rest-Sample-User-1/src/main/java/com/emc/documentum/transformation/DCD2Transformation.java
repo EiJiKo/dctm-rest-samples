@@ -7,19 +7,25 @@ import java.util.Map;
 
 import com.emc.d2fs.models.attribute.Attribute;
 import com.emc.d2fs.models.node.Node;
-import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 
 public class DCD2Transformation {
 	private DCD2Transformation(){
 		
 	}
-	public static DocumentumObject convertD2Object(Node d2Object)
+	public static <T extends DocumentumObject> T convertD2Object(Node d2Object, Class<T> type)
 	{
-		DocumentumObject object = new DocumentumObject();
-		object.setId(d2Object.getId());
-		object.setName(d2Object.getLabel());
-		object.setType(d2Object.getType());
+		T object = null ;
+		try {
+			object = type.newInstance();
+			object.setId(d2Object.getId());
+			object.setName(d2Object.getLabel());
+			object.setType(d2Object.getType());
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
 		return object;
 	}
 	
@@ -31,7 +37,7 @@ public class DCD2Transformation {
 			Class<T> class1) {
 		ArrayList<T> documentumObject = new ArrayList<T>();
 		for (Node d2object : list) {
-			documentumObject.add((T) convertD2Object(d2object));
+			documentumObject.add((T) convertD2Object(d2object , class1));
 		}
 		return documentumObject;
 	}
