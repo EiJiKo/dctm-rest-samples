@@ -21,7 +21,7 @@ public class DCD2Transformation {
 	}
 	@SuppressWarnings("unchecked")
 	public static <T extends DocumentumObject> ArrayList<T> convertD2ObjectList(List<Node> list,
-			Class<DocumentumFolder> class1) {
+			Class<T> class1) {
 		ArrayList<T> documentumObject = new ArrayList<T>();
 		for (Node d2object : list) {
 			documentumObject.add((T) convertD2Object(d2object));

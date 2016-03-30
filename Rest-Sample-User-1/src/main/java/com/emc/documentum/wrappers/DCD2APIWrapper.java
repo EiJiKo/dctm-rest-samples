@@ -75,7 +75,6 @@ public class DCD2APIWrapper {
 	
 	public List<Node> getChildren(String folderId)
 	{
-		try {
 			ModelPort port = service.getModelPortSoap11();
 			System.out.println("Invoking operation on the port.");
 			// Get the repository information from the docbroker
@@ -104,10 +103,6 @@ public class DCD2APIWrapper {
 			GetBrowserContentResponse response = port.getBrowserContent(request);
 			return response.getNode().getNodes();
 			
-
-		} catch (Exception e) {
-			
-		}
 
 	}
 	
