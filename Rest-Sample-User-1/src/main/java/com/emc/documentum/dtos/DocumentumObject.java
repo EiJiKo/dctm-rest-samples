@@ -4,8 +4,11 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-public  class DocumentumObject implements Serializable {
+@JsonInclude(Include.NON_NULL)
+public class DocumentumObject implements Serializable {
 
 	/**
 	 * 
@@ -16,10 +19,12 @@ public  class DocumentumObject implements Serializable {
 	private String name;
 	private String type;
 	private String definition;
+	private Boolean isCheckedOut = false;
+	private String lockUser;
 	@JsonFormat(with = { JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY,
 			JsonFormat.Feature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED })
 	private HashMap<String, Object> properties;
-	
+
 	public String getName() {
 		return name;
 	}
@@ -44,6 +49,22 @@ public  class DocumentumObject implements Serializable {
 		this.definition = definition;
 	}
 
+	public String getLockUser() {
+		return lockUser;
+	}
+
+	public void setLockUser(String lockUser) {
+		this.lockUser = lockUser;
+	}
+
+	public Boolean isCheckedOut() {
+		return isCheckedOut;
+	}
+
+	public void setCheckedOut(Boolean isCheckedOut) {
+		this.isCheckedOut = isCheckedOut;
+	}
+
 	public HashMap<String, Object> getProperties() {
 		return properties;
 	}
@@ -51,8 +72,6 @@ public  class DocumentumObject implements Serializable {
 	public void setProperties(HashMap<String, Object> properties) {
 		this.properties = properties;
 	}
-
-
 
 	public String getId() {
 		return id;
@@ -69,22 +88,23 @@ public  class DocumentumObject implements Serializable {
 	public void setPath(String path) {
 		this.path = path;
 	}
-	
-	public DocumentumObject(){
+
+	public DocumentumObject() {
 		properties = new HashMap<>();
 		setType("Object");
 	}
-	
-	public DocumentumObject(String id ,String name, String type) {
+
+	public DocumentumObject(String id, String name, String type) {
 		this();
 		this.id = id;
 		this.name = name;
 		this.type = type;
 	}
 
-	public DocumentumObject(String id , String name) {
+	public DocumentumObject(String id, String name) {
 		this();
 		this.id = id;
 		this.name = name;
 	}
+
 }

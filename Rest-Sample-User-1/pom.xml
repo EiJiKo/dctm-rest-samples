@@ -86,7 +86,12 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
-    
+
+	 <dependency>
+	 	<groupId>com.emc.Documentum.D2FS</groupId>
+	 	<artifactId>D2FSClient</artifactId>
+	 	<version>0.0.1-SNAPSHOT</version>
+	 </dependency>
 	</dependencies>
 
 	<build>
