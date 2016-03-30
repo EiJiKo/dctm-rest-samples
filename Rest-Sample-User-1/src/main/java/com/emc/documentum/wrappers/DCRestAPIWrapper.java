@@ -397,7 +397,7 @@ public class DCRestAPIWrapper {
 		HttpHeaders firstPartHeader = new HttpHeaders();
 		firstPartHeader.set("Content-Type", "application/vnd.emc.documentum+json");
 		parts.add("metadata", new HttpEntity<Object>(creationProperties,firstPartHeader));
-		parts.add("binary", content);
+		parts.add("binary", Base64.decodeBase64(content));
 		RestTemplate template = new RestTemplate();
 		ResponseEntity<JsonObject> response = template.exchange(link.getHref(), HttpMethod.POST, new HttpEntity<Object>(parts, httpHeader), JsonObject.class);
 		response.getHeaders();
