@@ -221,14 +221,15 @@ public class FileManagerController extends BaseController{
 	{
 		JSONArray children = new JSONArray() ;
 		for (int i = 0 ; i < objects.size() ; i++) {
-			if(objects.get(i).getType().endsWith("Document") || objects.get(i).getType().endsWith("Object") || objects.get(i).getType().endsWith("Folder")){
+			if(objects.get(i).getType().endsWith("Document") || objects.get(i).getType().endsWith("Object") || objects.get(i).getType().endsWith("Folder") || 
+					objects.get(i).getType().endsWith("document") || objects.get(i).getType().endsWith("object") || objects.get(i).getType().endsWith("folder")){
 				String type = "";
-				if(objects.get(i).getType().endsWith("Document")){
+				if(objects.get(i).getType().endsWith("Document") || objects.get(i).getType().endsWith("document")){
 					type = "file";
-				}else if(objects.get(i).getType().endsWith("Folder")){
+				}else if(objects.get(i).getType().endsWith("Folder") || objects.get(i).getType().endsWith("folder")){
 					type = "dir";
 				}
-				else if (objects.get(i).getType().endsWith("Object")){
+				else if (objects.get(i).getType().endsWith("Object") || objects.get(i).getType().endsWith("object")){
 					continue ;
 				}
 				
