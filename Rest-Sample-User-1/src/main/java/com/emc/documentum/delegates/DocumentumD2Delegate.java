@@ -59,8 +59,7 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 
 	@Override
 	public ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException {
-		
-		return null;
+		return DCD2Transformation.convertD2ObjectList(dcAPI.getChildren(folderId), DocumentumObject.class);
 	}
 
 	@Override
