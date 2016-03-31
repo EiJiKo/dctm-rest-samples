@@ -11,6 +11,7 @@ import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
+import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
@@ -122,7 +123,12 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	@Override
 	public void deleteFolder(String folderId) {
 		// TODO Auto-generated method stub
-		
+	}
+	
+	public DocumentumDocument cancelCheckout(String documentId)
+			throws RepositoryNotAvailableException, DocumentCheckoutException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

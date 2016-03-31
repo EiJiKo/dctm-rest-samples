@@ -7,6 +7,8 @@ import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
+import com.emc.documentum.exceptions.DocumentCheckinException;
+import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
@@ -49,9 +51,9 @@ public interface DocumentumDelegate {
 
 	ArrayList<DocumentumObject> getDocumentByName(String name) throws RepositoryNotAvailableException;
 	
-	DocumentumDocument checkoutDocument(String documentId) throws RepositoryNotAvailableException;
+	DocumentumDocument checkoutDocument(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException;
 	
-	DocumentumDocument checkinDocument(String documentId,byte[]content) throws RepositoryNotAvailableException;
+	DocumentumDocument checkinDocument(String documentId,byte[]content) throws RepositoryNotAvailableException, DocumentCheckinException;
 	ArrayList<DocumentumFolder> getPaginatedResult(String folderId , int startIndex , int pageSize) throws RepositoryNotAvailableException;
 
 	DocumentumFolder createFolderByParentId(String ParentId, String folderName)
@@ -59,6 +61,8 @@ public interface DocumentumDelegate {
 
 	ArrayList<DocumentumFolder> getAllCabinets(int pageNumber, int pageSize) throws RepositoryNotAvailableException;
 	
+
 	void deleteFolder(String folderId) ;
 	
+	DocumentumDocument cancelCheckout(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException;
 }

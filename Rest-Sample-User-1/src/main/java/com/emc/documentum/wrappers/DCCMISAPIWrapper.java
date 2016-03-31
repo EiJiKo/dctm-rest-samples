@@ -21,15 +21,19 @@ import org.apache.chemistry.opencmis.client.runtime.OperationContextImpl;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
+import org.apache.chemistry.opencmis.commons.data.AllowableActions;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
+import org.apache.chemistry.opencmis.commons.enums.Action;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConnectionException;
+import org.apache.chemistry.opencmis.commons.impl.dataobjects.AllowableActionsImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.emc.documentum.constants.DCCMISConstants;
+import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
@@ -179,11 +183,31 @@ public class DCCMISAPIWrapper {
 		}
 	}
 
-	public Document checkoutDocument(String documentId) {
+	public Document checkoutDocument(String documentId) throws DocumentCheckoutException {
 		Session session = getSession(data.username, data.password, data.repo);
 		Document document = (Document) session.getObject(documentId);
+		AllowableActions actions = document.getAllowableActions();
+		boolean canCheckout = actions.getAllowableActions().contains(Action.CAN_CHECK_OUT);
+		if(!canCheckout)
+		{
+			throw new DocumentCheckoutException("document already checked out");
+		}
 		Document checkoutDocument = (Document) session.getObject(document.checkOut());
 		return checkoutDocument;
+	}
+	public Document cancelCheckout(String documentId) throws DocumentCheckoutException
+	{
+		Session session = getSession(data.username, data.password, data.repo);
+		Document document = (Document) session.getObject(documentId);
+		AllowableActions actions = document.getAllowableActions();
+		boolean canCancelCheckout =  actions.getAllowableActions().contains(Action.CAN_CANCEL_CHECK_OUT);
+		if(!canCancelCheckout)
+		{
+			throw new DocumentCheckoutException("document is not Checked out");
+		}
+		document.cancelCheckOut();
+	
+		return document;
 	}
 
 	public Document checkinDocument(String documentId, byte[] content) {

@@ -12,19 +12,21 @@ import org.apache.chemistry.opencmis.client.api.Property;
 import org.apache.chemistry.opencmis.client.api.QueryResult;
 import org.apache.chemistry.opencmis.commons.data.PropertyData;
 
+import com.emc.documentum.dtos.DocumentumCabinet;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 
 public class CMISTransformation {
 
-	private static DocumentumObject createDocumentumObject(String baseTypeId) {
+	private static DocumentumObject createDocumentumObject(String objectTypeId,String baseTypeId) {
 		DocumentumObject documentumObject;
 		switch (baseTypeId) {
 		case "cmis:folder":
-		case "folders":
+			documentumObject = (objectTypeId.equals("dm_cabinet"))?new DocumentumCabinet():new DocumentumFolder();
+			break;
 		case "cabinets":
-			documentumObject = new DocumentumFolder();
+			documentumObject = new DocumentumCabinet();
 			break;
 		case "cmis:document":
 		case "documents":
@@ -46,11 +48,12 @@ public class CMISTransformation {
 
 	public static DocumentumObject convertCMISQueryResult(QueryResult queryResult) {
 		String baseType = queryResult.getPropertyById("cmis:baseTypeId").getFirstValue().toString();
-		DocumentumObject documentumObject = createDocumentumObject(baseType);
+		String objectType = queryResult.getPropertyById("cmis:objectTypeId").getFirstValue().toString();
+		DocumentumObject documentumObject = createDocumentumObject(objectType,baseType);
 		documentumObject.setId(queryResult.getPropertyById("cmis:objectId").getFirstValue().toString());
 		documentumObject.setName(queryResult.getPropertyById("cmis:name").getFirstValue().toString());
 		PropertyData<Boolean> checkedOut = queryResult.getPropertyById("cmis:isVersionSeriesCheckedOut");
-		if(checkedOut != null){
+		if(checkedOut != null && checkedOut.getFirstValue() != false){
 			documentumObject.setCheckedOut(checkedOut.getFirstValue());
 			documentumObject.setLockUser(queryResult.getPropertyById("cmis:versionSeriesCheckedOutBy").getFirstValue().toString());
 		}
@@ -59,11 +62,11 @@ public class CMISTransformation {
 	}
 
 	public static DocumentumObject convertCMISObject(CmisObject cmisObject) {
-		DocumentumObject object = createDocumentumObject(cmisObject.getPropertyValue("cmis:baseTypeId").toString());
+		DocumentumObject object = createDocumentumObject(cmisObject.getPropertyValue("cmis:objectTypeId").toString(),cmisObject.getPropertyValue("cmis:baseTypeId").toString());
 		object.setId(cmisObject.getId());
 		object.setName(cmisObject.getName());
 		Property<Boolean> checkedOut = cmisObject.getProperty("cmis:isVersionSeriesCheckedOut");
-		if(checkedOut != null){
+		if(checkedOut != null && checkedOut.getFirstValue() != false){
 			object.setCheckedOut(checkedOut.getValue());
 			object.setLockUser(cmisObject.getProperty("cmis:versionSeriesCheckedOutBy").getValueAsString());
 		}

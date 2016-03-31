@@ -14,6 +14,7 @@ import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
+import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
@@ -95,7 +96,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public DocumentumDocument checkoutDocument(String documentId) {
+	public DocumentumDocument checkoutDocument(String documentId) throws DocumentCheckoutException {
 		log.info("checkout document" + documentId);
 		return CMISTransformation.convertCMISDocument(dcAPI.checkoutDocument(documentId));
 
@@ -142,9 +143,14 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
+
 	public void deleteFolder(String folderId) {
 		// TODO Auto-generated method stub
-		
+	}
+	
+	public DocumentumDocument cancelCheckout(String documentId)
+			throws RepositoryNotAvailableException, DocumentCheckoutException {
+		return CMISTransformation.convertCMISDocument(dcAPI.cancelCheckout(documentId));
 	}
 
 }

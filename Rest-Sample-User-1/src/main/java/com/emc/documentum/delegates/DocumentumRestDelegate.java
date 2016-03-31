@@ -13,6 +13,8 @@ import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
+import com.emc.documentum.exceptions.DocumentCheckinException;
+import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
@@ -210,7 +212,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public DocumentumDocument checkoutDocument(String documentId) throws RepositoryNotAvailableException {
+	public DocumentumDocument checkoutDocument(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException {
 		try {
 			return CoreRestTransformation.convertCoreRSDocument(dcAPI.checkOutDocument(documentId));
 		} catch (ResourceAccessException e) {
@@ -220,7 +222,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 
 	@Override
 	public DocumentumDocument checkinDocument(String documentId, byte[] content)
-			throws RepositoryNotAvailableException {
+			throws RepositoryNotAvailableException, DocumentCheckinException {
 		try {
 			return CoreRestTransformation.convertCoreRSDocument(dcAPI.checkinDocument(documentId, content));
 		} catch (ResourceAccessException e) {
@@ -270,8 +272,18 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
+
 	public void deleteFolder(String folderId) {
 		dcAPI.deleteFolder(folderId) ;
+	}
+	
+	public DocumentumDocument cancelCheckout(String documentId)
+			throws RepositoryNotAvailableException, DocumentCheckoutException {
+		try {
+			return CoreRestTransformation.convertCoreRSDocument(dcAPI.cancelCheckout(documentId));
+		} catch (ResourceAccessException e) {
+			throw new RepositoryNotAvailableException("CoreRest");
+		}
 	}
 
 }
