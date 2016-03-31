@@ -53,7 +53,7 @@ public class CMISTransformation {
 		documentumObject.setId(queryResult.getPropertyById("cmis:objectId").getFirstValue().toString());
 		documentumObject.setName(queryResult.getPropertyById("cmis:name").getFirstValue().toString());
 		PropertyData<Boolean> checkedOut = queryResult.getPropertyById("cmis:isVersionSeriesCheckedOut");
-		if(checkedOut != null){
+		if(checkedOut != null && checkedOut.getFirstValue() != false){
 			documentumObject.setCheckedOut(checkedOut.getFirstValue());
 			documentumObject.setLockUser(queryResult.getPropertyById("cmis:versionSeriesCheckedOutBy").getFirstValue().toString());
 		}
@@ -66,7 +66,7 @@ public class CMISTransformation {
 		object.setId(cmisObject.getId());
 		object.setName(cmisObject.getName());
 		Property<Boolean> checkedOut = cmisObject.getProperty("cmis:isVersionSeriesCheckedOut");
-		if(checkedOut != null){
+		if(checkedOut != null && checkedOut.getFirstValue() != false){
 			object.setCheckedOut(checkedOut.getValue());
 			object.setLockUser(cmisObject.getProperty("cmis:versionSeriesCheckedOutBy").getValueAsString());
 		}
