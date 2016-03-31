@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.emc.documentum.constants.DocumentumProperties;
+import com.emc.documentum.dtos.DocumentumCabinet;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
@@ -67,8 +68,10 @@ public class CoreRestTransformation {
 		switch (baseTypeId) {
 		case "cmis:folder":
 		case "folders":
-		case "cabinets":
 			documentumObject = new DocumentumFolder();
+			break;
+		case "cabinets":
+			documentumObject = new DocumentumCabinet();
 			break;
 		case "cmis:document":
 		case "documents":
