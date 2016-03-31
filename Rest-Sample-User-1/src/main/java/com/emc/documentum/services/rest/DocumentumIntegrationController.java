@@ -123,5 +123,11 @@ public class DocumentumIntegrationController {
 		log.entering("checkin document ", documentId);
 		return (delegateProvider.getDelegate(api)).checkinDocument(documentId, content);
 	}
-
+	@RequestMapping(value = "get/document/cancelCheckout/id/{documentId}", method = RequestMethod.GET)
+	public DocumentumDocument cancelCheckout(@PathVariable(value = "api") String api,
+			@PathVariable(value = "documentId") String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException, DelegateNotFoundException
+	{
+		log.entering("checkin document ", documentId);
+		return (delegateProvider.getDelegate(api)).cancelCheckout(documentId);
+	}
 }
