@@ -10,20 +10,25 @@ import com.emc.d2fs.services.browser_service.GetBrowserContentRequest;
 import com.emc.d2fs.services.browser_service.GetBrowserContentResponse;
 import com.emc.d2fs.services.content_service.GetContentRequest;
 import com.emc.d2fs.services.content_service.GetContentResponse;
+import com.emc.d2fs.services.download_service.GetCheckinUrlsRequest;
+import com.emc.d2fs.services.download_service.GetCheckinUrlsResponse;
 import com.emc.d2fs.services.download_service.GetDownloadFileDetailsRequest;
 import com.emc.d2fs.services.download_service.GetDownloadUrlsRequest;
 import com.emc.d2fs.services.download_service.GetDownloadUrlsResponse;
+import com.emc.d2fs.services.download_service.GetFileInfoRequest;
+import com.emc.d2fs.services.download_service.GetFileInfoResponse;
 import com.emc.d2fs.services.property_service.GetPropertiesRequest;
 import com.emc.d2fs.services.property_service.GetPropertiesResponse;
 import com.emc.d2fs.services.repository_service.CheckLoginRequest;
 import com.emc.d2fs.services.repository_service.CheckLoginResponse;
 import com.emc.d2fs.services.repository_service.GetRepositoryRequest;
-import com.emc.d2fs.services.x3config_service.GetDownloadLocationsRequest;
+import com.emc.d2fs.services.x3config_service.GetImportContentSameRequest;
+import com.emc.d2fs.services.x3config_service.GetImportContentSameResponse;
 
 public class Main {
 	static ModelPortService service = new ModelPortService();
 
-	public void main(String[] args) {
+	public static void main(String[] args) {
 		
 		try {
 			doWsSample("repo1", "dmadmin", "d3m04doc", "some unique session identifier", "http://10.76.133.134:8080/D2");
@@ -73,9 +78,11 @@ public class Main {
 //				System.out.printf(" id:%s type:%s label:%s\n", node.getId(), node.getType(), node.getLabel());
 //			}
 //			 Get cabinets in the repository
+			GetDownloadUrlsRequest ree = new GetDownloadUrlsRequest();
+			ree.setId("090000018005b59e");
+			ree.setBaseUrl(webAppUrl);
 			
-			
-			
+	
 			getBrowserContentRequest.setContext(context);
 			getBrowserContentRequest.setId("090000018005b59e");
 			getBrowserContentRequest.setContentTypeName(D2fsConstants.FOLDER);
@@ -89,12 +96,12 @@ public class Main {
 			
 			
 			
-			
-			GetPropertiesRequest req = new GetPropertiesRequest();
-			req.setContext(context);
-			req.setId("0b0000018003f457");
-			GetPropertiesResponse res = port.getProperties(req);
-			res.getAttributes();
+//			
+//			GetPropertiesRequest req = new GetPropertiesRequest();
+//			req.setContext(context);
+//			req.setId("0b0000018003f457");
+//			GetPropertiesResponse res = port.getProperties(req);
+//			res.getAttributes();
 			
 			GetContentRequest req1 = new GetContentRequest();
 			req1.setContext(context);
