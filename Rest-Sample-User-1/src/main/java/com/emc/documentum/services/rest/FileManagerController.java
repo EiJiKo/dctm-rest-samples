@@ -122,6 +122,31 @@ public class FileManagerController extends BaseController{
 			return "";
 		}		
 	}
+	
+	
+	
+	@RequestMapping(value = "/api/deleteFolderUrl" , method = RequestMethod.POST)
+	public String deleteFolderUrl(@RequestBody String jsonString , @RequestHeader(value="API_BASE", defaultValue="Rest") String delegateKey) {
+		try {
+			JSONObject jsonRequest = null;
+			jsonRequest = (JSONObject) JSONValue.parseWithException(jsonString);
+			JSONArray items = (JSONArray) jsonRequest.get("items");
+			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
+			if(!items.isEmpty())
+			{
+				for(int i = 0 ; i < items.size() ; i++)
+				{
+					dcDelegate.deleteFolder((String) items.get(i));
+				}
+			}
+			//dcDelegate.deleteFolder(folderId);
+			return commonResponse();
+			
+		} catch (DelegateNotFoundException | ParseException e1) {
+			e1.printStackTrace();
+			return errorResponse(delegateKey + " Repository is not available ") ;
+		}
+	}
 
 	@RequestMapping(value = "/api/permissionsUrl", method = RequestMethod.POST)
 	public String permissionsUrl() {

@@ -119,4 +119,10 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 		return DCD2Transformation.convertD2ObjectList(dcAPI.getAllCabinets(),DocumentumFolder.class);
 	}
 
+	@Override
+	public void deleteFolder(String folderId) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

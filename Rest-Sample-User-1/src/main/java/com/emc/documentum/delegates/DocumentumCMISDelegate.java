@@ -141,4 +141,10 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 		return getAllCabinets(1, 20);
 	}
 
+	@Override
+	public void deleteFolder(String folderId) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

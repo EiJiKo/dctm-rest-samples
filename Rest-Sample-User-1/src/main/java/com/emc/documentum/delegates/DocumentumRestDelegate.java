@@ -269,4 +269,9 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		}
 	}
 
+	@Override
+	public void deleteFolder(String folderId) {
+		dcAPI.deleteFolder(folderId) ;
+	}
+
 }

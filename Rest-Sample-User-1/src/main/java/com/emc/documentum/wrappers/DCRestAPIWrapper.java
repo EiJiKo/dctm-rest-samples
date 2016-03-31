@@ -107,6 +107,16 @@ public class DCRestAPIWrapper {
 
 	}
 
+
+	public JsonObject deleteFolder(String folderId) {
+		RestTemplate restTemplate = new RestTemplate();
+		String folderUri = data.fetchFolderURI + "/" + folderId;
+		ResponseEntity<JsonObject> response;
+		response = restTemplate.exchange(folderUri, HttpMethod.DELETE, new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonObject.class);
+		return response.getBody();
+
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -249,10 +259,10 @@ public class DCRestAPIWrapper {
 	public List<JsonEntry> getAllCabinets(int pageNumber, int pageSize) {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = data.dqlQuery + "select * from dm_cabinet";
-		
+
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-		params.add("page", ""+ pageNumber);
-		params.add("items-per-page", ""+pageSize);
+		params.add("page", "" + pageNumber);
+		params.add("items-per-page", "" + pageSize);
 		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(URI).queryParams(params).build();
 		System.out.println("Fetch Cabinets URI is " + uriComponents.toUriString());
 		ResponseEntity<JsonFeed> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET,
@@ -265,17 +275,18 @@ public class DCRestAPIWrapper {
 
 	/**
 	 * @param folderId
-	 * @param pageSize 
-	 * @param pageNumber 
+	 * @param pageSize
+	 * @param pageNumber
 	 * @return
 	 */
 	public List<JsonEntry> getChildren(String folderId, int pageNumber, int pageSize) {
 		RestTemplate restTemplate = new RestTemplate();
-		String URI = data.dqlQuery + "select *,r_lock_owner from dm_folder where  FOLDER(ID('"+folderId + "')) union select *,r_lock_owner from dm_document where FOLDER(ID('" +folderId  + "'))";
-		
+		String URI = data.dqlQuery + "select *,r_lock_owner from dm_folder where  FOLDER(ID('" + folderId
+				+ "')) union select *,r_lock_owner from dm_document where FOLDER(ID('" + folderId + "'))";
+
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-		params.add("page", ""+ pageNumber);
-		params.add("items-per-page", ""+pageSize);
+		params.add("page", "" + pageNumber);
+		params.add("items-per-page", "" + pageSize);
 		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(URI).queryParams(params).build();
 		System.out.println("Fetch Children of Folder URI is " + uriComponents.toUriString());
 		ResponseEntity<JsonFeed> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET,
@@ -301,8 +312,8 @@ public class DCRestAPIWrapper {
 		JsonObject content = getObjectByUri(link.getHref());
 		return getContentBase64Content(content);
 	}
-	public JsonObject checkOutDocument(String documentId)
-	{
+
+	public JsonObject checkOutDocument(String documentId) {
 		JsonObject document = getObjectById(documentId);
 		JsonLink link = getLink(document.getLinks(), LinkRelation.checkOutDocument);
 		RestTemplate restTemplate = new RestTemplate();
@@ -312,10 +323,11 @@ public class DCRestAPIWrapper {
 		httpHeader.setAccept(mediaTypes);
 		ResponseEntity<JsonObject> jsonDocuemnt;
 
-		jsonDocuemnt = restTemplate.exchange(link.getHref(), HttpMethod.PUT,
-				new HttpEntity<Object>(httpHeader), JsonObject.class);
+		jsonDocuemnt = restTemplate.exchange(link.getHref(), HttpMethod.PUT, new HttpEntity<Object>(httpHeader),
+				JsonObject.class);
 		return jsonDocuemnt.getBody();
 	}
+
 	private byte[] getContentBase64Content(JsonObject content) {
 		try {
 			JsonLink link = getLink(content.getLinks(), LinkRelation.enclosure);
@@ -373,45 +385,45 @@ public class DCRestAPIWrapper {
 				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
 
 		JsonFeed feed = response.getBody();
-		
-		if(feed == null){
+
+		if (feed == null) {
 			throw new DocumentNotFoundException(name);
 		}
-		
+
 		return feed.getEntries();
 
 	}
-	
-	public JsonObject checkinDocument(String documentId,byte[]content)
-	{
+
+	public JsonObject checkinDocument(String documentId, byte[] content) {
 		JsonObject document = getObjectById(documentId);
 		JsonLink link = getLink(document.getLinks(), LinkRelation.checkInNextMajor);
 		Properties creationProperties = new Properties();
 		HashMap<String, Object> properties = new HashMap<>();
-//		properties.put("object_name", "Sample Name");
-//		properties.put("title", "Sample Type");
+		// properties.put("object_name", "Sample Name");
+		// properties.put("title", "Sample Type");
 		creationProperties.setProperties(properties);
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
 		HttpHeaders httpHeader = createHeaders(data.username, data.password);
 		httpHeader.add("Content-Type", "multipart/form-data");
 		HttpHeaders firstPartHeader = new HttpHeaders();
 		firstPartHeader.set("Content-Type", "application/vnd.emc.documentum+json");
-		parts.add("metadata", new HttpEntity<Object>(creationProperties,firstPartHeader));
+		parts.add("metadata", new HttpEntity<Object>(creationProperties, firstPartHeader));
 		parts.add("binary", Base64.decodeBase64(content));
 		RestTemplate template = new RestTemplate();
-		ResponseEntity<JsonObject> response = template.exchange(link.getHref(), HttpMethod.POST, new HttpEntity<Object>(parts, httpHeader), JsonObject.class);
+		ResponseEntity<JsonObject> response = template.exchange(link.getHref(), HttpMethod.POST,
+				new HttpEntity<Object>(parts, httpHeader), JsonObject.class);
 		response.getHeaders();
 		return response.getBody();
 	}
 
-	
-	
-	public ArrayList<DocumentumFolder> getPaginatedResult(String folderId , int startIndex , int pageSize) {
-		//TODO check count first and check it against page size		
-		String query = String.format("select * from dm_folder where folder(id('%s')) ENABLE(RETURN_RANGE 1 1 'r_creation_date ASC' ) ", folderId);
-		ResponseEntity<JsonFeed> response = executeDQL(query) ;				
+	public ArrayList<DocumentumFolder> getPaginatedResult(String folderId, int startIndex, int pageSize) {
+		// TODO check count first and check it against page size
+		String query = String.format(
+				"select * from dm_folder where folder(id('%s')) ENABLE(RETURN_RANGE 1 1 'r_creation_date ASC' ) ",
+				folderId);
+		ResponseEntity<JsonFeed> response = executeDQL(query);
 		JsonFeed feed = response.getBody();
-		
+
 		ArrayList<DocumentumFolder> folders = new ArrayList<>();
 		for (JsonEntry entry : feed.getEntries()) {
 			folders.add(new DocumentumFolder((String) entry.getContent().getProperties().get("r_object_id"),
@@ -419,22 +431,22 @@ public class DCRestAPIWrapper {
 		}
 		return folders;
 	}
-	
-	private ResponseEntity<JsonFeed> executeDQL(String query)
-	{
+
+	private ResponseEntity<JsonFeed> executeDQL(String query) {
 		RestTemplate restTemplate = new RestTemplate();
-		//log.log(level, msg, thrown);
-		String URI = data.dqlQuery + query ;
-		ResponseEntity<JsonFeed> response = restTemplate.exchange(URI, HttpMethod.GET,new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
-		return response ;
+		// log.log(level, msg, thrown);
+		String URI = data.dqlQuery + query;
+		ResponseEntity<JsonFeed> response = restTemplate.exchange(URI, HttpMethod.GET,
+				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
+		return response;
 	}
-	
-	private ResponseEntity<JsonObject> executeDQLObject(String query)
-	{
+
+	private ResponseEntity<JsonObject> executeDQLObject(String query) {
 		RestTemplate restTemplate = new RestTemplate();
-		//log.log(level, msg, thrown);
-		String URI = data.dqlQuery + query ;
-		ResponseEntity<JsonObject> response = restTemplate.exchange(URI, HttpMethod.GET,new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonObject.class);
-		return response ;
+		// log.log(level, msg, thrown);
+		String URI = data.dqlQuery + query;
+		ResponseEntity<JsonObject> response = restTemplate.exchange(URI, HttpMethod.GET,
+				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonObject.class);
+		return response;
 	}
 }
