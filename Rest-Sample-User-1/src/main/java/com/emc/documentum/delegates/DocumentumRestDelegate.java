@@ -271,4 +271,15 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		}
 	}
 
+	@Override
+	public DocumentumDocument cancelCheckout(String documentId)
+			throws RepositoryNotAvailableException, DocumentCheckoutException {
+		try {
+			return CoreRestTransformation.convertCoreRSDocument(dcAPI.cancelCheckout(documentId));
+		} catch (ResourceAccessException e) {
+			throw new RepositoryNotAvailableException("CoreRest");
+		}
+		
+	}
+
 }

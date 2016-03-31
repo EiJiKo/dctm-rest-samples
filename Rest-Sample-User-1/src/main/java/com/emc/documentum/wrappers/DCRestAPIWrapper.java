@@ -415,7 +415,25 @@ public class DCRestAPIWrapper {
 		return response.getBody();
 	}
 
-	
+	public JsonObject cancelCheckout(String documentId) throws DocumentCheckoutException
+	{
+		JsonObject document = getObjectById(documentId);
+		JsonLink link = getLink(document.getLinks(), LinkRelation.cancelCheckout);
+		if(link == null)
+		{
+			throw new DocumentCheckoutException("document is not Checked out");
+		}
+		RestTemplate restTemplate = new RestTemplate();
+		List<MediaType> mediaTypes = new ArrayList<MediaType>();
+		mediaTypes.add(MediaType.ALL);
+		HttpHeaders httpHeader = createHeaders(data.username, data.password);
+		httpHeader.setAccept(mediaTypes);
+		ResponseEntity<JsonObject> jsonDocuemnt;
+
+		jsonDocuemnt = restTemplate.exchange(link.getHref(), HttpMethod.DELETE,
+				new HttpEntity<Object>(httpHeader), JsonObject.class);
+		return getObjectById(documentId);
+	}
 	
 	public ArrayList<DocumentumFolder> getPaginatedResult(String folderId , int startIndex , int pageSize) {
 		//TODO check count first and check it against page size		

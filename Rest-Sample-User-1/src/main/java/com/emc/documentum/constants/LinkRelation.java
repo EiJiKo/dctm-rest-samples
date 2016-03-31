@@ -15,4 +15,6 @@ public class LinkRelation {
 	public static final String checkOutDocument = "http://identifiers.emc.com/linkrel/checkout";
 	
 	public static final String checkInNextMajor = "http://identifiers.emc.com/linkrel/checkin-next-major";
+	
+	public static final String cancelCheckout = "http://identifiers.emc.com/linkrel/cancel-checkout";
 }

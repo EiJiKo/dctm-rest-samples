@@ -11,6 +11,7 @@ import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
+import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
@@ -117,6 +118,13 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 			throws RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
 		return DCD2Transformation.convertD2ObjectList(dcAPI.getAllCabinets(),DocumentumFolder.class);
+	}
+
+	@Override
+	public DocumentumDocument cancelCheckout(String documentId)
+			throws RepositoryNotAvailableException, DocumentCheckoutException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
