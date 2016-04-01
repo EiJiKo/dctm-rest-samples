@@ -12,7 +12,7 @@ The following guide describes how to setup your Document Integration Layer
 ## 2. Getting Started
 
 Clone the repository to your local environment. The repository currently contains two projects :-
-1. `Rest-Sample-User-1` ( needs to be renamed soon ie: `DocumentumIntegrationLayer`) Which provides the Rest Microservices integrating with the configured repositories.
+1. `Rest-Sample-User-1` ( needs to be renamed soon ie: `DocumentumIntegrationLayer`) Which provides the Rest Micro services integrating with the configured repositories.
 2. `D2FS Client` ( Soap Client used for D2 Integration )
 
 ##### Cloning the Repository
@@ -37,14 +37,14 @@ Make sure that the link used to reference the ACS Server can be referenced from 
 
 ## 2. Spring Boot Application
 
-After configuring your link to the repositoris, Run the `Rest-Sample-User-1` Project as a Spring Boot App
+After configuring your link to the repositories, Run the `Rest-Sample-User-1` Project as a Spring Boot App
 
 ![spring-boot](https://cloud.githubusercontent.com/assets/17758685/14206282/61092344-f812-11e5-9fc1-ec83a836d096.PNG)
 
 
 ##### Testing the application
 
-Use the following endpoints to get a list of cabinets avilable for the configured used
+Use the following endpoints to get a list of cabinets available for the configured used
 
 `http://localhost:8080/cmis/services/get/cabinets`
 `http://localhost:8080/corerest/services/get/cabinets`
@@ -116,6 +116,7 @@ You should get a response similar to this
 		"checkedOut": false
 	  }
 	]
+
 
 
 
