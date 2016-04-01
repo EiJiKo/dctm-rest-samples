@@ -428,9 +428,7 @@ public class DCRestAPIWrapper {
 		mediaTypes.add(MediaType.ALL);
 		HttpHeaders httpHeader = createHeaders(data.username, data.password);
 		httpHeader.setAccept(mediaTypes);
-		ResponseEntity<JsonObject> jsonDocuemnt;
-
-		jsonDocuemnt = restTemplate.exchange(link.getHref(), HttpMethod.DELETE,
+		restTemplate.exchange(link.getHref(), HttpMethod.DELETE,
 				new HttpEntity<Object>(httpHeader), JsonObject.class);
 		return getObjectById(documentId);
 	}

@@ -19,7 +19,6 @@ import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.DelegateNotFoundException;
-import com.emc.documentum.exceptions.DocumentCheckinException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
@@ -62,7 +61,7 @@ public class DocumentumIntegrationController {
 	@RequestMapping(value = "get/cabinet/name/{cabinetName}")
 	public DocumentumFolder getCabinetByName(@PathVariable(value = "api") String api,
 			@PathVariable(value = "cabinetName") String cabinetName)
-			throws CabinetNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException {
+			throws DelegateNotFoundException, DocumentumException {
 
 		try {
 			return (delegateProvider.getDelegate(api)).getCabinetByName(cabinetName);
@@ -111,7 +110,7 @@ public class DocumentumIntegrationController {
 
 	@RequestMapping(value = "get/document/checkout/id/{documentId}")
 	public DocumentumDocument checkoutDocuement(@PathVariable(value = "api") String api,
-			@PathVariable(value = "documentId") String documentId) throws DelegateNotFoundException, RepositoryNotAvailableException, DocumentCheckoutException {
+			@PathVariable(value = "documentId") String documentId) throws DelegateNotFoundException, DocumentumException {
 		log.entering("checkout document ", documentId);
 		return (delegateProvider.getDelegate(api)).checkoutDocument(documentId);
 	}
@@ -119,12 +118,12 @@ public class DocumentumIntegrationController {
 	@RequestMapping(value = "get/document/checkin/id/{documentId}", method = RequestMethod.POST)
 	public DocumentumDocument checkinDocuement(@PathVariable(value = "api") String api,
 			@PathVariable(value = "documentId") String documentId, @RequestBody byte[] content)
-			throws DelegateNotFoundException, RepositoryNotAvailableException, DocumentCheckinException {
+			throws DelegateNotFoundException, DocumentumException {
 		log.entering("checkin document ", documentId);
 		return (delegateProvider.getDelegate(api)).checkinDocument(documentId, content);
 	}
 	@RequestMapping(value = "get/document/cancelCheckout/id/{documentId}", method = RequestMethod.GET)
-	public DocumentumDocument cancelCheckout(@PathVariable(value = "api") String api,
+	public DocumentumObject cancelCheckout(@PathVariable(value = "api") String api,
 			@PathVariable(value = "documentId") String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException, DelegateNotFoundException
 	{
 		log.entering("checkin document ", documentId);

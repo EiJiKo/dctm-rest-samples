@@ -10,6 +10,7 @@ import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.model.JsonEntry;
 import com.emc.documentum.model.JsonEntry.Content;
+import com.emc.documentum.model.JsonLink;
 import com.emc.documentum.model.JsonObject;
 import com.emc.documentum.wrappers.DCRestAPIWrapper;
 
@@ -19,6 +20,45 @@ public class CoreRestTransformation {
 
 	}
 
+	public static DocumentumObject convertJsonObject(JsonObject jsonObject) {
+		DocumentumObject documentumObject = getDocumentumObject(jsonObject);
+		mapJsonObjectProperties(jsonObject, documentumObject);
+		return documentumObject;
+
+	}
+
+	private static void mapJsonObjectProperties(JsonObject jsonObject, DocumentumObject documentumObject) {
+		documentumObject.setId((String) jsonObject.getPropertyByName(DocumentumProperties.OBJECT_ID));
+		documentumObject.setName((String) jsonObject.getPropertyByName("object_name"));
+		documentumObject.setProperties(jsonObject.getProperties());
+		documentumObject.setDefinition(jsonObject.getDefinition());
+		Object lockUser = jsonObject.getPropertyByName("r_lock_owner");
+		if (lockUser != null && lockUser.toString().length() > 0) {
+			documentumObject.setCheckedOut(true);
+			documentumObject.setLockUser(lockUser.toString());
+		}
+	}
+
+	private static DocumentumObject getDocumentumObject(JsonObject jsonObject) {
+		JsonLink link = DCRestAPIWrapper.getLink(jsonObject.getLinks(), "canonical");
+		if(link == null){
+			link = DCRestAPIWrapper.getLink(jsonObject.getLinks(), "self");
+		}
+		String[] linkParts = link.getHref().split("/");
+		String baseType = linkParts[linkParts.length - 2];
+		DocumentumObject documentumObject = createDocumentumObject(baseType);
+		return documentumObject;
+	}
+
+	public static <T extends DocumentumObject> T convertJsonObject(JsonObject jsonObject, Class<T> classType)
+			throws InstantiationException, IllegalAccessException {
+		T documentumObject = classType.newInstance();
+		mapJsonObjectProperties(jsonObject, documentumObject);
+		return documentumObject;
+
+	}
+
+	@Deprecated
 	public static DocumentumFolder convertCoreRSFolder(JsonObject restFolder) {
 		DocumentumFolder folder = new DocumentumFolder();
 		folder.setId((String) restFolder.getPropertyByName(DocumentumProperties.OBJECT_ID));
@@ -33,21 +73,14 @@ public class CoreRestTransformation {
 		return folder;
 	}
 
+	@Deprecated
 	public static DocumentumObject convertCoreRSObject(JsonObject restObject) {
 		DocumentumObject object = new DocumentumObject();
-		object.setId((String) restObject.getPropertyByName(DocumentumProperties.OBJECT_ID));
-		object.setName(restObject.getName());
-		object.setProperties(restObject.getProperties());
-		object.setDefinition(restObject.getDefinition());
-		object.setType(restObject.getType());
-		Object lockUser = restObject.getPropertyByName("r_lock_owner");
-		if(lockUser != null && lockUser.toString().length() > 0){
-			object.setCheckedOut(true);
-			object.setLockUser(lockUser.toString());
-		}
+		mapJsonObjectProperties(restObject, object);
 		return object;
 	}
 
+	@Deprecated
 	public static DocumentumDocument convertCoreRSDocument(JsonObject restDocument) {
 		DocumentumDocument document = new DocumentumDocument();
 		document.setId((String) restDocument.getPropertyByName(DocumentumProperties.OBJECT_ID));
@@ -56,7 +89,7 @@ public class CoreRestTransformation {
 		document.setDefinition(restDocument.getDefinition());
 		document.setType(restDocument.getType());
 		Object lockUser = restDocument.getPropertyByName("r_lock_owner");
-		if(lockUser != null && lockUser.toString().length() > 0){
+		if (lockUser != null && lockUser.toString().length() > 0) {
 			document.setCheckedOut(true);
 			document.setLockUser(lockUser.toString());
 		}
@@ -142,7 +175,7 @@ public class CoreRestTransformation {
 		documentumObject.setName(content.getPropertyByName("object_name").toString());
 		documentumObject.setProperties(content.getProperties());
 		Object lockUser = content.getPropertyByName("r_lock_owner");
-		if(lockUser != null && lockUser.toString().length() > 0){
+		if (lockUser != null && lockUser.toString().length() > 0) {
 			documentumObject.setCheckedOut(true);
 			documentumObject.setLockUser(lockUser.toString());
 		}

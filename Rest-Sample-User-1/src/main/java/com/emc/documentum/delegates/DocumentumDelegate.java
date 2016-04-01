@@ -19,11 +19,11 @@ public interface DocumentumDelegate {
 	String getIdentifier();
 	
 	DocumentumFolder createFolder(String cabinetName, String folderName)
-			throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException;
+			throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException, DocumentumException;
 
 	DocumentumDocument createDocument(DocumentCreation docCreation) throws DocumentumException;
 
-	DocumentumFolder getCabinetByName(String cabinetName) throws CabinetNotFoundException, RepositoryNotAvailableException;
+	DocumentumFolder getCabinetByName(String cabinetName) throws CabinetNotFoundException, RepositoryNotAvailableException, DocumentumException;
 
 	DocumentumObject getObjectById(String cabinetId) throws CabinetNotFoundException, RepositoryNotAvailableException;
 
@@ -51,15 +51,15 @@ public interface DocumentumDelegate {
 
 	ArrayList<DocumentumObject> getDocumentByName(String name) throws RepositoryNotAvailableException;
 	
-	DocumentumDocument checkoutDocument(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException;
+	DocumentumDocument checkoutDocument(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException, DocumentumException;
 	
-	DocumentumDocument checkinDocument(String documentId,byte[]content) throws RepositoryNotAvailableException, DocumentCheckinException;
+	DocumentumDocument checkinDocument(String documentId,byte[]content) throws RepositoryNotAvailableException, DocumentCheckinException, DocumentumException;
 	ArrayList<DocumentumFolder> getPaginatedResult(String folderId , int startIndex , int pageSize) throws RepositoryNotAvailableException;
 
 	DocumentumFolder createFolderByParentId(String ParentId, String folderName)
-			throws FolderCreationException, RepositoryNotAvailableException;
+			throws FolderCreationException, RepositoryNotAvailableException, DocumentumException;
 
 	ArrayList<DocumentumFolder> getAllCabinets(int pageNumber, int pageSize) throws RepositoryNotAvailableException;
 	
-	DocumentumDocument cancelCheckout(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException;
+	DocumentumObject cancelCheckout(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException;
 }

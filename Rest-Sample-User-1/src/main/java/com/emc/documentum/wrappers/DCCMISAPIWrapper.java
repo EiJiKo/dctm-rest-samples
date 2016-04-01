@@ -26,7 +26,6 @@ import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.enums.Action;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConnectionException;
-import org.apache.chemistry.opencmis.commons.impl.dataobjects.AllowableActionsImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;

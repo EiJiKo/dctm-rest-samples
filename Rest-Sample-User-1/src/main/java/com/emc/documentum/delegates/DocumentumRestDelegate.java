@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 
 import com.emc.documentum.dtos.DocumentCreation;
+import com.emc.documentum.dtos.DocumentumCabinet;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
-import com.emc.documentum.exceptions.DocumentCheckinException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
@@ -40,20 +40,23 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	 * String, java.lang.String)
 	 */
 	@Override
-	public DocumentumFolder createFolder(String cabinetName, String folderName)
-			throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException {
+	public DocumentumFolder createFolder(String cabinetName, String folderName) throws DocumentumException {
 		log.entering(DocumentumRestDelegate.class.getSimpleName(), "CreateFolder");
 		JsonObject cabinet;
 		JsonObject folder;
 		try {
 			cabinet = dcAPI.getCabinet(cabinetName);
 			folder = dcAPI.createFolder(cabinet, folderName);
-			return CoreRestTransformation.convertCoreRSFolder(folder);
+			return CoreRestTransformation.convertJsonObject(folder, DocumentumFolder.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		} catch (CabinetNotFoundException | FolderCreationException e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			throw e;
+		} catch (InstantiationException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new DocumentumException("Unable to instantiate class of type " + DocumentumDocument.class.getName());
 		}
 	}
 
@@ -65,19 +68,22 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	 * String, java.lang.String)
 	 */
 	@Override
-	public DocumentumFolder createFolderByParentId(String ParentId, String folderName)
-			throws FolderCreationException, RepositoryNotAvailableException {
+	public DocumentumFolder createFolderByParentId(String ParentId, String folderName) throws DocumentumException {
 		log.entering(DocumentumRestDelegate.class.getSimpleName(), "CreateFolder");
 		JsonObject parent = dcAPI.getObjectById(ParentId);
 		JsonObject folder;
 		try {
 			folder = dcAPI.createFolder(parent, folderName);
-			return CoreRestTransformation.convertCoreRSFolder(folder);
+			return CoreRestTransformation.convertJsonObject(folder, DocumentumFolder.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		} catch (FolderCreationException e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			throw e;
+		} catch (InstantiationException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new DocumentumException("Unable to instantiate class of type " + DocumentumDocument.class.getName());
 		}
 	}
 
@@ -96,12 +102,16 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		try {
 			folder = dcAPI.getFolderByPath(docCreation.getFolderPath());
 			document = dcAPI.createDocument(folder, docCreation.getProperties());
-			return CoreRestTransformation.convertCoreRSDocument(document);
+			return CoreRestTransformation.convertJsonObject(document, DocumentumDocument.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		} catch (FolderNotFoundException | DocumentCreationException e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			throw e;
+		} catch (InstantiationException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new DocumentumException("Unable to instantiate class of type " + DocumentumDocument.class.getName());
 		}
 	}
 
@@ -113,16 +123,19 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	 * lang.String)
 	 */
 	@Override
-	public DocumentumFolder getCabinetByName(String cabinetName)
-			throws CabinetNotFoundException, RepositoryNotAvailableException {
+	public DocumentumFolder getCabinetByName(String cabinetName) throws DocumentumException {
 
 		try {
-			return CoreRestTransformation.convertCoreRSFolder(dcAPI.getCabinet(cabinetName));
+			return CoreRestTransformation.convertJsonObject(dcAPI.getCabinet(cabinetName), DocumentumCabinet.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		} catch (CabinetNotFoundException e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			throw e;
+		} catch (InstantiationException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new DocumentumException("Unable to instantiate class of type " + DocumentumCabinet.class.getName());
 		}
 	}
 
@@ -137,7 +150,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	public DocumentumObject getObjectById(String cabinetId)
 			throws CabinetNotFoundException, RepositoryNotAvailableException {
 		try {
-			return CoreRestTransformation.convertCoreRSObject(dcAPI.getObjectById(cabinetId));
+			return CoreRestTransformation.convertJsonObject(dcAPI.getObjectById(cabinetId));
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		} catch (Exception e) {
@@ -155,7 +168,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	@Override
 	public ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException {
 		try {
-			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getAllCabinets(1,20), DocumentumFolder.class);
+			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getAllCabinets(1, 20), DocumentumFolder.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		} catch (Exception e) {
@@ -173,7 +186,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	@Override
 	public ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException {
 		try {
-			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getChildren(folderId,1,20));
+			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getChildren(folderId, 1, 20));
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		} catch (Exception e) {
@@ -212,21 +225,31 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public DocumentumDocument checkoutDocument(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException {
+	public DocumentumDocument checkoutDocument(String documentId)
+			throws DocumentumException {
 		try {
-			return CoreRestTransformation.convertCoreRSDocument(dcAPI.checkOutDocument(documentId));
+			return CoreRestTransformation.convertJsonObject(dcAPI.checkOutDocument(documentId),DocumentumDocument.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
+		}catch (InstantiationException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new DocumentumException("Unable to instantiate class of type " + DocumentumDocument.class.getName());
 		}
 	}
 
 	@Override
 	public DocumentumDocument checkinDocument(String documentId, byte[] content)
-			throws RepositoryNotAvailableException, DocumentCheckinException {
+			throws DocumentumException {
 		try {
-			return CoreRestTransformation.convertCoreRSDocument(dcAPI.checkinDocument(documentId, content));
+			return CoreRestTransformation.convertJsonObject(dcAPI.checkinDocument(documentId, content),
+					DocumentumDocument.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
+		} catch (InstantiationException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new DocumentumException("Unable to instantiate class of type " + DocumentumDocument.class.getName());
 		}
 
 	}
@@ -250,7 +273,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	public ArrayList<DocumentumObject> getChildren(String folderId, int pageNumber, int pageSize)
 			throws RepositoryNotAvailableException {
 		try {
-			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getChildren(folderId,pageNumber,pageSize));
+			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getChildren(folderId, pageNumber, pageSize));
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		} catch (Exception e) {
@@ -263,7 +286,8 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	public ArrayList<DocumentumFolder> getAllCabinets(int pageNumber, int pageSize)
 			throws RepositoryNotAvailableException {
 		try {
-			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getAllCabinets(pageNumber,pageSize), DocumentumFolder.class);
+			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getAllCabinets(pageNumber, pageSize),
+					DocumentumFolder.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		} catch (Exception e) {
@@ -272,14 +296,16 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public DocumentumDocument cancelCheckout(String documentId)
+	public DocumentumObject cancelCheckout(String documentId)
 			throws RepositoryNotAvailableException, DocumentCheckoutException {
 		try {
-			return CoreRestTransformation.convertCoreRSDocument(dcAPI.cancelCheckout(documentId));
+
+			return CoreRestTransformation.convertJsonObject(dcAPI.cancelCheckout(documentId));
+
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		}
-		
+
 	}
 
 }
