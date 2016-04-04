@@ -110,13 +110,27 @@ public class DCRestAPIWrapper {
 	}
 
 
-	public JsonObject deleteFolder(String folderId) {
-		RestTemplate restTemplate = new RestTemplate();
-		String folderUri = data.fetchFolderURI + "/" + folderId;
-		ResponseEntity<JsonObject> response;
-		response = restTemplate.exchange(folderUri, HttpMethod.DELETE, new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonObject.class);
-		return response.getBody();
-
+	public JsonObject deleteObject(String objectId) {
+		
+		JsonObject object = getObjectById(objectId) ;
+		if(object.getType().equals("dm_folder"))
+		{
+			RestTemplate restTemplate = new RestTemplate();
+			String folderUri = data.fetchFolderURI + "/" + objectId;
+			ResponseEntity<JsonObject> response;
+			response = restTemplate.exchange(folderUri, HttpMethod.DELETE, new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonObject.class);
+			return response.getBody();
+		}
+		else if (object.getType().equals("dm_document"))
+		{
+			RestTemplate restTemplate = new RestTemplate();
+			String folderUri = data.fetchObjectUri + "/" + objectId;
+			ResponseEntity<JsonObject> response;
+			response = restTemplate.exchange(folderUri, HttpMethod.DELETE, new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonObject.class);
+			return response.getBody();			
+		}
+		
+		return null ;
 	}
 
 	/*

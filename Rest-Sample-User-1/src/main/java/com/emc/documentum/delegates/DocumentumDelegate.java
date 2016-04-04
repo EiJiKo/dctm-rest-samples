@@ -61,7 +61,7 @@ public interface DocumentumDelegate {
 
 	ArrayList<DocumentumFolder> getAllCabinets(int pageNumber, int pageSize) throws RepositoryNotAvailableException;
 
-	void deleteFolder(String folderId) ;
+	void deleteObject(String objectId) ;
 	
 	DocumentumObject cancelCheckout(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException;
 }

@@ -158,9 +158,9 @@ public class DCCMISAPIWrapper {
 	}
 	
 
-	public void deleteFolder(Folder folder) throws RepositoryNotAvailableException {
+	public void deleteObject(CmisObject object) throws RepositoryNotAvailableException {
 		try {
-			folder.delete();			
+			object.delete();			
 		} catch (CmisConnectionException e) {
 			throw new RepositoryNotAvailableException("CMIS", e);
 		}

@@ -133,7 +133,7 @@ public class FileManagerController extends BaseController{
 			{
 				for(int i = 0 ; i < items.size() ; i++)
 				{
-					dcDelegate.deleteFolder((String) items.get(i));
+					dcDelegate.deleteObject((String) items.get(i));
 				}
 			}
 			//dcDelegate.deleteFolder(folderId);
