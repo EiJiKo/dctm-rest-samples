@@ -141,11 +141,15 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	public ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException {
 		return getAllCabinets(1, 20);
 	}
-
+	
 	@Override
-
 	public void deleteFolder(String folderId) {
-		// TODO Auto-generated method stub
+		try {
+			Folder folder = (Folder) dcAPI.getObjectById(folderId);
+			dcAPI.deleteFolder(folder);
+		} catch (RepositoryNotAvailableException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public DocumentumDocument cancelCheckout(String documentId)

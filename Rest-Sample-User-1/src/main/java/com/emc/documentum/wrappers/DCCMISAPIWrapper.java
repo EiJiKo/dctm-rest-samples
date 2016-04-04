@@ -157,6 +157,15 @@ public class DCCMISAPIWrapper {
 			throw new RepositoryNotAvailableException("CMIS", e);
 		}
 	}
+	
+
+	public void deleteFolder(Folder folder) throws RepositoryNotAvailableException {
+		try {
+			folder.delete();			
+		} catch (CmisConnectionException e) {
+			throw new RepositoryNotAvailableException("CMIS", e);
+		}
+	}
 
 	public CmisObject getObjectById(String cabinetId) throws RepositoryNotAvailableException {
 		try {
