@@ -18,6 +18,7 @@ import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
+import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DelegateNotFoundException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
@@ -84,7 +85,12 @@ public class DocumentumIntegrationController {
 	public void deleteObject(@PathVariable(value = "api") String api,
 			@PathVariable(value = "objectId") String objectId)
 			throws CabinetNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException {
-		(delegateProvider.getDelegate(api)).deleteObject(objectId);
+		//TODO added the boolean for now false
+		try {
+			(delegateProvider.getDelegate(api)).deleteObject(objectId , false);
+		} catch (CanNotDeleteFolderException e) {
+			e.printStackTrace();
+		}
 		return;
 
 	}

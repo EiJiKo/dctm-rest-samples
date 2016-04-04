@@ -7,6 +7,7 @@ import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
 import org.apache.chemistry.opencmis.client.api.QueryResult;
+import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
+import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
@@ -144,10 +146,10 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 	
 	@Override
-	public void deleteObject(String objectId) {
+	public void deleteObject(String objectId , boolean deleteChildrenOrNot) throws CanNotDeleteFolderException {
 		try {
 			CmisObject object = dcAPI.getObjectById(objectId);
-			dcAPI.deleteObject(object);
+			dcAPI.deleteObject(object , deleteChildrenOrNot);
 		} catch (RepositoryNotAvailableException e) {
 			e.printStackTrace();
 		}

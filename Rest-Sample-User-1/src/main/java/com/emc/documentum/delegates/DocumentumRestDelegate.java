@@ -14,6 +14,7 @@ import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
+import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
@@ -290,8 +291,8 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public void deleteObject(String objectId) {
-		dcAPI.deleteObject(objectId) ;
+	public void deleteObject(String objectId , boolean deleteChildrenOrNot) throws CanNotDeleteFolderException {
+		dcAPI.deleteObject(objectId , deleteChildrenOrNot) ;
 	}
 	
 	@Override

@@ -15,6 +15,7 @@ import com.emc.documentum.delegate.provider.DelegateProvider;
 import com.emc.documentum.delegates.DocumentumDelegate;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
+import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DelegateNotFoundException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
@@ -133,15 +134,18 @@ public class FileManagerController extends BaseController{
 			{
 				for(int i = 0 ; i < items.size() ; i++)
 				{
-					dcDelegate.deleteObject((String) items.get(i));
+					//TODO should get this boolean from UI
+					dcDelegate.deleteObject((String) items.get(i) , false);
 				}
 			}
-			//dcDelegate.deleteFolder(folderId);
 			return commonResponse();
 			
 		} catch (DelegateNotFoundException | ParseException e1) {
 			e1.printStackTrace();
 			return errorResponse(delegateKey + " Repository is not available ") ;
+		} catch (CanNotDeleteFolderException e) {
+			e.printStackTrace();
+			return errorResponse(e.getMessage()) ;
 		}
 	}
 
