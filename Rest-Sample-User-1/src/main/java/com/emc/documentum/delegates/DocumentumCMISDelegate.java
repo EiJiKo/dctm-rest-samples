@@ -3,6 +3,7 @@ package com.emc.documentum.delegates;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
 import org.apache.chemistry.opencmis.client.api.QueryResult;
@@ -143,10 +144,10 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 	
 	@Override
-	public void deleteFolder(String folderId) {
+	public void deleteObject(String objectId) {
 		try {
-			Folder folder = (Folder) dcAPI.getObjectById(folderId);
-			dcAPI.deleteFolder(folder);
+			CmisObject object = dcAPI.getObjectById(objectId);
+			dcAPI.deleteObject(object);
 		} catch (RepositoryNotAvailableException e) {
 			e.printStackTrace();
 		}
