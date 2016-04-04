@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -38,7 +40,7 @@ public abstract class IntegrationLayerTests {
 	@Test
 	public void testCabinetsRetrieval() throws Exception {
 		DocumentumFolder[] cabinets = null;
-		cabinets = retrieveCabinets(getAPI());
+		cabinets = retrieveCabinets();
 		Assert.assertTrue(getAPI() + " Zero Cabinets Returned", cabinets.length > 0);
 
 	}
@@ -46,16 +48,42 @@ public abstract class IntegrationLayerTests {
 	@Test
 	public void testCabinetsType() {
 		DocumentumFolder[] cabinets = null;
-		cabinets = retrieveCabinets(getAPI());
+		cabinets = retrieveCabinets();
 		for (DocumentumFolder folder : cabinets) {
 			Assert.assertTrue(getAPI() + " : Cabinet Type not equal Cabinet", folder.getType().equals("Cabinet"));
 		}
 
 	}
 
-	private DocumentumFolder[] retrieveCabinets(String api) {
+	@Test
+	public void testCreateThenDeleteFolder() {
+		String cabinetName = "dmadmin";
+		String folderName = "MySampleCreatedFolder";
+		ResponseEntity<DocumentumFolder> folderCreationResponse = createFolder(cabinetName,folderName);
+		Assert.assertTrue("Unable to Create Folder",folderCreationResponse.getStatusCode() == HttpStatus.OK);
+		Assert.assertNotNull("Created Folder Not Equal Null", folderCreationResponse.getBody().getId());
+		logger.info("Created Folder with Id:- " + folderCreationResponse.getBody().getId());
+		ResponseEntity<Void> responseEntity = deleteObject(folderCreationResponse.getBody().getId());
+		Assert.assertTrue("unable to delete Folder", responseEntity.getStatusCode() == HttpStatus.OK);
+		logger.info("Delete response equal " + responseEntity.getStatusCode());
+	}
+
+	private DocumentumFolder[] retrieveCabinets() {
 		ResponseEntity<DocumentumFolder[]> entity = new TestRestTemplate().getForEntity(
-				"http://localhost:" + this.port + "/" + api + "/services/get/cabinets", DocumentumFolder[].class);
+				"http://localhost:" + this.port + "/" + getAPI() + "/services/get/cabinets", DocumentumFolder[].class);
 		return entity.getBody();
+	}
+
+	private ResponseEntity<DocumentumFolder> createFolder(String cabinetName, String folderName) {
+		ResponseEntity<DocumentumFolder> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port
+				+ "/" + getAPI() + "/services/folder/create/" + cabinetName + "/" + folderName, DocumentumFolder.class);
+		return entity;
+	}
+
+	private ResponseEntity<Void> deleteObject(String objectId) {
+		ResponseEntity<Void> entity = new TestRestTemplate().exchange(
+				"http://localhost:" + this.port + "/" + getAPI() + "/services/delete/object/id/" + objectId, HttpMethod.DELETE,
+				null, Void.class);
+		return entity;
 	}
 }
