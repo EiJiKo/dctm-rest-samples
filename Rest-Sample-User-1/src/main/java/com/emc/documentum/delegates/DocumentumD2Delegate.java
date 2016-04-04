@@ -121,7 +121,7 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	}
 
 	@Override
-	public void deleteFolder(String folderId) {
+	public void deleteObject(String objectId) {
 		// TODO Auto-generated method stub
 	}
 	
