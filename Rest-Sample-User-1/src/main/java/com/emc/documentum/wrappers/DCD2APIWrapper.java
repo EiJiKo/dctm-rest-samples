@@ -16,12 +16,15 @@ import org.springframework.web.client.RestTemplate;
 import com.emc.d2fs.constants.D2fsConstants;
 import com.emc.d2fs.models.attribute.Attribute;
 import com.emc.d2fs.models.context.Context;
+import com.emc.d2fs.models.item.Item;
 import com.emc.d2fs.models.node.Node;
 import com.emc.d2fs.models.repository.Repository;
 import com.emc.d2fs.schemas.models.ModelPort;
 import com.emc.d2fs.schemas.models.ModelPortService;
 import com.emc.d2fs.services.browser_service.GetBrowserContentRequest;
 import com.emc.d2fs.services.browser_service.GetBrowserContentResponse;
+import com.emc.d2fs.services.content_service.GetDQLContentRequest;
+import com.emc.d2fs.services.content_service.GetDQLContentResponse;
 import com.emc.d2fs.services.property_service.GetPropertiesRequest;
 import com.emc.d2fs.services.property_service.GetPropertiesResponse;
 import com.emc.d2fs.services.repository_service.CheckLoginRequest;
@@ -41,23 +44,22 @@ public class DCD2APIWrapper {
 
 	ModelPortService service = new ModelPortService();
 
-	public List<Node> getAllCabinets() throws RepositoryNotAvailableException {
+	public List<Item> getAllCabinets() throws RepositoryNotAvailableException {
 		try {
 			ModelPort port = getPort();
 			Context context = getContext(port,data.repo,data.username,data.password,data.UID);
-			// Validate user credentials
+			// Validate user credential
 			CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
 			checkLoginRequest.setContext(context);
 			CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
 			if (!checkLoginResponse.isResult())
 				System.out.println("login failed");
-			GetBrowserContentRequest request = new GetBrowserContentRequest();
-			request.setContext(context);
-			request.setContentTypeName(D2fsConstants.REPOSITORY);
-			request.setId(data.repo);
-			GetBrowserContentResponse response = port.getBrowserContent(request);
-			if (response.getNode() != null)
-				return response.getNode().getNodes();
+			GetDQLContentRequest r = new GetDQLContentRequest();
+			r.setContext(context);
+			r.setDql("select * from dm_cabinet");
+			GetDQLContentResponse response = port.getDQLContent(r);
+			if (response.getDocItems() != null && response.getDocItems().getItems()!=null)
+				return response.getDocItems().getItems();
 			throw new RepositoryNotAvailableException(data.repo);
 
 		} catch (Exception e) {
@@ -66,7 +68,7 @@ public class DCD2APIWrapper {
 
 	}
 	
-	public List<Node> getChildren(String folderId) {
+	public List<Item> getChildren(String folderId) {
 		ModelPort port = getPort();
 		Context context = getContext(port,data.repo,data.username,data.password,data.UID);
 		// Validate user credentials
@@ -76,15 +78,16 @@ public class DCD2APIWrapper {
 		if (!checkLoginResponse.isResult())
 			System.out.println("login failed");
 		GetBrowserContentRequest request = new GetBrowserContentRequest();
-		request.setContext(context);
-		request.setContentTypeName(D2fsConstants.FOLDER);
-		request.setId(folderId);
-		GetBrowserContentResponse response = port.getBrowserContent(request);
-		return response.getNode().getNodes();
+		GetDQLContentRequest r = new GetDQLContentRequest();
+		r.setContext(context);
+		r.setDql("select *,r_lock_owner from dm_folder where  FOLDER(ID('" + folderId
+				+ "')) union select *,r_lock_owner from dm_document where FOLDER(ID('" + folderId + "'))");
+		GetDQLContentResponse response = port.getDQLContent(r);
+		return response.getDocItems().getItems();
 
 	}
 
-	public List<Node> getChildren(String folderId, int pageNumber, int pageSize) {
+	public List<Item> getChildren(String folderId, int pageNumber, int pageSize) {
 		ModelPort port = getPort();
 		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
 		// Validate user credentials
@@ -94,12 +97,13 @@ public class DCD2APIWrapper {
 		if (!checkLoginResponse.isResult())
 			System.out.println("login failed");
 		GetBrowserContentRequest request = new GetBrowserContentRequest();
-		request.setContext(context);
-		request.setContentTypeName(D2fsConstants.FOLDER);
-		request.setId(folderId);
-		GetBrowserContentResponse response = port.getBrowserContent(request);
-		List<Node> returnedNodes = new ArrayList<>();
-		List<Node> responseNodes = response.getNode().getNodes();
+		GetDQLContentRequest r = new GetDQLContentRequest();
+		r.setContext(context);
+		r.setDql("select *,r_lock_owner from dm_folder where  FOLDER(ID('" + folderId
+				+ "')) union select *,r_lock_owner from dm_document where FOLDER(ID('" + folderId + "'))");
+		GetDQLContentResponse response = port.getDQLContent(r);
+		List<Item> returnedNodes = new ArrayList<>();
+		List<Item> responseNodes = response.getDocItems().getItems();
 		for (int i = ((pageNumber - 1) * pageSize); i < responseNodes.size() && i < (pageNumber * pageSize); i++)
 			returnedNodes.add(responseNodes.get(i));
 		return returnedNodes;
