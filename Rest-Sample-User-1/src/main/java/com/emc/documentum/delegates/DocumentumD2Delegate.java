@@ -54,13 +54,13 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 
 	@Override
 	public ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException {
-		return DCD2Transformation.convertD2ObjectList(dcAPI.getAllCabinets(), DocumentumFolder.class);
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getAllCabinets());
 	
 	}
 
 	@Override
 	public ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException {
-		return DCD2Transformation.convertD2ObjectList(dcAPI.getChildren(folderId), DocumentumObject.class);
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getChildren(folderId));
 	}
 
 	@Override
@@ -110,14 +110,14 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	public ArrayList<DocumentumObject> getChildren(String folderId, int pageNumber, int pageSize)
 			throws RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
-		return DCD2Transformation.convertD2ObjectList(dcAPI.getChildren(folderId,pageNumber,pageSize), DocumentumObject.class);
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getChildren(folderId,pageNumber,pageSize));
 	}
 
 	@Override
 	public ArrayList<DocumentumFolder> getAllCabinets(int pageNumber, int pageSize)
 			throws RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
-		return DCD2Transformation.convertD2ObjectList(dcAPI.getAllCabinets(),DocumentumFolder.class);
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getAllCabinets());
 	}
 
 	@Override
