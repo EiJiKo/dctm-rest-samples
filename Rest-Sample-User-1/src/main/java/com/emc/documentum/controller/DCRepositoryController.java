@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.emc.documentum.delegates.DocumentumDelegate;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
+import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 
@@ -38,6 +39,9 @@ public class DCRepositoryController {
 		} catch (CabinetNotFoundException  | FolderCreationException e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			model.addAttribute("exception", e);
+		} catch (DocumentumException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} 
 		
 

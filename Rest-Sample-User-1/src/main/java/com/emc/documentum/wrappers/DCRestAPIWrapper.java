@@ -387,7 +387,7 @@ public class DCRestAPIWrapper {
 
 	public List<JsonEntry> getDocumentByName(String name) throws DocumentNotFoundException {
 		RestTemplate restTemplate = new RestTemplate();
-		String URI = String.format(data.dqlQuery + "select * from dm_document where object_name like '%s'",
+		String URI = String.format(data.dqlQuery + "select * from dm_sysobject where object_name like '%s'",
 				"%" + name + "%");
 		ResponseEntity<JsonFeed> response = restTemplate.exchange(URI, HttpMethod.GET,
 				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
@@ -446,9 +446,7 @@ public class DCRestAPIWrapper {
 		mediaTypes.add(MediaType.ALL);
 		HttpHeaders httpHeader = createHeaders(data.username, data.password);
 		httpHeader.setAccept(mediaTypes);
-		ResponseEntity<JsonObject> jsonDocuemnt;
-
-		jsonDocuemnt = restTemplate.exchange(link.getHref(), HttpMethod.DELETE,
+		restTemplate.exchange(link.getHref(), HttpMethod.DELETE,
 				new HttpEntity<Object>(httpHeader), JsonObject.class);
 		return getObjectById(documentId);
 	}

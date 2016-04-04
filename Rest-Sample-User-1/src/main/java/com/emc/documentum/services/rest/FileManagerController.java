@@ -17,6 +17,7 @@ import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.DelegateNotFoundException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
+import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.model.JsonObject;
@@ -113,14 +114,10 @@ public class FileManagerController extends BaseController{
 			System.out.println("parent Folder  id " + parentFolderId);
 			DocumentumFolder folder = dcDelegate.createFolderByParentId(parentFolderId, folderName) ;
 			return commonResponse();
-		} catch (FolderCreationException | ParseException e) {
+		} catch (DocumentumException | ParseException e ) {
 			e.printStackTrace();
 			return errorResponse("can't create folder");
-		} catch (RepositoryNotAvailableException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return "";
-		}		
+		}	
 	}
 	
 	
