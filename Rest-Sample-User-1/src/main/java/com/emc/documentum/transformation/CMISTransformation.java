@@ -19,11 +19,11 @@ import com.emc.documentum.dtos.DocumentumObject;
 
 public class CMISTransformation {
 
-	private static DocumentumObject createDocumentumObject(String objectTypeId,String baseTypeId) {
+	private static DocumentumObject createDocumentumObject(String objectTypeId, String baseTypeId) {
 		DocumentumObject documentumObject;
 		switch (baseTypeId) {
 		case "cmis:folder":
-			documentumObject = (objectTypeId.equals("dm_cabinet"))?new DocumentumCabinet():new DocumentumFolder();
+			documentumObject = (objectTypeId.equals("dm_cabinet")) ? new DocumentumCabinet() : new DocumentumFolder();
 			break;
 		case "cabinets":
 			documentumObject = new DocumentumCabinet();
@@ -49,24 +49,26 @@ public class CMISTransformation {
 	public static DocumentumObject convertCMISQueryResult(QueryResult queryResult) {
 		String baseType = queryResult.getPropertyById("cmis:baseTypeId").getFirstValue().toString();
 		String objectType = queryResult.getPropertyById("cmis:objectTypeId").getFirstValue().toString();
-		DocumentumObject documentumObject = createDocumentumObject(objectType,baseType);
+		DocumentumObject documentumObject = createDocumentumObject(objectType, baseType);
 		documentumObject.setId(queryResult.getPropertyById("cmis:objectId").getFirstValue().toString());
 		documentumObject.setName(queryResult.getPropertyById("cmis:name").getFirstValue().toString());
 		PropertyData<Boolean> checkedOut = queryResult.getPropertyById("cmis:isVersionSeriesCheckedOut");
-		if(checkedOut != null && checkedOut.getFirstValue() != false){
+		if (checkedOut != null && checkedOut.getFirstValue() != false) {
 			documentumObject.setCheckedOut(checkedOut.getFirstValue());
-			documentumObject.setLockUser(queryResult.getPropertyById("cmis:versionSeriesCheckedOutBy").getFirstValue().toString());
+			documentumObject.setLockUser(
+					queryResult.getPropertyById("cmis:versionSeriesCheckedOutBy").getFirstValue().toString());
 		}
 		mapPropertyDataList(documentumObject, queryResult.getProperties());
 		return documentumObject;
 	}
 
 	public static DocumentumObject convertCMISObject(CmisObject cmisObject) {
-		DocumentumObject object = createDocumentumObject(cmisObject.getPropertyValue("cmis:objectTypeId").toString(),cmisObject.getPropertyValue("cmis:baseTypeId").toString());
+		DocumentumObject object = createDocumentumObject(cmisObject.getPropertyValue("cmis:objectTypeId").toString(),
+				cmisObject.getPropertyValue("cmis:baseTypeId").toString());
 		object.setId(cmisObject.getId());
 		object.setName(cmisObject.getName());
 		Property<Boolean> checkedOut = cmisObject.getProperty("cmis:isVersionSeriesCheckedOut");
-		if(checkedOut != null && checkedOut.getFirstValue() != false){
+		if (checkedOut != null && checkedOut.getFirstValue() != false) {
 			object.setCheckedOut(checkedOut.getValue());
 			object.setLockUser(cmisObject.getProperty("cmis:versionSeriesCheckedOutBy").getValueAsString());
 		}
@@ -78,9 +80,12 @@ public class CMISTransformation {
 		DocumentumDocument document = new DocumentumDocument();
 		document.setId(cmisDocument.getId());
 		document.setName(cmisDocument.getName());
-		document.setPath(cmisDocument.getPaths().get(0));
+		//TODO Get Path breaks after using CMIS Build 7.3.0.8
+//		if (cmisDocument.getPaths() != null && cmisDocument.getPaths().size() > 0) {
+//			document.setPath(cmisDocument.getPaths().get(0));
+//		}
 		Property<Boolean> checkedOut = cmisDocument.getProperty("cmis:isVersionSeriesCheckedOut");
-		if(checkedOut != null){
+		if (checkedOut != null && checkedOut.getFirstValue() != false) {
 			document.setCheckedOut(checkedOut.getValue());
 			document.setLockUser(cmisDocument.getProperty("cmis:versionSeriesCheckedOutBy").getValueAsString());
 		}
