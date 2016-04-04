@@ -72,11 +72,20 @@ public class DocumentumIntegrationController {
 
 	}
 
-	@RequestMapping(value = "get/cabinet/id/{cabinetId}")
+	@RequestMapping(value = "get/cabinet/id/{cabinetId}",method={RequestMethod.GET})
 	public DocumentumObject getCabinetById(@PathVariable(value = "api") String api,
 			@PathVariable(value = "cabinetId") String cabinetId)
 			throws CabinetNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException {
 		return (delegateProvider.getDelegate(api)).getObjectById(cabinetId);
+
+	}
+	
+	@RequestMapping(value = "delete/object/id/{objectId}",method={RequestMethod.DELETE})
+	public void deleteObject(@PathVariable(value = "api") String api,
+			@PathVariable(value = "objectId") String objectId)
+			throws CabinetNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException {
+		(delegateProvider.getDelegate(api)).deleteObject(objectId);
+		return;
 
 	}
 
@@ -122,6 +131,7 @@ public class DocumentumIntegrationController {
 		log.entering("checkin document ", documentId);
 		return (delegateProvider.getDelegate(api)).checkinDocument(documentId, content);
 	}
+	
 	@RequestMapping(value = "get/document/cancelCheckout/id/{documentId}", method = RequestMethod.GET)
 	public DocumentumObject cancelCheckout(@PathVariable(value = "api") String api,
 			@PathVariable(value = "documentId") String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException, DelegateNotFoundException
