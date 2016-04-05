@@ -1,30 +1,38 @@
 package com.emc.documentum.wrappers;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.chemistry.opencmis.client.api.CmisObject;
-import org.codehaus.groovy.classgen.GeneratorContext;
+import org.apache.commons.io.IOUtils;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import com.emc.d2fs.constants.D2fsConstants;
 import com.emc.d2fs.models.attribute.Attribute;
 import com.emc.d2fs.models.context.Context;
 import com.emc.d2fs.models.item.Item;
-import com.emc.d2fs.models.node.Node;
 import com.emc.d2fs.models.repository.Repository;
 import com.emc.d2fs.schemas.models.ModelPort;
 import com.emc.d2fs.schemas.models.ModelPortService;
 import com.emc.d2fs.services.browser_service.GetBrowserContentRequest;
-import com.emc.d2fs.services.browser_service.GetBrowserContentResponse;
 import com.emc.d2fs.services.content_service.GetDQLContentRequest;
 import com.emc.d2fs.services.content_service.GetDQLContentResponse;
+import com.emc.d2fs.services.download_service.GetDispatchDownloadUrlRequest;
+import com.emc.d2fs.services.download_service.GetDispatchDownloadUrlResponse;
 import com.emc.d2fs.services.property_service.GetPropertiesRequest;
 import com.emc.d2fs.services.property_service.GetPropertiesResponse;
 import com.emc.d2fs.services.repository_service.CheckLoginRequest;
@@ -32,8 +40,6 @@ import com.emc.d2fs.services.repository_service.CheckLoginResponse;
 import com.emc.d2fs.services.repository_service.GetRepositoryRequest;
 import com.emc.documentum.constants.DCD2Constants;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
-import com.emc.documentum.model.JsonEntry;
-import com.emc.documentum.model.JsonFeed;
 
 @Component("DCD2APIWrapper")
 public class DCD2APIWrapper {
@@ -43,11 +49,11 @@ public class DCD2APIWrapper {
 	DCD2Constants data;
 
 	ModelPortService service = new ModelPortService();
-
+	ModelPort port;
 	public List<Item> getAllCabinets() throws RepositoryNotAvailableException {
 		try {
 			ModelPort port = getPort();
-			Context context = getContext(port,data.repo,data.username,data.password,data.UID);
+			Context context = getContext(port, data.repo, data.username, data.password, data.UID);
 			// Validate user credential
 			CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
 			checkLoginRequest.setContext(context);
@@ -58,7 +64,7 @@ public class DCD2APIWrapper {
 			r.setContext(context);
 			r.setDql("select * from dm_cabinet");
 			GetDQLContentResponse response = port.getDQLContent(r);
-			if (response.getDocItems() != null && response.getDocItems().getItems()!=null)
+			if (response.getDocItems() != null && response.getDocItems().getItems() != null)
 				return response.getDocItems().getItems();
 			throw new RepositoryNotAvailableException(data.repo);
 
@@ -67,10 +73,10 @@ public class DCD2APIWrapper {
 		}
 
 	}
-	
+
 	public List<Item> getChildren(String folderId) {
 		ModelPort port = getPort();
-		Context context = getContext(port,data.repo,data.username,data.password,data.UID);
+		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
 		// Validate user credentials
 		CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
 		checkLoginRequest.setContext(context);
@@ -110,6 +116,55 @@ public class DCD2APIWrapper {
 
 	}
 
+	public byte[] getDocumentContent(String documentId) {
+
+		try {
+			ModelPort port = getPort();
+			Context context = getContext(port, data.repo, data.username, data.password, data.UID);
+			CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
+			checkLoginRequest.setContext(context);
+			CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
+			if (!checkLoginResponse.isResult())
+				System.out.println("login failed");
+			GetDispatchDownloadUrlRequest request = new GetDispatchDownloadUrlRequest();
+			request.setId(documentId);
+			request.setContext(context);
+			request.setCurrent(true);
+			request.setViewNative(true);
+			GetDispatchDownloadUrlResponse response = port.getDispatchDownloadUrl(request);
+			RestTemplate restTemplate = new RestTemplate();
+			HttpHeaders httpHeader = createHeaders(data.username, data.password);
+			List<MediaType> mediaTypes = new ArrayList<MediaType>();
+			mediaTypes.add(MediaType.ALL);
+			httpHeader.setAccept(mediaTypes);
+			ResponseEntity<Resource> resource;
+			resource = restTemplate.exchange(URLDecoder.decode(response.getUrl(), "UTF-8"), HttpMethod.GET,
+					new HttpEntity<Object>(httpHeader), Resource.class);
+
+			if (resource == null) {
+
+			} else {
+
+				System.out.println("Response Headers: " + resource.getHeaders());
+				System.out.println("Response status: " + resource.getStatusCode());
+			}
+
+			if (resource.getBody() != null) {
+				InputStream docStream = resource.getBody().getInputStream();
+				byte[] fileContent = IOUtils.toByteArray(docStream);
+				byte[] encodedfile = Base64.encodeBase64(fileContent);
+				return encodedfile;
+
+			} else {
+				log.fine(documentId + " has empty content");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			log.log(Level.SEVERE, "IO Exception while reading dm_document input stream", e);
+		}
+		return new byte[0];
+	}
+
 	public List<Attribute> getObjectProperties(String objectId) {
 		ModelPort port = getPort();
 		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
@@ -122,7 +177,9 @@ public class DCD2APIWrapper {
 	}
 
 	private ModelPort getPort() {
-		return service.getModelPortSoap11();
+		if(port == null)
+			port = service.getModelPortSoap11();
+		return port;
 	}
 
 	private Context getContext(ModelPort port, String repoId, String username, String password, String UID) {
@@ -142,5 +199,18 @@ public class DCD2APIWrapper {
 		context.setUid(UID);
 		context.setWebAppURL(host);
 		return context;
+	}
+
+	private HttpHeaders createHeaders(String username, String password) {
+		return new HttpHeaders() {
+			private static final long serialVersionUID = -3310695110391522574L;
+
+			{
+				String usernameAndPassword = username + ":" + password;
+				String authHeader = "Basic " + new String(Base64.encodeBase64(usernameAndPassword.getBytes()));
+				set("Authorization", authHeader);
+			}
+		};
+
 	}
 }

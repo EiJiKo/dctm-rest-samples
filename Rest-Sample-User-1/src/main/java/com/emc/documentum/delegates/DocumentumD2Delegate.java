@@ -66,8 +66,7 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	@Override
 	public byte[] getDocumentContentById(String documentId)
 			throws DocumentNotFoundException, RepositoryNotAvailableException {
-		// TODO Auto-generated method stub
-		return null;
+			return dcAPI.getDocumentContent(documentId);
 	}
 
 	@Override
