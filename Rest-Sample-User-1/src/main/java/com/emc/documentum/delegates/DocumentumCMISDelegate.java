@@ -160,4 +160,9 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 		return CMISTransformation.convertCMISDocument(dcAPI.cancelCheckout(documentId));
 	}
 
+	@Override
+	public ArrayList<DocumentumObject> query(String query) throws RepositoryNotAvailableException {
+		throw new UnsupportedOperationException();
+	}
+
 }

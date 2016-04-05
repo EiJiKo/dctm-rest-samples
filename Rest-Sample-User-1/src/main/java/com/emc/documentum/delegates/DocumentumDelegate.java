@@ -65,4 +65,6 @@ public interface DocumentumDelegate {
 	void deleteObject(String objectId , boolean deleteChildrenOrNot) throws CanNotDeleteFolderException ;
 	
 	DocumentumObject cancelCheckout(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException;
+	
+	ArrayList<DocumentumObject> query(String query) throws RepositoryNotAvailableException;
 }

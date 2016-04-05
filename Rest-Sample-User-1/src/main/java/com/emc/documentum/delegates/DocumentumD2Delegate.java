@@ -130,4 +130,9 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 		return null;
 	}
 
+	@Override
+	public ArrayList<DocumentumObject> query(String query) throws RepositoryNotAvailableException {
+		throw new UnsupportedOperationException();
+	}
+
 }

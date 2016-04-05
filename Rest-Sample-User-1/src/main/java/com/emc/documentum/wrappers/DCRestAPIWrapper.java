@@ -466,7 +466,7 @@ public class DCRestAPIWrapper {
 		return folders;
 	}
 
-	private ResponseEntity<JsonFeed> executeDQL(String query) {
+	public ResponseEntity<JsonFeed> executeDQL(String query) {
 		RestTemplate restTemplate = new RestTemplate();
 		// log.log(level, msg, thrown);
 		String URI = data.dqlQuery + query;

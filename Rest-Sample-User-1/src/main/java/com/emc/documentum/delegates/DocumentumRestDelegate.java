@@ -22,6 +22,7 @@ import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
+import com.emc.documentum.model.JsonFeed;
 import com.emc.documentum.model.JsonObject;
 import com.emc.documentum.transformation.CoreRestTransformation;
 import com.emc.documentum.wrappers.DCRestAPIWrapper;
@@ -222,21 +223,20 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public DocumentumDocument checkoutDocument(String documentId)
-			throws DocumentumException {
+	public DocumentumDocument checkoutDocument(String documentId) throws DocumentumException {
 		try {
-			return CoreRestTransformation.convertJsonObject(dcAPI.checkOutDocument(documentId),DocumentumDocument.class);
+			return CoreRestTransformation.convertJsonObject(dcAPI.checkOutDocument(documentId),
+					DocumentumDocument.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
-		}catch (InstantiationException | IllegalAccessException e) {
+		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 			throw new DocumentumException("Unable to instantiate class of type " + DocumentumDocument.class.getName());
 		}
 	}
 
 	@Override
-	public DocumentumDocument checkinDocument(String documentId, byte[] content)
-			throws DocumentumException {
+	public DocumentumDocument checkinDocument(String documentId, byte[] content) throws DocumentumException {
 		try {
 			return CoreRestTransformation.convertJsonObject(dcAPI.checkinDocument(documentId, content),
 					DocumentumDocument.class);
@@ -291,14 +291,25 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public void deleteObject(String objectId , boolean deleteChildrenOrNot) throws CanNotDeleteFolderException {
-		dcAPI.deleteObject(objectId , deleteChildrenOrNot) ;
+	public void deleteObject(String objectId, boolean deleteChildrenOrNot) throws CanNotDeleteFolderException {
+		dcAPI.deleteObject(objectId, deleteChildrenOrNot);
 	}
-	
+
 	@Override
-	public DocumentumObject cancelCheckout(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException {
+	public DocumentumObject cancelCheckout(String documentId)
+			throws RepositoryNotAvailableException, DocumentCheckoutException {
 		try {
 			return CoreRestTransformation.convertJsonObject(dcAPI.cancelCheckout(documentId));
+		} catch (ResourceAccessException e) {
+			throw new RepositoryNotAvailableException("CoreRest");
+		}
+	}
+
+	@Override
+	public ArrayList<DocumentumObject> query(String query) throws RepositoryNotAvailableException {
+		try {
+			JsonFeed queryResult = dcAPI.executeDQL(query).getBody();
+			return CoreRestTransformation.convertCoreRSEntryList(queryResult.getEntries());
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		}
