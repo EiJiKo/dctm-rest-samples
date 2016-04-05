@@ -2,6 +2,7 @@ package com.emc.documentum.wrappers;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -30,6 +32,7 @@ import com.emc.documentum.constants.DCCoreRestConstants;
 import com.emc.documentum.constants.LinkRelation;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
+import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckinException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentCreationException;
@@ -109,14 +112,19 @@ public class DCRestAPIWrapper {
 
 	}
 
-	public JsonObject deleteObject(String objectId) {
-		RestTemplate restTemplate = new RestTemplate();
-		String objectUri = data.fetchObjectUri + "/" + objectId;
-		ResponseEntity<JsonObject> response;
-		response = restTemplate.exchange(objectUri, HttpMethod.DELETE,
-				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonObject.class);
-		return response.getBody();
-
+	public JsonObject deleteObject(String objectId , boolean deleteChildrenOrNot) throws CanNotDeleteFolderException {
+		try {
+			RestTemplate restTemplate = new RestTemplate();
+			String objectUri = data.fetchObjectUri + "/" + objectId;
+			URI targetUrl = UriComponentsBuilder.fromUriString(objectUri).queryParam("del-non-empty", deleteChildrenOrNot).build().toUri();
+			
+			ResponseEntity<JsonObject> response;
+			response = restTemplate.exchange(targetUrl, HttpMethod.DELETE,new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonObject.class);
+			return response.getBody();
+		} catch (HttpClientErrorException ex){
+			ex.printStackTrace();
+			throw new CanNotDeleteFolderException(objectId) ;
+		}
 	}
 
 	/*
