@@ -24,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.emc.d2fs.models.attribute.Attribute;
 import com.emc.d2fs.models.context.Context;
+import com.emc.d2fs.models.destroyresult.Destroyresult;
 import com.emc.d2fs.models.item.Item;
 import com.emc.d2fs.models.repository.Repository;
 import com.emc.d2fs.schemas.models.ModelPort;
@@ -31,6 +32,8 @@ import com.emc.d2fs.schemas.models.ModelPortService;
 import com.emc.d2fs.services.browser_service.GetBrowserContentRequest;
 import com.emc.d2fs.services.content_service.GetDQLContentRequest;
 import com.emc.d2fs.services.content_service.GetDQLContentResponse;
+import com.emc.d2fs.services.destroy_service.DestroyRequest;
+import com.emc.d2fs.services.destroy_service.DestroyResponse;
 import com.emc.d2fs.services.download_service.GetDispatchDownloadUrlRequest;
 import com.emc.d2fs.services.download_service.GetDispatchDownloadUrlResponse;
 import com.emc.d2fs.services.property_service.GetPropertiesRequest;
@@ -39,6 +42,7 @@ import com.emc.d2fs.services.repository_service.CheckLoginRequest;
 import com.emc.d2fs.services.repository_service.CheckLoginResponse;
 import com.emc.d2fs.services.repository_service.GetRepositoryRequest;
 import com.emc.documentum.constants.DCD2Constants;
+import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 
 @Component("DCD2APIWrapper")
@@ -115,7 +119,45 @@ public class DCD2APIWrapper {
 		return returnedNodes;
 
 	}
+	public void deleteObject(String objectId,boolean deleteChildren) throws CanNotDeleteFolderException
+	{
+		ModelPort port = getPort();
+		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
+		// Validate user credentials
+		CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
+		checkLoginRequest.setContext(context);
+		CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
+		if (!checkLoginResponse.isResult())
+			System.out.println("login failed");
+		Attribute deepFolders = new Attribute();
+		deepFolders.setName("deepFolders");
+		deepFolders.setType(0);   // DF_BOOLEAN DfType: see AttributeUtils in JavaDoc
+		deepFolders.setValue(deleteChildren ? "true": "false");
 
+		// "version" Attribute
+		Attribute version = new Attribute();
+		version.setName("version");
+		version.setType(1);     // DF_INTEGER
+		version.setValue("2");  // ALL_VERSIONS
+		
+		
+		// Create DestroyRequest
+		DestroyRequest destroyRequest = new DestroyRequest();
+		destroyRequest.setContext(context);
+		destroyRequest.setId(objectId);
+
+		// add attributes to request
+		List<Attribute> attributes = destroyRequest.getAttributes(); 
+		attributes.add(deepFolders);
+		attributes.add(version);
+		DestroyResponse destroyResponse = port.destroy(destroyRequest);
+		Destroyresult destroyResult = destroyResponse.getDestroyresult();
+		if(!destroyResult.isIsDestroyed())
+		{
+			throw new CanNotDeleteFolderException(objectId);
+		}
+			
+	}
 	public byte[] getDocumentContent(String documentId) {
 
 		try {
@@ -200,7 +242,7 @@ public class DCD2APIWrapper {
 		context.setWebAppURL(host);
 		return context;
 	}
-
+	
 	private HttpHeaders createHeaders(String username, String password) {
 		return new HttpHeaders() {
 			private static final long serialVersionUID = -3310695110391522574L;
