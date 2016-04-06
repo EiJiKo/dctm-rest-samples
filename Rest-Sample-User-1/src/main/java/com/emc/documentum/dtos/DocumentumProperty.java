@@ -15,40 +15,41 @@ public class DocumentumProperty {
 
 	private Cardinality cardinality;
 
-	public DocumentumProperty(String localName, String displayName, Object value , Cardinality cardinality){
+	public DocumentumProperty(String localName, String displayName, Object value, Cardinality cardinality) {
 		this();
 		this.localName = localName;
 		this.displayName = displayName;
 		this.value = value;
 		this.cardinality = cardinality;
 	}
-	
-	public DocumentumProperty(String localName, String displayName, Object value ){
+
+	public DocumentumProperty(String localName, Object value, String displayName) {
 		this();
 		this.localName = localName;
 		this.displayName = displayName;
 		this.value = value;
 	}
-	
-	public DocumentumProperty(String localName, Object value , Cardinality cardinality){
+
+	public DocumentumProperty(String localName, Object value, Cardinality cardinality) {
 		this();
 		this.localName = localName;
 		this.displayName = localName;
 		this.value = value;
 		this.cardinality = cardinality;
 	}
-	
-	public DocumentumProperty(String localName, Object value){
+
+	public DocumentumProperty(String localName, Object value) {
 		this();
 		this.localName = localName;
 		this.displayName = localName;
 		this.value = value;
 	}
-	
-	public DocumentumProperty(){
+
+	public DocumentumProperty() {
 		this.cardinality = Cardinality.Single;
 		value = null;
 	}
+
 	public String getLocalName() {
 		return localName;
 	}
