@@ -84,11 +84,12 @@ public class DocumentumIntegrationController {
 	@RequestMapping(value = "delete/object/id/{objectId}", method = { RequestMethod.DELETE })
 	public void deleteObject(@PathVariable(value = "api") String api, @PathVariable(value = "objectId") String objectId,
 			@RequestParam(name = "pageNumber", defaultValue = "false") boolean deleteChildren)
-			throws CabinetNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException {
+			throws CabinetNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException, CanNotDeleteFolderException {
 		try {
 			(delegateProvider.getDelegate(api)).deleteObject(objectId, deleteChildren);
 		} catch (CanNotDeleteFolderException e) {
 			e.printStackTrace();
+			throw e;
 		}
 		return;
 
