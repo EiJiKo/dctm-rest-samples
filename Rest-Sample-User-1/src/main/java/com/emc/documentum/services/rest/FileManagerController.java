@@ -166,7 +166,7 @@ public class FileManagerController extends BaseController{
 	
 
 	@RequestMapping(value= "/api/document/content/{documentId}" , produces = "application/pdf")
-	public byte[] getDocumentContentById(@PathVariable(value="documentId")String documentId , @RequestHeader(value="API_BASE", defaultValue="Rest") String delegateKey) throws DocumentNotFoundException{
+	public byte[] getDocumentContentById(@PathVariable(value="documentId")String documentId , @RequestHeader(value="API_BASE" , defaultValue="Rest") String delegateKey) throws DocumentNotFoundException{
 		try {
 			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
 		} catch (DelegateNotFoundException e1) {
@@ -247,8 +247,6 @@ public class FileManagerController extends BaseController{
 	{
 		JSONArray children = new JSONArray() ;
 		for (int i = 0 ; i < objects.size() ; i++) {
-			if(objects.get(i).getType().endsWith("Document") || objects.get(i).getType().endsWith("Object") || objects.get(i).getType().endsWith("Folder") || 
-					objects.get(i).getType().endsWith("document") || objects.get(i).getType().endsWith("object") || objects.get(i).getType().endsWith("folder")){
 				String type = "";
 				if(objects.get(i).getType().endsWith("Document") || objects.get(i).getType().endsWith("document")){
 					type = "file";
@@ -257,6 +255,10 @@ public class FileManagerController extends BaseController{
 				}
 				else if (objects.get(i).getType().endsWith("Object") || objects.get(i).getType().endsWith("object")){
 					continue ;
+				}
+				else
+				{
+					type = "file";
 				}
 				
 				JSONObject json = new JSONObject() ;					
@@ -271,7 +273,6 @@ public class FileManagerController extends BaseController{
 				json.put("date", "2016-03-05 04:33:27") ;
 				json.put("type", type) ;
 				children.add(json) ;
-			}
 		}
 		JSONObject returnJson = new JSONObject() ;
 		returnJson.put("result", children) ;
