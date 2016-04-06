@@ -97,6 +97,7 @@ public class DocumentumObject implements Serializable {
 
 	public DocumentumObject() {
 		properties = new HashMap<>();
+		docProperties = new ArrayList<>();
 		setType("Object");
 	}
 
