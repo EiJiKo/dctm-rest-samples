@@ -1,7 +1,6 @@
 package com.emc.documentum.transformation;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
@@ -12,10 +11,12 @@ import org.apache.chemistry.opencmis.client.api.Property;
 import org.apache.chemistry.opencmis.client.api.QueryResult;
 import org.apache.chemistry.opencmis.commons.data.PropertyData;
 
+import com.emc.documentum.constants.Cardinality;
 import com.emc.documentum.dtos.DocumentumCabinet;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
+import com.emc.documentum.dtos.DocumentumProperty;
 
 public class CMISTransformation {
 
@@ -80,10 +81,11 @@ public class CMISTransformation {
 		DocumentumDocument document = new DocumentumDocument();
 		document.setId(cmisDocument.getId());
 		document.setName(cmisDocument.getName());
-		//TODO Get Path breaks after using CMIS Build 7.3.0.8
-//		if (cmisDocument.getPaths() != null && cmisDocument.getPaths().size() > 0) {
-//			document.setPath(cmisDocument.getPaths().get(0));
-//		}
+		// TODO Get Path breaks after using CMIS Build 7.3.0.8
+		// if (cmisDocument.getPaths() != null && cmisDocument.getPaths().size()
+		// > 0) {
+		// document.setPath(cmisDocument.getPaths().get(0));
+		// }
 		Property<Boolean> checkedOut = cmisDocument.getProperty("cmis:isVersionSeriesCheckedOut");
 		if (checkedOut != null && checkedOut.getFirstValue() != false) {
 			document.setCheckedOut(checkedOut.getValue());
@@ -104,23 +106,26 @@ public class CMISTransformation {
 	}
 
 	private static void mapPropertyList(DocumentumObject object, List<Property<?>> properties) {
-		HashMap<String, Object> objectProperties = object.getProperties();
+		ArrayList<DocumentumProperty> objectProperties = object.getDocProperties();
 		for (Property<?> property : properties) {
 			if (property.getLocalName().startsWith("i_")) {
 				continue;
 			}
 
-			objectProperties.put(property.getId(), property.getValue());
+			objectProperties.add(new DocumentumProperty(property.getId(), property.getValue(),
+					(property.isMultiValued() ? Cardinality.List : Cardinality.Single)));
 		}
 	}
 
 	private static void mapPropertyDataList(DocumentumObject documentumObject, List<PropertyData<?>> properties) {
-		HashMap<String, Object> objectProperties = documentumObject.getProperties();
+		ArrayList<DocumentumProperty> objectProperties = documentumObject.getDocProperties();
 		for (PropertyData<?> property : properties) {
 			if (property.getLocalName().startsWith("i_")) {
 				continue;
 			}
-			objectProperties.put(property.getId(), property.getValues());
+
+			objectProperties.add(new DocumentumProperty(property.getId(), property.getValues(),
+					(property.getValues().size() > 0 ? Cardinality.Single : Cardinality.List)));
 		}
 
 	}
