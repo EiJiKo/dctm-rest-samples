@@ -13,14 +13,22 @@ public class TranslationUtility {
 	@Autowired
 	private TranslationMapWrapper mapWrapper;
 
-	public DocumentumObject transelateToRepo(DocumentumObject object, String Repo ,boolean directionFromRepo) {
-
+	public DocumentumObject translateFromRepo(DocumentumObject object, String Repo)
+	{
+		return translate(object, Repo, true) ;
+	}
+	
+	public DocumentumObject translateToRepo(DocumentumObject object, String Repo)
+	{
+		return translate(object, Repo, false) ;
+	}
+	
+	
+	private DocumentumObject translate(DocumentumObject object, String Repo ,boolean directionFromRepo) {
 		ArrayList<DocumentumProperty> objectProperties = object.getDocProperties();
 		String translation = null;
 		for (int i = 0; i < objectProperties.size(); i++) {
 
-			//Properties prop = mapWrapper.propertiesMap.get(Repo+".mapping.properties") ;
-			//translation = prop.getProperty(objectProperties.get(i).getLocalName());
 			BidiMap<String,String> map = mapWrapper.bidiMapsMap.get(Repo+".mapping.properties") ;
 			if(directionFromRepo)
 			{
@@ -29,6 +37,11 @@ public class TranslationUtility {
 			else
 			{
 				translation = map.getKey(objectProperties.get(i).getLocalName());
+			}
+
+			if(translation == null )
+			{
+				translation = objectProperties.get(i).getLocalName() ;
 			}
 			
 			// set the translation in object ...
