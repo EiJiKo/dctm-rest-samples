@@ -1,13 +1,18 @@
 package com.emc.documentum.transformation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
+import com.emc.documentum.constants.Cardinality;
 import com.emc.documentum.constants.DocumentumProperties;
 import com.emc.documentum.dtos.DocumentumCabinet;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
+import com.emc.documentum.dtos.DocumentumProperty;
 import com.emc.documentum.model.JsonEntry;
 import com.emc.documentum.model.JsonEntry.Content;
 import com.emc.documentum.model.JsonLink;
@@ -27,10 +32,27 @@ public class CoreRestTransformation {
 
 	}
 
+	private static void setDocumentumObjectProperties(DocumentumObject documentumObject, HashMap<String,Object> properties){
+		ArrayList<DocumentumProperty> objectProperties = documentumObject.getDocProperties();
+		Iterator<Entry<String, Object>> it = properties.entrySet().iterator();
+	    while (it.hasNext()) {
+	    	HashMap.Entry<String, Object> pair = it.next();
+	    	Object value = pair.getValue();
+	    	Cardinality cardinality = Cardinality.Single;
+	    	if(value instanceof List<?>){
+	    		cardinality = Cardinality.List;
+	    	}
+	    	if(pair.getKey().equals("r_version_label")){
+	    		System.out.println("Here");
+	    	}
+	    	objectProperties.add(new DocumentumProperty(pair.getKey(), pair.getValue(),cardinality));
+	    }
+	}
+	
 	private static void mapJsonObjectProperties(JsonObject jsonObject, DocumentumObject documentumObject) {
 		documentumObject.setId((String) jsonObject.getPropertyByName(DocumentumProperties.OBJECT_ID));
 		documentumObject.setName((String) jsonObject.getPropertyByName("object_name"));
-		documentumObject.setProperties(jsonObject.getProperties());
+		setDocumentumObjectProperties(documentumObject, jsonObject.getProperties());
 		documentumObject.setDefinition(jsonObject.getDefinition());
 		Object lockUser = jsonObject.getPropertyByName("r_lock_owner");
 		if (lockUser != null && lockUser.toString().length() > 0) {
@@ -56,44 +78,6 @@ public class CoreRestTransformation {
 		mapJsonObjectProperties(jsonObject, documentumObject);
 		return documentumObject;
 
-	}
-
-	@Deprecated
-	public static DocumentumFolder convertCoreRSFolder(JsonObject restFolder) {
-		DocumentumFolder folder = new DocumentumFolder();
-		folder.setId((String) restFolder.getPropertyByName(DocumentumProperties.OBJECT_ID));
-		ArrayList<?> folderPath = (ArrayList<?>) restFolder.getPropertyByName(DocumentumProperties.FOLDER_PATH);
-		if (folderPath != null & folderPath.size() > 0) {
-			folder.setPath(folderPath.get(0).toString());
-		}
-		folder.setName(restFolder.getName());
-		folder.setProperties(restFolder.getProperties());
-		folder.setDefinition(restFolder.getDefinition());
-		folder.setType(restFolder.getType());
-		return folder;
-	}
-
-	@Deprecated
-	public static DocumentumObject convertCoreRSObject(JsonObject restObject) {
-		DocumentumObject object = new DocumentumObject();
-		mapJsonObjectProperties(restObject, object);
-		return object;
-	}
-
-	@Deprecated
-	public static DocumentumDocument convertCoreRSDocument(JsonObject restDocument) {
-		DocumentumDocument document = new DocumentumDocument();
-		document.setId((String) restDocument.getPropertyByName(DocumentumProperties.OBJECT_ID));
-		document.setName(restDocument.getName());
-		document.setProperties(restDocument.getProperties());
-		document.setDefinition(restDocument.getDefinition());
-		document.setType(restDocument.getType());
-		Object lockUser = restDocument.getPropertyByName("r_lock_owner");
-		if (lockUser != null && lockUser.toString().length() > 0) {
-			document.setCheckedOut(true);
-			document.setLockUser(lockUser.toString());
-		}
-		return document;
 	}
 
 	private static DocumentumObject createDocumentumObject(String baseTypeId) {
@@ -173,7 +157,7 @@ public class CoreRestTransformation {
 
 		documentumObject.setId(content.getPropertyByName("r_object_id").toString());
 		documentumObject.setName(content.getPropertyByName("object_name").toString());
-		documentumObject.setProperties(content.getProperties());
+		setDocumentumObjectProperties(documentumObject, content.getProperties());
 		Object lockUser = content.getPropertyByName("r_lock_owner");
 		if (lockUser != null && lockUser.toString().length() > 0) {
 			documentumObject.setCheckedOut(true);

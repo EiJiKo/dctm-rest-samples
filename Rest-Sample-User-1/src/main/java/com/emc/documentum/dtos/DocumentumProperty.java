@@ -9,8 +9,7 @@ public class DocumentumProperty {
 
 	private String displayName;
 
-	@JsonFormat(with = { JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY,
-			JsonFormat.Feature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED })
+	@JsonFormat(with = { JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY})
 	private Object value;
 
 	private Cardinality cardinality;
