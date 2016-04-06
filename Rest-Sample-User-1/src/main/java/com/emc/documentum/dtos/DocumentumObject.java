@@ -1,6 +1,7 @@
 package com.emc.documentum.dtos;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -21,9 +22,12 @@ public class DocumentumObject implements Serializable {
 	private String definition;
 	private Boolean isCheckedOut = false;
 	private String lockUser;
+	@Deprecated
 	@JsonFormat(with = { JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY,
 			JsonFormat.Feature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED })
 	private HashMap<String, Object> properties;
+	
+	private ArrayList<DocumentumProperty> docProperties;
 
 	public String getName() {
 		return name;
@@ -65,10 +69,12 @@ public class DocumentumObject implements Serializable {
 		this.isCheckedOut = isCheckedOut;
 	}
 
+	@Deprecated
 	public HashMap<String, Object> getProperties() {
 		return properties;
 	}
 
+	@Deprecated
 	public void setProperties(HashMap<String, Object> properties) {
 		this.properties = properties;
 	}
@@ -105,6 +111,14 @@ public class DocumentumObject implements Serializable {
 		this();
 		this.id = id;
 		this.name = name;
+	}
+
+	public ArrayList<DocumentumProperty> getDocProperties() {
+		return docProperties;
+	}
+
+	public void setDocProperties(ArrayList<DocumentumProperty> docProperties) {
+		this.docProperties = docProperties;
 	}
 
 }
