@@ -1,5 +1,6 @@
 package com.emc.documentum.dtos;
 
+import com.emc.documentum.constants.Cardinality;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class DocumentumProperty {
@@ -12,8 +13,42 @@ public class DocumentumProperty {
 			JsonFormat.Feature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED })
 	private Object value;
 
-	private String cardinality;
+	private Cardinality cardinality;
 
+	public DocumentumProperty(String localName, String displayName, Object value , Cardinality cardinality){
+		this();
+		this.localName = localName;
+		this.displayName = displayName;
+		this.value = value;
+		this.cardinality = cardinality;
+	}
+	
+	public DocumentumProperty(String localName, String displayName, Object value ){
+		this();
+		this.localName = localName;
+		this.displayName = displayName;
+		this.value = value;
+	}
+	
+	public DocumentumProperty(String localName, Object value , Cardinality cardinality){
+		this();
+		this.localName = localName;
+		this.displayName = localName;
+		this.value = value;
+		this.cardinality = cardinality;
+	}
+	
+	public DocumentumProperty(String localName, Object value){
+		this();
+		this.localName = localName;
+		this.displayName = localName;
+		this.value = value;
+	}
+	
+	public DocumentumProperty(){
+		this.cardinality = Cardinality.Single;
+		value = null;
+	}
 	public String getLocalName() {
 		return localName;
 	}
@@ -38,11 +73,11 @@ public class DocumentumProperty {
 		this.value = value;
 	}
 
-	public String getCardinality() {
+	public Cardinality getCardinality() {
 		return cardinality;
 	}
 
-	public void setCardinality(String cardinality) {
+	public void setCardinality(Cardinality cardinality) {
 		this.cardinality = cardinality;
 	}
 
