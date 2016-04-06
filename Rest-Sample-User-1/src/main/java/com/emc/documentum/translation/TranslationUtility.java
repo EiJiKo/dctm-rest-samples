@@ -2,46 +2,38 @@ package com.emc.documentum.translation;
 
 import java.util.ArrayList;
 
+import org.apache.commons.collections4.BidiMap;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 
-import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.dtos.DocumentumProperty;
 
-//TODO should add here the properties files containing the translation values
-@PropertySource("classpath:rest.properties")
 public class TranslationUtility {
 
 	@Autowired
-	private Environment env;
+	private TranslationMapWrapper mapWrapper;
 
-	public DocumentumObject transelateToRepo(DocumentumObject object, String Repo) {
+	public DocumentumObject transelateToRepo(DocumentumObject object, String Repo ,boolean directionFromRepo) {
 
-	}
-
-	public DocumentumObject transelateFromRepo(DocumentumObject object, String Repo) {
-		// TODO doing translation
 		ArrayList<DocumentumProperty> objectProperties = object.getDocProperties();
 		String translation = null;
 		for (int i = 0; i < objectProperties.size(); i++) {
-			translation = env.getProperty(Repo + ":" + objectProperties.get(i).getLocalName());
+
+			//Properties prop = mapWrapper.propertiesMap.get(Repo+".mapping.properties") ;
+			//translation = prop.getProperty(objectProperties.get(i).getLocalName());
+			BidiMap<String,String> map = mapWrapper.bidiMapsMap.get(Repo+".mapping.properties") ;
+			if(directionFromRepo)
+			{
+				translation = map.get(objectProperties.get(i).getLocalName());
+			}
+			else
+			{
+				translation = map.getKey(objectProperties.get(i).getLocalName());
+			}
+			
 			// set the translation in object ...
+			objectProperties.get(i).setLocalName(translation);
 		}
 		return object;
 	}
-
-	public DocumentumDocument transelateToRepo(DocumentumDocument object, String Repo) {
-		// TODO do translation
-
-		return object;
-	}
-
-	public DocumentumDocument transelateFromRepo(DocumentumDocument object, String Repo) {
-		// TODO do translation
-
-		return object;
-	}
-
 }
