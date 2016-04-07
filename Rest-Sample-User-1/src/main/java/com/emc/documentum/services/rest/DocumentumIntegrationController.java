@@ -103,11 +103,11 @@ public class DocumentumIntegrationController {
 	}
 
 	@ApiOperation(value = "Get Object By Id", notes = "Get an object by its object_id")
-	@RequestMapping(value = "get/cabinet/id/{cabinetId}", method = { RequestMethod.GET })
+	@RequestMapping(value = "get/object/id/{objectId}", method = { RequestMethod.GET })
 	public DocumentumObject getCabinetById(@PathVariable(value = "api") String api,
-			@PathVariable(value = "cabinetId") String cabinetId)
+			@PathVariable(value = "objectId") String objectId)
 			throws CabinetNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException {
-		return (delegateProvider.getDelegate(api)).getObjectById(cabinetId);
+		return (delegateProvider.getDelegate(api)).getObjectById(objectId);
 
 	}
 
