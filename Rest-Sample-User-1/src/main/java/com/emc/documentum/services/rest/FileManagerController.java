@@ -11,17 +11,19 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.emc.documentum.delegate.provider.DelegateProvider;
 import com.emc.documentum.delegates.DocumentumDelegate;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
+import com.emc.documentum.dtos.DocumentumProperty;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DelegateNotFoundException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
-import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.model.JsonObject;
+
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
@@ -265,7 +267,14 @@ public class FileManagerController extends BaseController{
 				json.put("id", objects.get(i).getId()) ;
 				json.put("name", objects.get(i).getName()) ;
 				json.put("rights", "drwxr-xr-x") ;
-				json.put("size", objects.get(i).getProperties().get("r_content_size")) ;										
+				ArrayList<DocumentumProperty> properties = objects.get(i).getProperties();
+				for(DocumentumProperty property : properties){
+					if(property.getLocalName().equals("r_content_size")){
+						json.put("size", property.getValue()) ;
+						break;
+					}
+				}
+														
 				//parsing date
 				//StringBuffer dateString = new StringBuffer((String) folders.get(i).getProperties().get("r_creation_date")) ;
 				//dateString.replace(10, 11, " ").delete(18,28) ;
