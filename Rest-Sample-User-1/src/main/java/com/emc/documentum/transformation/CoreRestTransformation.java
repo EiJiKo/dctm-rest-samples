@@ -42,9 +42,6 @@ public class CoreRestTransformation {
 	    	if(value instanceof List<?>){
 	    		cardinality = Cardinality.List;
 	    	}
-	    	if(pair.getKey().equals("r_version_label")){
-	    		System.out.println("Here");
-	    	}
 	    	objectProperties.add(new DocumentumProperty(pair.getKey(), pair.getValue(),cardinality));
 	    }
 	}
