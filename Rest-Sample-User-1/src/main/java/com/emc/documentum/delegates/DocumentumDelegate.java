@@ -1,6 +1,7 @@
 package com.emc.documentum.delegates;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.emc.documentum.dtos.DocumentCreation;
 import com.emc.documentum.dtos.DocumentumDocument;
@@ -65,4 +66,6 @@ public interface DocumentumDelegate {
 	void deleteObject(String objectId , boolean deleteChildrenOrNot) throws CanNotDeleteFolderException ;
 	
 	DocumentumObject cancelCheckout(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException;
+
+	DocumentumFolder createFolder(String parentId, HashMap<String, Object> properties) throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException, DocumentumException;;
 }

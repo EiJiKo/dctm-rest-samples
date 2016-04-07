@@ -1,6 +1,7 @@
 package com.emc.documentum.delegates;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
@@ -157,6 +158,13 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	public DocumentumDocument cancelCheckout(String documentId)
 			throws RepositoryNotAvailableException, DocumentCheckoutException {
 		return CMISTransformation.convertCMISDocument(dcAPI.cancelCheckout(documentId));
+	}
+
+	@Override
+	public DocumentumFolder createFolder(String parentId, HashMap<String, Object> properties)
+			throws FolderCreationException, RepositoryNotAvailableException, DocumentumException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

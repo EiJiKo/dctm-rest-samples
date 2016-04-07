@@ -1,7 +1,7 @@
 package com.emc.documentum.delegates;
 
 import java.util.ArrayList;
-
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -129,6 +129,12 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 			throws RepositoryNotAvailableException, DocumentCheckoutException {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public DocumentumFolder createFolder(String parentId, HashMap<String, Object> properties)
+			throws FolderCreationException, RepositoryNotAvailableException, DocumentumException {
+		throw new UnsupportedOperationException("Method not Implemented");
 	}
 
 }
