@@ -9,6 +9,7 @@ import com.emc.d2fs.models.item.Item;
 import com.emc.d2fs.models.node.Node;
 import com.emc.documentum.constants.Cardinality;
 import com.emc.documentum.dtos.DocumentumCabinet;
+import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.dtos.DocumentumProperty;
@@ -23,7 +24,7 @@ public class DCD2Transformation {
 			object = (T) createDocumentumObject(d2Object.getType());
 			object.setId(d2Object.getId());
 			object.setName(d2Object.getLabel());
-			object.setType(d2Object.getType());
+//			object.setType(d2Object.getType());
 			if(d2Object.getAttributes()!=null)
 			{
 				object.setProperties(convertD2PropertiesList(d2Object.getAttributes()));
@@ -35,7 +36,7 @@ public class DCD2Transformation {
 		T object = null ;
 			object = (T) createDocumentumObject(d2Object.getType());
 			object.setId(d2Object.getId());
-			object.setType(d2Object.getType());
+//			object.setType(d2Object.getType());
 			if(d2Object.getAttributes()!=null)
 			{
 				object.setProperties(convertD2PropertiesList(d2Object.getAttributes()));
@@ -70,7 +71,8 @@ public class DCD2Transformation {
 			documentumObject = new DocumentumCabinet();
 			break;
 		case "dm_document":
-
+			documentumObject = new DocumentumDocument();
+			break;
 		default:
 			documentumObject = new DocumentumObject();
 		}
