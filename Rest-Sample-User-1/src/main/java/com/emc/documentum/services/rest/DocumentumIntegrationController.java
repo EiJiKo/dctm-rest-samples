@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.emc.documentum.delegate.provider.APIDelegateProvider;
+import com.emc.documentum.delegates.DocumentumDelegate;
 import com.emc.documentum.dtos.DocumentCreation;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
@@ -24,6 +25,7 @@ import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
+import com.emc.documentum.translation.TranslationUtility;
 
 @RestController
 @RequestMapping("{api}/services")
@@ -34,6 +36,9 @@ public class DocumentumIntegrationController {
 
 	@Autowired
 	APIDelegateProvider delegateProvider;
+
+	@Autowired
+	TranslationUtility translationUtility;
 
 	@RequestMapping("/folder/create/{cabinetName}/{folderName}")
 	public DocumentumFolder createFolder(@PathVariable(value = "api") String api,
@@ -65,7 +70,10 @@ public class DocumentumIntegrationController {
 			throws DelegateNotFoundException, DocumentumException {
 
 		try {
-			return (delegateProvider.getDelegate(api)).getCabinetByName(cabinetName);
+			DocumentumDelegate delegate = delegateProvider.getDelegate(api);
+			DocumentumFolder cabinet = delegate.getCabinetByName(cabinetName);
+			translationUtility.translateFromRepo(cabinet, api);
+			return cabinet;
 		} catch (CabinetNotFoundException e) {
 			// TODO Auto-generated catch block
 			throw e;
@@ -84,7 +92,8 @@ public class DocumentumIntegrationController {
 	@RequestMapping(value = "delete/object/id/{objectId}", method = { RequestMethod.DELETE })
 	public void deleteObject(@PathVariable(value = "api") String api, @PathVariable(value = "objectId") String objectId,
 			@RequestParam(name = "pageNumber", defaultValue = "false") boolean deleteChildren)
-			throws CabinetNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException, CanNotDeleteFolderException {
+			throws CabinetNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException,
+			CanNotDeleteFolderException {
 		try {
 			(delegateProvider.getDelegate(api)).deleteObject(objectId, deleteChildren);
 		} catch (CanNotDeleteFolderException e) {
