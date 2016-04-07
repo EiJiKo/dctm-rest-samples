@@ -1,36 +1,49 @@
 package com.emc.documentum.wrappers;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.chemistry.opencmis.client.api.CmisObject;
-import org.codehaus.groovy.classgen.GeneratorContext;
+import org.apache.commons.io.IOUtils;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import com.emc.d2fs.constants.D2fsConstants;
 import com.emc.d2fs.models.attribute.Attribute;
 import com.emc.d2fs.models.context.Context;
-import com.emc.d2fs.models.node.Node;
+import com.emc.d2fs.models.destroyresult.Destroyresult;
+import com.emc.d2fs.models.item.Item;
 import com.emc.d2fs.models.repository.Repository;
 import com.emc.d2fs.schemas.models.ModelPort;
 import com.emc.d2fs.schemas.models.ModelPortService;
 import com.emc.d2fs.services.browser_service.GetBrowserContentRequest;
-import com.emc.d2fs.services.browser_service.GetBrowserContentResponse;
+import com.emc.d2fs.services.content_service.GetDQLContentRequest;
+import com.emc.d2fs.services.content_service.GetDQLContentResponse;
+import com.emc.d2fs.services.destroy_service.DestroyRequest;
+import com.emc.d2fs.services.destroy_service.DestroyResponse;
+import com.emc.d2fs.services.download_service.GetDispatchDownloadUrlRequest;
+import com.emc.d2fs.services.download_service.GetDispatchDownloadUrlResponse;
 import com.emc.d2fs.services.property_service.GetPropertiesRequest;
 import com.emc.d2fs.services.property_service.GetPropertiesResponse;
 import com.emc.d2fs.services.repository_service.CheckLoginRequest;
 import com.emc.d2fs.services.repository_service.CheckLoginResponse;
 import com.emc.d2fs.services.repository_service.GetRepositoryRequest;
 import com.emc.documentum.constants.DCD2Constants;
+import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
-import com.emc.documentum.model.JsonEntry;
-import com.emc.documentum.model.JsonFeed;
 
 @Component("DCD2APIWrapper")
 public class DCD2APIWrapper {
@@ -40,24 +53,23 @@ public class DCD2APIWrapper {
 	DCD2Constants data;
 
 	ModelPortService service = new ModelPortService();
-
-	public List<Node> getAllCabinets() throws RepositoryNotAvailableException {
+	ModelPort port;
+	public List<Item> getAllCabinets() throws RepositoryNotAvailableException {
 		try {
 			ModelPort port = getPort();
-			Context context = getContext(port,data.repo,data.username,data.password,data.UID);
-			// Validate user credentials
+			Context context = getContext(port, data.repo, data.username, data.password, data.UID);
+			// Validate user credential
 			CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
 			checkLoginRequest.setContext(context);
 			CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
 			if (!checkLoginResponse.isResult())
 				System.out.println("login failed");
-			GetBrowserContentRequest request = new GetBrowserContentRequest();
-			request.setContext(context);
-			request.setContentTypeName(D2fsConstants.REPOSITORY);
-			request.setId(data.repo);
-			GetBrowserContentResponse response = port.getBrowserContent(request);
-			if (response.getNode() != null)
-				return response.getNode().getNodes();
+			GetDQLContentRequest r = new GetDQLContentRequest();
+			r.setContext(context);
+			r.setDql("select * from dm_cabinet");
+			GetDQLContentResponse response = port.getDQLContent(r);
+			if (response.getDocItems() != null && response.getDocItems().getItems() != null)
+				return response.getDocItems().getItems();
 			throw new RepositoryNotAvailableException(data.repo);
 
 		} catch (Exception e) {
@@ -65,26 +77,8 @@ public class DCD2APIWrapper {
 		}
 
 	}
-	
-	public List<Node> getChildren(String folderId) {
-		ModelPort port = getPort();
-		Context context = getContext(port,data.repo,data.username,data.password,data.UID);
-		// Validate user credentials
-		CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
-		checkLoginRequest.setContext(context);
-		CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
-		if (!checkLoginResponse.isResult())
-			System.out.println("login failed");
-		GetBrowserContentRequest request = new GetBrowserContentRequest();
-		request.setContext(context);
-		request.setContentTypeName(D2fsConstants.FOLDER);
-		request.setId(folderId);
-		GetBrowserContentResponse response = port.getBrowserContent(request);
-		return response.getNode().getNodes();
 
-	}
-
-	public List<Node> getChildren(String folderId, int pageNumber, int pageSize) {
+	public List<Item> getChildren(String folderId) {
 		ModelPort port = getPort();
 		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
 		// Validate user credentials
@@ -94,16 +88,123 @@ public class DCD2APIWrapper {
 		if (!checkLoginResponse.isResult())
 			System.out.println("login failed");
 		GetBrowserContentRequest request = new GetBrowserContentRequest();
-		request.setContext(context);
-		request.setContentTypeName(D2fsConstants.FOLDER);
-		request.setId(folderId);
-		GetBrowserContentResponse response = port.getBrowserContent(request);
-		List<Node> returnedNodes = new ArrayList<>();
-		List<Node> responseNodes = response.getNode().getNodes();
+		GetDQLContentRequest r = new GetDQLContentRequest();
+		r.setContext(context);
+		r.setDql("select *,r_lock_owner from dm_folder where  FOLDER(ID('" + folderId
+				+ "')) union select *,r_lock_owner from dm_document where FOLDER(ID('" + folderId + "'))");
+		GetDQLContentResponse response = port.getDQLContent(r);
+		return response.getDocItems().getItems();
+
+	}
+
+	public List<Item> getChildren(String folderId, int pageNumber, int pageSize) {
+		ModelPort port = getPort();
+		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
+		// Validate user credentials
+		CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
+		checkLoginRequest.setContext(context);
+		CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
+		if (!checkLoginResponse.isResult())
+			System.out.println("login failed");
+		GetBrowserContentRequest request = new GetBrowserContentRequest();
+		GetDQLContentRequest r = new GetDQLContentRequest();
+		r.setContext(context);
+		r.setDql("select *,r_lock_owner from dm_folder where  FOLDER(ID('" + folderId
+				+ "')) union select *,r_lock_owner from dm_document where FOLDER(ID('" + folderId + "'))");
+		GetDQLContentResponse response = port.getDQLContent(r);
+		List<Item> returnedNodes = new ArrayList<>();
+		List<Item> responseNodes = response.getDocItems().getItems();
 		for (int i = ((pageNumber - 1) * pageSize); i < responseNodes.size() && i < (pageNumber * pageSize); i++)
 			returnedNodes.add(responseNodes.get(i));
 		return returnedNodes;
 
+	}
+	public void deleteObject(String objectId,boolean deleteChildren) throws CanNotDeleteFolderException
+	{
+		ModelPort port = getPort();
+		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
+		// Validate user credentials
+		CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
+		checkLoginRequest.setContext(context);
+		CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
+		if (!checkLoginResponse.isResult())
+			System.out.println("login failed");
+		Attribute deepFolders = new Attribute();
+		deepFolders.setName("deepFolders");
+		deepFolders.setType(0);   // DF_BOOLEAN DfType: see AttributeUtils in JavaDoc
+		deepFolders.setValue(deleteChildren ? "true": "false");
+
+		// "version" Attribute
+		Attribute version = new Attribute();
+		version.setName("version");
+		version.setType(1);     // DF_INTEGER
+		version.setValue("2");  // ALL_VERSIONS
+		
+		
+		// Create DestroyRequest
+		DestroyRequest destroyRequest = new DestroyRequest();
+		destroyRequest.setContext(context);
+		destroyRequest.setId(objectId);
+
+		// add attributes to request
+		List<Attribute> attributes = destroyRequest.getAttributes(); 
+		attributes.add(deepFolders);
+		attributes.add(version);
+		DestroyResponse destroyResponse = port.destroy(destroyRequest);
+		Destroyresult destroyResult = destroyResponse.getDestroyresult();
+		if(!destroyResult.isIsDestroyed())
+		{
+			throw new CanNotDeleteFolderException(objectId);
+		}
+			
+	}
+	public byte[] getDocumentContent(String documentId) {
+
+		try {
+			ModelPort port = getPort();
+			Context context = getContext(port, data.repo, data.username, data.password, data.UID);
+			CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
+			checkLoginRequest.setContext(context);
+			CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
+			if (!checkLoginResponse.isResult())
+				System.out.println("login failed");
+			GetDispatchDownloadUrlRequest request = new GetDispatchDownloadUrlRequest();
+			request.setId(documentId);
+			request.setContext(context);
+			request.setCurrent(true);
+			request.setViewNative(true);
+			GetDispatchDownloadUrlResponse response = port.getDispatchDownloadUrl(request);
+			RestTemplate restTemplate = new RestTemplate();
+			HttpHeaders httpHeader = createHeaders(data.username, data.password);
+			List<MediaType> mediaTypes = new ArrayList<MediaType>();
+			mediaTypes.add(MediaType.ALL);
+			httpHeader.setAccept(mediaTypes);
+			ResponseEntity<Resource> resource;
+			resource = restTemplate.exchange(URLDecoder.decode(response.getUrl(), "UTF-8"), HttpMethod.GET,
+					new HttpEntity<Object>(httpHeader), Resource.class);
+
+			if (resource == null) {
+
+			} else {
+
+				System.out.println("Response Headers: " + resource.getHeaders());
+				System.out.println("Response status: " + resource.getStatusCode());
+			}
+
+			if (resource.getBody() != null) {
+				InputStream docStream = resource.getBody().getInputStream();
+				byte[] fileContent = IOUtils.toByteArray(docStream);
+				byte[] encodedfile = Base64.encodeBase64(fileContent);
+				return encodedfile;
+
+			} else {
+				log.fine(documentId + " has empty content");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			log.log(Level.SEVERE, "IO Exception while reading dm_document input stream", e);
+		}
+		return new byte[0];
 	}
 
 	public List<Attribute> getObjectProperties(String objectId) {
@@ -118,7 +219,9 @@ public class DCD2APIWrapper {
 	}
 
 	private ModelPort getPort() {
-		return service.getModelPortSoap11();
+		if(port == null)
+			port = service.getModelPortSoap11();
+		return port;
 	}
 
 	private Context getContext(ModelPort port, String repoId, String username, String password, String UID) {
@@ -138,5 +241,18 @@ public class DCD2APIWrapper {
 		context.setUid(UID);
 		context.setWebAppURL(host);
 		return context;
+	}
+	
+	private HttpHeaders createHeaders(String username, String password) {
+		return new HttpHeaders() {
+			private static final long serialVersionUID = -3310695110391522574L;
+
+			{
+				String usernameAndPassword = username + ":" + password;
+				String authHeader = "Basic " + new String(Base64.encodeBase64(usernameAndPassword.getBytes()));
+				set("Authorization", authHeader);
+			}
+		};
+
 	}
 }

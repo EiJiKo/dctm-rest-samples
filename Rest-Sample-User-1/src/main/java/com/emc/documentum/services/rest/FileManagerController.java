@@ -11,16 +11,19 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.emc.documentum.delegate.provider.DelegateProvider;
 import com.emc.documentum.delegates.DocumentumDelegate;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
+import com.emc.documentum.dtos.DocumentumProperty;
+import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DelegateNotFoundException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
-import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.model.JsonObject;
+
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
@@ -133,15 +136,18 @@ public class FileManagerController extends BaseController{
 			{
 				for(int i = 0 ; i < items.size() ; i++)
 				{
-					dcDelegate.deleteFolder((String) items.get(i));
+					//TODO should get this boolean from UI
+					dcDelegate.deleteObject((String) items.get(i) , false);
 				}
 			}
-			//dcDelegate.deleteFolder(folderId);
 			return commonResponse();
 			
 		} catch (DelegateNotFoundException | ParseException e1) {
 			e1.printStackTrace();
 			return errorResponse(delegateKey + " Repository is not available ") ;
+		} catch (CanNotDeleteFolderException e) {
+			e.printStackTrace();
+			return errorResponse(e.getMessage()) ;
 		}
 	}
 
@@ -162,7 +168,7 @@ public class FileManagerController extends BaseController{
 	
 
 	@RequestMapping(value= "/api/document/content/{documentId}" , produces = "application/pdf")
-	public byte[] getDocumentContentById(@PathVariable(value="documentId")String documentId , @RequestHeader(value="API_BASE", defaultValue="Rest") String delegateKey) throws DocumentNotFoundException{
+	public byte[] getDocumentContentById(@PathVariable(value="documentId")String documentId , @RequestHeader(value="API_BASE" , defaultValue="Rest") String delegateKey) throws DocumentNotFoundException{
 		try {
 			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
 		} catch (DelegateNotFoundException e1) {
@@ -243,8 +249,6 @@ public class FileManagerController extends BaseController{
 	{
 		JSONArray children = new JSONArray() ;
 		for (int i = 0 ; i < objects.size() ; i++) {
-			if(objects.get(i).getType().endsWith("Document") || objects.get(i).getType().endsWith("Object") || objects.get(i).getType().endsWith("Folder") || 
-					objects.get(i).getType().endsWith("document") || objects.get(i).getType().endsWith("object") || objects.get(i).getType().endsWith("folder")){
 				String type = "";
 				if(objects.get(i).getType().endsWith("Document") || objects.get(i).getType().endsWith("document")){
 					type = "file";
@@ -254,12 +258,23 @@ public class FileManagerController extends BaseController{
 				else if (objects.get(i).getType().endsWith("Object") || objects.get(i).getType().endsWith("object")){
 					continue ;
 				}
+				else
+				{
+					type = "file";
+				}
 				
 				JSONObject json = new JSONObject() ;					
 				json.put("id", objects.get(i).getId()) ;
 				json.put("name", objects.get(i).getName()) ;
 				json.put("rights", "drwxr-xr-x") ;
-				json.put("size", objects.get(i).getProperties().get("r_content_size")) ;										
+				ArrayList<DocumentumProperty> properties = objects.get(i).getProperties();
+				for(DocumentumProperty property : properties){
+					if(property.getLocalName().equals("r_content_size")){
+						json.put("size", property.getValue()) ;
+						break;
+					}
+				}
+														
 				//parsing date
 				//StringBuffer dateString = new StringBuffer((String) folders.get(i).getProperties().get("r_creation_date")) ;
 				//dateString.replace(10, 11, " ").delete(18,28) ;
@@ -267,7 +282,6 @@ public class FileManagerController extends BaseController{
 				json.put("date", "2016-03-05 04:33:27") ;
 				json.put("type", type) ;
 				children.add(json) ;
-			}
 		}
 		JSONObject returnJson = new JSONObject() ;
 		returnJson.put("result", children) ;

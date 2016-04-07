@@ -25,13 +25,16 @@ import org.apache.chemistry.opencmis.commons.data.AllowableActions;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.enums.Action;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
+import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConnectionException;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisConstraintException;
 import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.emc.documentum.constants.DCCMISConstants;
+import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
@@ -158,11 +161,21 @@ public class DCCMISAPIWrapper {
 	}
 	
 
-	public void deleteFolder(Folder folder) throws RepositoryNotAvailableException {
-		try {
-			folder.delete();			
+	public void deleteObject(CmisObject object , boolean deleteChildrenOrNot) throws RepositoryNotAvailableException, CanNotDeleteFolderException {
+		try {			
+			if(object.getType().getLocalName().equals("dm_folder") && deleteChildrenOrNot)
+			{
+				((Folder) object).deleteTree(true, UnfileObject.DELETE, true);
+			}
+			else
+			{
+				object.delete();
+			}
 		} catch (CmisConnectionException e) {
 			throw new RepositoryNotAvailableException("CMIS", e);
+		}catch (CmisConstraintException ex){
+			ex.printStackTrace();
+			throw new CanNotDeleteFolderException(object.getId()) ;
 		}
 	}
 

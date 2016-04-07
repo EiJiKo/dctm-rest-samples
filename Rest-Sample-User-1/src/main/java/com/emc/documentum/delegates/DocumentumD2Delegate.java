@@ -11,6 +11,7 @@ import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
+import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
@@ -54,20 +55,19 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 
 	@Override
 	public ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException {
-		return DCD2Transformation.convertD2ObjectList(dcAPI.getAllCabinets(), DocumentumFolder.class);
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getAllCabinets());
 	
 	}
 
 	@Override
 	public ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException {
-		return DCD2Transformation.convertD2ObjectList(dcAPI.getChildren(folderId), DocumentumObject.class);
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getChildren(folderId));
 	}
 
 	@Override
 	public byte[] getDocumentContentById(String documentId)
 			throws DocumentNotFoundException, RepositoryNotAvailableException {
-		// TODO Auto-generated method stub
-		return null;
+			return dcAPI.getDocumentContent(documentId);
 	}
 
 	@Override
@@ -110,19 +110,19 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	public ArrayList<DocumentumObject> getChildren(String folderId, int pageNumber, int pageSize)
 			throws RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
-		return DCD2Transformation.convertD2ObjectList(dcAPI.getChildren(folderId,pageNumber,pageSize), DocumentumObject.class);
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getChildren(folderId,pageNumber,pageSize));
 	}
 
 	@Override
 	public ArrayList<DocumentumFolder> getAllCabinets(int pageNumber, int pageSize)
 			throws RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
-		return DCD2Transformation.convertD2ObjectList(dcAPI.getAllCabinets(),DocumentumFolder.class);
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getAllCabinets());
 	}
 
 	@Override
-	public void deleteFolder(String folderId) {
-		// TODO Auto-generated method stub
+	public void deleteObject(String objectId , boolean deleteChildrenOrNot) throws CanNotDeleteFolderException {
+		dcAPI.deleteObject(objectId, deleteChildrenOrNot);
 	}
 	
 	public DocumentumDocument cancelCheckout(String documentId)

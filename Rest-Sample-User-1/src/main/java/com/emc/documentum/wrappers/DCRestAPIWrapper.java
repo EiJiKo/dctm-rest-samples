@@ -2,6 +2,7 @@ package com.emc.documentum.wrappers;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -30,6 +32,7 @@ import com.emc.documentum.constants.DCCoreRestConstants;
 import com.emc.documentum.constants.LinkRelation;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
+import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckinException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentCreationException;
@@ -109,14 +112,19 @@ public class DCRestAPIWrapper {
 
 	}
 
-
-	public JsonObject deleteFolder(String folderId) {
-		RestTemplate restTemplate = new RestTemplate();
-		String folderUri = data.fetchFolderURI + "/" + folderId;
-		ResponseEntity<JsonObject> response;
-		response = restTemplate.exchange(folderUri, HttpMethod.DELETE, new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonObject.class);
-		return response.getBody();
-
+	public JsonObject deleteObject(String objectId , boolean deleteChildrenOrNot) throws CanNotDeleteFolderException {
+		try {
+			RestTemplate restTemplate = new RestTemplate();
+			String objectUri = data.fetchObjectUri + "/" + objectId;
+			URI targetUrl = UriComponentsBuilder.fromUriString(objectUri).queryParam("del-non-empty", deleteChildrenOrNot).build().toUri();
+			
+			ResponseEntity<JsonObject> response;
+			response = restTemplate.exchange(targetUrl, HttpMethod.DELETE,new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonObject.class);
+			return response.getBody();
+		} catch (HttpClientErrorException ex){
+			ex.printStackTrace();
+			throw new CanNotDeleteFolderException(objectId) ;
+		}
 	}
 
 	/*
@@ -315,13 +323,11 @@ public class DCRestAPIWrapper {
 		return getContentBase64Content(content);
 	}
 
-	public JsonObject checkOutDocument(String documentId) throws DocumentCheckoutException
-	{
+	public JsonObject checkOutDocument(String documentId) throws DocumentCheckoutException {
 
 		JsonObject document = getObjectById(documentId);
 		JsonLink link = getLink(document.getLinks(), LinkRelation.checkOutDocument);
-		if(link == null)
-		{
+		if (link == null) {
 			throw new DocumentCheckoutException("document already checked out");
 		}
 		RestTemplate restTemplate = new RestTemplate();
@@ -402,17 +408,14 @@ public class DCRestAPIWrapper {
 
 	}
 
-	
-	public JsonObject checkinDocument(String documentId,byte[]content) throws DocumentCheckinException
-	{
+	public JsonObject checkinDocument(String documentId, byte[] content) throws DocumentCheckinException {
 
 		JsonObject document = getObjectById(documentId);
 		JsonLink link = getLink(document.getLinks(), LinkRelation.checkInNextMajor);
-		if(link == null)
-		{
+		if (link == null) {
 			throw new DocumentCheckinException("document is not checked out");
 		}
-			
+
 		Properties creationProperties = new Properties();
 		HashMap<String, Object> properties = new HashMap<>();
 		// properties.put("object_name", "Sample Name");
@@ -432,13 +435,10 @@ public class DCRestAPIWrapper {
 		return response.getBody();
 	}
 
-	
-	public JsonObject cancelCheckout(String documentId) throws DocumentCheckoutException
-	{
+	public JsonObject cancelCheckout(String documentId) throws DocumentCheckoutException {
 		JsonObject document = getObjectById(documentId);
 		JsonLink link = getLink(document.getLinks(), LinkRelation.cancelCheckout);
-		if(link == null)
-		{
+		if (link == null) {
 			throw new DocumentCheckoutException("document is not Checked out");
 		}
 		RestTemplate restTemplate = new RestTemplate();
@@ -446,15 +446,16 @@ public class DCRestAPIWrapper {
 		mediaTypes.add(MediaType.ALL);
 		HttpHeaders httpHeader = createHeaders(data.username, data.password);
 		httpHeader.setAccept(mediaTypes);
-		restTemplate.exchange(link.getHref(), HttpMethod.DELETE,
-				new HttpEntity<Object>(httpHeader), JsonObject.class);
+		restTemplate.exchange(link.getHref(), HttpMethod.DELETE, new HttpEntity<Object>(httpHeader), JsonObject.class);
 		return getObjectById(documentId);
 	}
-	
-	public ArrayList<DocumentumFolder> getPaginatedResult(String folderId , int startIndex , int pageSize) {
-		//TODO check count first and check it against page size		
-		String query = String.format("select * from dm_folder where folder(id('%s')) ENABLE(RETURN_RANGE 1 1 'r_creation_date ASC' ) ", folderId);
-		ResponseEntity<JsonFeed> response = executeDQL(query) ;
+
+	public ArrayList<DocumentumFolder> getPaginatedResult(String folderId, int startIndex, int pageSize) {
+		// TODO check count first and check it against page size
+		String query = String.format(
+				"select * from dm_folder where folder(id('%s')) ENABLE(RETURN_RANGE 1 1 'r_creation_date ASC' ) ",
+				folderId);
+		ResponseEntity<JsonFeed> response = executeDQL(query);
 		JsonFeed feed = response.getBody();
 
 		ArrayList<DocumentumFolder> folders = new ArrayList<>();

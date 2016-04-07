@@ -14,6 +14,7 @@ import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
+import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
@@ -54,7 +55,6 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			throw e;
 		} catch (InstantiationException | IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new DocumentumException("Unable to instantiate class of type " + DocumentumDocument.class.getName());
 		}
@@ -81,7 +81,6 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			throw e;
 		} catch (InstantiationException | IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new DocumentumException("Unable to instantiate class of type " + DocumentumDocument.class.getName());
 		}
@@ -109,7 +108,6 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			throw e;
 		} catch (InstantiationException | IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new DocumentumException("Unable to instantiate class of type " + DocumentumDocument.class.getName());
 		}
@@ -133,7 +131,6 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			throw e;
 		} catch (InstantiationException | IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new DocumentumException("Unable to instantiate class of type " + DocumentumCabinet.class.getName());
 		}
@@ -168,6 +165,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	@Override
 	public ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException {
 		try {
+			//TODO cabinets pagination should be set on front end ...
 			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getAllCabinets(1, 20), DocumentumFolder.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
@@ -232,7 +230,6 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		}catch (InstantiationException | IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new DocumentumException("Unable to instantiate class of type " + DocumentumDocument.class.getName());
 		}
@@ -247,7 +244,6 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		} catch (InstantiationException | IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new DocumentumException("Unable to instantiate class of type " + DocumentumDocument.class.getName());
 		}
@@ -296,8 +292,8 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public void deleteFolder(String folderId) {
-		dcAPI.deleteFolder(folderId) ;
+	public void deleteObject(String objectId , boolean deleteChildrenOrNot) throws CanNotDeleteFolderException {
+		dcAPI.deleteObject(objectId , deleteChildrenOrNot) ;
 	}
 	
 	@Override
