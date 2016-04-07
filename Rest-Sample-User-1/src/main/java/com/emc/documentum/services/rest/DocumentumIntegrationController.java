@@ -27,6 +27,8 @@ import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.translation.TranslationUtility;
 
+import io.swagger.annotations.ApiOperation;
+
 @RestController
 @RequestMapping("{api}/services")
 @CrossOrigin("*")
@@ -40,7 +42,8 @@ public class DocumentumIntegrationController {
 	@Autowired
 	TranslationUtility translationUtility;
 
-	@RequestMapping("/folder/create/{cabinetName}/{folderName}")
+	@ApiOperation(value = "Create Folder", notes = "Create a folder named {folderName} under the cabinet named {cabinetName}")
+	@RequestMapping(value = "/folder/create/{cabinetName}/{folderName}", method = RequestMethod.POST)
 	public DocumentumFolder createFolder(@PathVariable(value = "api") String api,
 			@PathVariable(value = "cabinetName") String cabinetName,
 			@PathVariable(value = "folderName") String folderName)
@@ -53,6 +56,7 @@ public class DocumentumIntegrationController {
 		}
 	}
 
+	@ApiOperation(value = "Create Document", notes = "Create a Contentless document")
 	@RequestMapping(value = "/document/create", method = RequestMethod.POST)
 	public DocumentumDocument createDocument(@PathVariable(value = "api") String api,
 			@RequestBody DocumentCreation docCreation) throws DocumentumException, DelegateNotFoundException {
@@ -64,7 +68,8 @@ public class DocumentumIntegrationController {
 		}
 	}
 
-	@RequestMapping(value = "get/cabinet/name/{cabinetName}")
+	@ApiOperation(value = "Get Cabinet By Name", notes = "Get a Cabinet by its name")
+	@RequestMapping(value = "get/cabinet/name/{cabinetName}", method = RequestMethod.GET)
 	public DocumentumFolder getCabinetByName(@PathVariable(value = "api") String api,
 			@PathVariable(value = "cabinetName") String cabinetName)
 			throws DelegateNotFoundException, DocumentumException {
@@ -81,6 +86,7 @@ public class DocumentumIntegrationController {
 
 	}
 
+	@ApiOperation(value = "Get Object By Id", notes = "Get an object by its object_id")
 	@RequestMapping(value = "get/cabinet/id/{cabinetId}", method = { RequestMethod.GET })
 	public DocumentumObject getCabinetById(@PathVariable(value = "api") String api,
 			@PathVariable(value = "cabinetId") String cabinetId)
@@ -89,9 +95,10 @@ public class DocumentumIntegrationController {
 
 	}
 
+	@ApiOperation(value = "Delete Object", notes = "Deletes an object using identified by its {objectId}, if the object is a folder with children the deleteChildren query paramater must be set to true")
 	@RequestMapping(value = "delete/object/id/{objectId}", method = { RequestMethod.DELETE })
 	public void deleteObject(@PathVariable(value = "api") String api, @PathVariable(value = "objectId") String objectId,
-			@RequestParam(name = "pageNumber", defaultValue = "false") boolean deleteChildren)
+			@RequestParam(name = "deleteChildren", defaultValue = "false") boolean deleteChildren)
 			throws CabinetNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException,
 			CanNotDeleteFolderException {
 		try {
@@ -104,7 +111,8 @@ public class DocumentumIntegrationController {
 
 	}
 
-	@RequestMapping(value = "get/cabinets")
+	@ApiOperation(value = "Get Cabinets", notes = "Get all Cabinets")
+	@RequestMapping(value = "get/cabinets", method = RequestMethod.GET)
 	public ArrayList<DocumentumFolder> getAllCabinets(@PathVariable(value = "api") String api,
 			@RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
 			@RequestParam(name = "pageSize", defaultValue = "20") int pageSize)
@@ -112,7 +120,8 @@ public class DocumentumIntegrationController {
 		return (delegateProvider.getDelegate(api)).getAllCabinets(pageNumber, pageSize);
 	}
 
-	@RequestMapping(value = "get/{folderId}/children")
+	@ApiOperation(value = "Get Children of a Folder", notes = "Get children of a folder/cabinet identified by its {folderId}")
+	@RequestMapping(value = "get/{folderId}/children", method = RequestMethod.GET)
 	public ArrayList<DocumentumObject> getChildren(@PathVariable(value = "api") String api,
 			@PathVariable(value = "folderId") String folderId,
 			@RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
@@ -121,14 +130,16 @@ public class DocumentumIntegrationController {
 		return (delegateProvider.getDelegate(api)).getChildren(folderId, pageNumber, pageSize);
 	}
 
-	@RequestMapping(value = "get/document/content/id/{documentId}")
+	@ApiOperation(value = "Get Document Content", notes = "Gets the document content as a Base64 encoded string")
+	@RequestMapping(value = "get/document/content/id/{documentId}", method = RequestMethod.GET)
 	public Object getDocumentContentById(@PathVariable(value = "api") String api,
 			@PathVariable(value = "documentId") String documentId)
 			throws DocumentNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException {
 		return (delegateProvider.getDelegate(api)).getDocumentContentById(documentId);
 	}
 
-	@RequestMapping(value = "document/search/{name}")
+	@ApiOperation(value = "Search document by name", notes = "Search document by its name")
+	@RequestMapping(value = "document/search/{name}", method = RequestMethod.GET)
 	public ArrayList<DocumentumObject> searchDocumentByName(@PathVariable(value = "api") String api,
 			@PathVariable(value = "name") String name)
 			throws RepositoryNotAvailableException, DelegateNotFoundException {
@@ -136,22 +147,25 @@ public class DocumentumIntegrationController {
 		return (delegateProvider.getDelegate(api)).getDocumentByName(name);
 	}
 
-	@RequestMapping(value = "get/document/checkout/id/{documentId}")
-	public DocumentumDocument checkoutDocuement(@PathVariable(value = "api") String api,
+	@ApiOperation(value = "Checkout Document", notes = "Checkout a specific document")
+	@RequestMapping(value = "get/document/checkout/id/{documentId}", method = RequestMethod.POST)
+	public DocumentumDocument checkoutDocument(@PathVariable(value = "api") String api,
 			@PathVariable(value = "documentId") String documentId)
 			throws DelegateNotFoundException, DocumentumException {
 		log.entering("checkout document ", documentId);
 		return (delegateProvider.getDelegate(api)).checkoutDocument(documentId);
 	}
 
+	@ApiOperation(value = "Checkin Document", notes = "Check in a document using the provided Base64 encoded stream")
 	@RequestMapping(value = "get/document/checkin/id/{documentId}", method = RequestMethod.POST)
-	public DocumentumDocument checkinDocuement(@PathVariable(value = "api") String api,
+	public DocumentumDocument checkinDocument(@PathVariable(value = "api") String api,
 			@PathVariable(value = "documentId") String documentId, @RequestBody byte[] content)
 			throws DelegateNotFoundException, DocumentumException {
 		log.entering("checkin document ", documentId);
 		return (delegateProvider.getDelegate(api)).checkinDocument(documentId, content);
 	}
 
+	@ApiOperation(value = "Cancel Document Checkout", notes = "Cancels the Checkout of this specific document")
 	@RequestMapping(value = "get/document/cancelCheckout/id/{documentId}", method = RequestMethod.GET)
 	public DocumentumObject cancelCheckout(@PathVariable(value = "api") String api,
 			@PathVariable(value = "documentId") String documentId)
