@@ -1,6 +1,7 @@
 package com.emc.documentum.services.rest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,14 +43,29 @@ public class DocumentumIntegrationController {
 	@Autowired
 	TranslationUtility translationUtility;
 
-	@ApiOperation(value = "Create Folder", notes = "Create a folder named {folderName} under the cabinet named {cabinetName}")
-	@RequestMapping(value = "/folder/create/{cabinetName}/{folderName}", method = RequestMethod.POST)
-	public DocumentumFolder createFolder(@PathVariable(value = "api") String api,
-			@PathVariable(value = "cabinetName") String cabinetName,
+	@ApiOperation(value = "Create Folder", notes = "Create a folder named {folderName} under the folder/cabinet identified using {parentId}")
+	@RequestMapping(value = "/folder/create/{parentId}/{folderName}", method = RequestMethod.POST)
+	public DocumentumFolder createFolderUsingParentId(@PathVariable(value = "api") String api,
+			@PathVariable(value = "parentId") String parentId,
 			@PathVariable(value = "folderName") String folderName)
 			throws DocumentumException, DelegateNotFoundException {
 		try {
-			return delegateProvider.getDelegate(api).createFolder(cabinetName, folderName);
+			return delegateProvider.getDelegate(api).createFolderByParentId(parentId, folderName);
+		} catch (DocumentumException e) {
+			// TODO Customize Error Handling
+			throw e;
+		}
+	}
+	
+	
+	@ApiOperation(value = "Create Folder under a parent", notes = "Create a folder under a parent identifed by {parentId}",hidden=true)
+	@RequestMapping(value = "/folder/create/{parentId}", method = RequestMethod.POST)
+	public DocumentumFolder createFolder(@PathVariable(value = "api") String api,
+			@PathVariable(value = "parentId") String parentId,
+			@RequestBody HashMap<String, Object> properties)
+			throws DocumentumException, DelegateNotFoundException {
+		try {
+			return delegateProvider.getDelegate(api).createFolder(parentId, properties);
 		} catch (DocumentumException e) {
 			// TODO Customize Error Handling
 			throw e;
@@ -166,7 +182,7 @@ public class DocumentumIntegrationController {
 	}
 
 	@ApiOperation(value = "Cancel Document Checkout", notes = "Cancels the Checkout of this specific document")
-	@RequestMapping(value = "get/document/cancelCheckout/id/{documentId}", method = RequestMethod.GET)
+	@RequestMapping(value = "get/document/cancelCheckout/id/{documentId}", method = RequestMethod.POST)
 	public DocumentumObject cancelCheckout(@PathVariable(value = "api") String api,
 			@PathVariable(value = "documentId") String documentId)
 			throws RepositoryNotAvailableException, DocumentCheckoutException, DelegateNotFoundException {

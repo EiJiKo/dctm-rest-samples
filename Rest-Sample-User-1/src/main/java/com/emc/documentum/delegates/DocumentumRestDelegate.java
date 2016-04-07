@@ -1,6 +1,7 @@
 package com.emc.documentum.delegates;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,9 +69,9 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	 * String, java.lang.String)
 	 */
 	@Override
-	public DocumentumFolder createFolderByParentId(String ParentId, String folderName) throws DocumentumException {
+	public DocumentumFolder createFolderByParentId(String parentId, String folderName) throws DocumentumException {
 		log.entering(DocumentumRestDelegate.class.getSimpleName(), "CreateFolder");
-		JsonObject parent = dcAPI.getObjectById(ParentId);
+		JsonObject parent = dcAPI.getObjectById(parentId);
 		JsonObject folder;
 		try {
 			folder = dcAPI.createFolder(parent, folderName);
@@ -303,6 +304,12 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		}
+	}
+
+	@Override
+	public DocumentumFolder createFolder(String parentId, HashMap<String, Object> properties)
+			throws FolderCreationException, RepositoryNotAvailableException, DocumentumException {
+		throw new UnsupportedOperationException();
 	}
 
 }
