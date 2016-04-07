@@ -106,7 +106,7 @@ public class CMISTransformation {
 	}
 
 	private static void mapPropertyList(DocumentumObject object, List<Property<?>> properties) {
-		ArrayList<DocumentumProperty> objectProperties = object.getDocProperties();
+		ArrayList<DocumentumProperty> objectProperties = object.getProperties();
 		for (Property<?> property : properties) {
 			if (property.getLocalName().startsWith("i_")) {
 				continue;
@@ -118,7 +118,7 @@ public class CMISTransformation {
 	}
 
 	private static void mapPropertyDataList(DocumentumObject documentumObject, List<PropertyData<?>> properties) {
-		ArrayList<DocumentumProperty> objectProperties = documentumObject.getDocProperties();
+		ArrayList<DocumentumProperty> objectProperties = documentumObject.getProperties();
 		for (PropertyData<?> property : properties) {
 			if (property.getLocalName().startsWith("i_")) {
 				continue;

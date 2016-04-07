@@ -61,7 +61,7 @@ public class TranslationUtility {
 
 	private DocumentumObject translate(DocumentumObject object, String repositoryIdentifier,
 			boolean directionFromRepo) {
-		ArrayList<DocumentumProperty> objectProperties = object.getDocProperties();
+		ArrayList<DocumentumProperty> objectProperties = object.getProperties();
 		String translation = null;
 		for (int i = 0; i < objectProperties.size(); i++) {
 

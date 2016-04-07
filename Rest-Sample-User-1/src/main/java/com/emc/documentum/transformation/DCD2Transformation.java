@@ -26,7 +26,7 @@ public class DCD2Transformation {
 			object.setType(d2Object.getType());
 			if(d2Object.getAttributes()!=null)
 			{
-				object.setDocProperties(convertD2PropertiesList(d2Object.getAttributes()));
+				object.setProperties(convertD2PropertiesList(d2Object.getAttributes()));
 			}
 		return object;
 	}
@@ -38,13 +38,13 @@ public class DCD2Transformation {
 			object.setType(d2Object.getType());
 			if(d2Object.getAttributes()!=null)
 			{
-				object.setDocProperties(convertD2PropertiesList(d2Object.getAttributes()));
-				for(DocumentumProperty property:object.getDocProperties())
+				object.setProperties(convertD2PropertiesList(d2Object.getAttributes()));
+				for(DocumentumProperty property:object.getProperties())
 				{
 					if(property.getLocalName().equals("object_name"))
 					{
 						object.setName(property.getValue()+"");
-						object.getDocProperties().remove(property);
+						object.getProperties().remove(property);
 						break;
 					}
 				}

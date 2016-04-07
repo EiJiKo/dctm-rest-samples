@@ -33,7 +33,7 @@ public class CoreRestTransformation {
 	}
 
 	private static void setDocumentumObjectProperties(DocumentumObject documentumObject, HashMap<String,Object> properties){
-		ArrayList<DocumentumProperty> objectProperties = documentumObject.getDocProperties();
+		ArrayList<DocumentumProperty> objectProperties = documentumObject.getProperties();
 		Iterator<Entry<String, Object>> it = properties.entrySet().iterator();
 	    while (it.hasNext()) {
 	    	HashMap.Entry<String, Object> pair = it.next();
