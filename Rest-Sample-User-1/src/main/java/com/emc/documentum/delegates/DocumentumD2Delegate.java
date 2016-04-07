@@ -49,8 +49,8 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	@Override
 	public DocumentumObject getObjectById(String cabinetId)
 			throws CabinetNotFoundException, RepositoryNotAvailableException {
-		// TODO Auto-generated method stub
-		return null;
+		return DCD2Transformation.convertD2DocItemObject(dcAPI.getObjectById(cabinetId));
+		
 	}
 
 	@Override
@@ -77,9 +77,10 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	}
 
 	@Override
-	public DocumentumDocument checkoutDocument(String documentId) {
-		// TODO Auto-generated method stub
-		return null;
+	public DocumentumDocument checkoutDocument(String documentId) throws DocumentCheckoutException, RepositoryNotAvailableException {
+		DocumentumDocument document = DCD2Transformation.convertD2DocItemObject(dcAPI.checkoutDocument(documentId));
+		document.setCheckedOut(true);
+		return document;
 	}
 
 	@Override
@@ -117,7 +118,7 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	public ArrayList<DocumentumFolder> getAllCabinets(int pageNumber, int pageSize)
 			throws RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
-		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getAllCabinets());
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getAllCabinets(pageNumber,pageSize));
 	}
 
 	@Override
@@ -127,8 +128,7 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	
 	public DocumentumDocument cancelCheckout(String documentId)
 			throws RepositoryNotAvailableException, DocumentCheckoutException {
-		// TODO Auto-generated method stub
-		return null;
+			return DCD2Transformation.convertD2DocItemObject(dcAPI.cancelCheckout(documentId));
 	}
 
 	@Override

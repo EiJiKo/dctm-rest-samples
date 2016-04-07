@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.xml.ws.soap.SOAPFaultException;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.remoting.soap.SoapFaultException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -30,6 +33,12 @@ import com.emc.d2fs.models.repository.Repository;
 import com.emc.d2fs.schemas.models.ModelPort;
 import com.emc.d2fs.schemas.models.ModelPortService;
 import com.emc.d2fs.services.browser_service.GetBrowserContentRequest;
+import com.emc.d2fs.services.checkout_service.CancelCheckoutRequest;
+import com.emc.d2fs.services.checkout_service.CancelCheckoutResponse;
+import com.emc.d2fs.services.checkout_service.CheckoutRequest;
+import com.emc.d2fs.services.checkout_service.CheckoutResponse;
+import com.emc.d2fs.services.checkout_service.TestCheckoutRequest;
+import com.emc.d2fs.services.checkout_service.TestCheckoutResponse;
 import com.emc.d2fs.services.content_service.GetDQLContentRequest;
 import com.emc.d2fs.services.content_service.GetDQLContentResponse;
 import com.emc.d2fs.services.destroy_service.DestroyRequest;
@@ -42,7 +51,9 @@ import com.emc.d2fs.services.repository_service.CheckLoginRequest;
 import com.emc.d2fs.services.repository_service.CheckLoginResponse;
 import com.emc.d2fs.services.repository_service.GetRepositoryRequest;
 import com.emc.documentum.constants.DCD2Constants;
+import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
+import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 
 @Component("DCD2APIWrapper")
@@ -77,7 +88,61 @@ public class DCD2APIWrapper {
 		}
 
 	}
+	public List<Item> getAllCabinets(int pageNumber,int pageSize) throws RepositoryNotAvailableException {
+		try {
+			ModelPort port = getPort();
+			Context context = getContext(port, data.repo, data.username, data.password, data.UID);
+			// Validate user credential
+			CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
+			checkLoginRequest.setContext(context);
+			CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
+			if (!checkLoginResponse.isResult())
+				System.out.println("login failed");
+			GetDQLContentRequest r = new GetDQLContentRequest();
+			r.setContext(context);
+			r.setDql("select * from dm_cabinet");
+			GetDQLContentResponse response = port.getDQLContent(r);
+			if (response.getDocItems() != null && !response.getDocItems().getItems().isEmpty()){
+			List<Item> returnedNodes =new ArrayList<Item>();
+			List<Item> responseNodes = response.getDocItems().getItems();
+			for (int i = ((pageNumber - 1) * pageSize); i < responseNodes.size() && i < (pageNumber * pageSize); i++)
+				returnedNodes.add(responseNodes.get(i));
+			return returnedNodes;
+			}
+			else
+				throw new RepositoryNotAvailableException(data.repo);
 
+		} catch (Exception e) {
+			throw new RepositoryNotAvailableException(data.repo);
+		}
+
+	}
+	public Item getObjectById(String id) throws RepositoryNotAvailableException
+	{
+		try {
+			ModelPort port = getPort();
+			Context context = getContext(port, data.repo, data.username, data.password, data.UID);
+			// Validate user credential
+			CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
+			checkLoginRequest.setContext(context);
+			CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
+			if (!checkLoginResponse.isResult())
+				System.out.println("login failed");
+			GetDQLContentRequest r = new GetDQLContentRequest();
+			r.setContext(context);
+			r.setDql(String.format("select * from dm_sysobject where r_object_id =  '%s'",
+					id));
+			GetDQLContentResponse response = port.getDQLContent(r);
+			if (response.getDocItems() != null && !response.getDocItems().getItems().isEmpty())
+				return response.getDocItems().getItems().get(0);
+			else
+				throw new CabinetNotFoundException("");
+
+		} catch (Exception e) {
+			throw new RepositoryNotAvailableException(data.repo);
+		}
+
+	}
 	public List<Item> getChildren(String folderId) {
 		ModelPort port = getPort();
 		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
@@ -96,7 +161,66 @@ public class DCD2APIWrapper {
 		return response.getDocItems().getItems();
 
 	}
-
+	public Item checkoutDocument(String documentId) throws DocumentCheckoutException, RepositoryNotAvailableException
+	{
+		ModelPort port = getPort();
+		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
+		// Validate user credentials
+		CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
+		checkLoginRequest.setContext(context);
+		CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
+		if (!checkLoginResponse.isResult())
+			System.out.println("login failed");
+		TestCheckoutRequest checkoutTest = new TestCheckoutRequest();
+		checkoutTest.setContext(context);
+		checkoutTest.setId(documentId);
+		TestCheckoutResponse checkoutTestResponse = port.testCheckout(checkoutTest);
+		String[] testResult =  checkoutTestResponse.getResult().split(" ");
+		if (testResult.length > 1) {
+			String isCheckout = checkoutTestResponse.getResult().split(" ")[1];
+			if (isCheckout.indexOf("true") != -1) {
+				throw new DocumentCheckoutException("document already Checked out.");
+			}
+		}
+		CheckoutRequest request = new CheckoutRequest();
+		request.setContext(context);
+		request.setId(documentId);
+		CheckoutResponse response = port.checkout(request);
+		if(response.isDone())
+		{
+			return getObjectById(documentId);
+		}
+		else
+			throw new DocumentCheckoutException("document check out failed.");
+	}
+	public Item cancelCheckout(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException
+	{
+		try{
+		ModelPort port = getPort();
+		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
+		// Validate user credentials
+		CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
+		checkLoginRequest.setContext(context);
+		CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
+		if (!checkLoginResponse.isResult())
+			System.out.println("login failed");
+		CancelCheckoutRequest r = new CancelCheckoutRequest();
+		r.setContext(context);
+		r.setId(documentId);
+		CancelCheckoutResponse s = port.cancelCheckout(r);
+		if(s.isDone())
+		{
+			return getObjectById(documentId);
+		}
+		else
+		{
+			throw new DocumentCheckoutException("cancel check out failed.");
+		}}
+		catch(SOAPFaultException e)
+		{
+			throw new DocumentCheckoutException("cancel check out failed.");
+		}
+	}
 	public List<Item> getChildren(String folderId, int pageNumber, int pageSize) {
 		ModelPort port = getPort();
 		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
