@@ -22,7 +22,7 @@ public class DCD2Transformation {
 		object = (T) createDocumentumObject(d2Object.getType());
 		object.setId(d2Object.getId());
 		object.setName(d2Object.getLabel());
-		object.setType(d2Object.getType());
+//		object.setType(d2Object.getType());
 
 		return object;
 	}
