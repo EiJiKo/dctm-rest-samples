@@ -1,5 +1,7 @@
 package com.emc.documentum.test;
 
+import java.text.DateFormat;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,9 +59,12 @@ public abstract class IntegrationLayerTests {
 
 	@Test
 	public void testCreateThenDeleteFolder() {
-		String cabinetName = "dmadmin";
-		String folderName = "MySampleCreatedFolder";
-		ResponseEntity<DocumentumFolder> folderCreationResponse = createFolder(cabinetName,folderName);
+		DocumentumFolder [] cabinets = retrieveCabinets();
+		if(cabinets.length == 0 || cabinets == null){
+			Assert.fail("No Cabinets Available");
+		}
+		String folderName = "MySampleCreatedFolder" + (Math.random() * 10000);
+		ResponseEntity<DocumentumFolder> folderCreationResponse = createFolder(cabinets[0].getId(),folderName);
 		Assert.assertTrue("Unable to Create Folder",folderCreationResponse.getStatusCode() == HttpStatus.OK);
 		Assert.assertNotNull("Created Folder Not Equal Null", folderCreationResponse.getBody().getId());
 		logger.info("Created Folder with Id:- " + folderCreationResponse.getBody().getId());
@@ -75,8 +80,8 @@ public abstract class IntegrationLayerTests {
 	}
 
 	private ResponseEntity<DocumentumFolder> createFolder(String cabinetName, String folderName) {
-		ResponseEntity<DocumentumFolder> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port
-				+ "/" + getAPI() + "/services/folder/create/" + cabinetName + "/" + folderName, DocumentumFolder.class);
+		ResponseEntity<DocumentumFolder> entity = new TestRestTemplate().exchange("http://localhost:" + this.port
+				+ "/" + getAPI() + "/services/folder/create/" + cabinetName + "/" + folderName,HttpMethod.POST,null, DocumentumFolder.class);
 		return entity;
 	}
 
