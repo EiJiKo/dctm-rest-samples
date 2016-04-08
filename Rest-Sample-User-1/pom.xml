@@ -6,7 +6,7 @@
 	<groupId>com.emc.documentum.rest</groupId>
 	<artifactId>rest-sample-user</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 
 	<name>Rest-Sample-User-1</name>
 	<description>Demo project for Spring Boot</description>
