@@ -2,6 +2,7 @@ package com.emc.documentum.wrappers;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -9,6 +10,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.ws.soap.SOAPFaultException;
 
 import org.apache.commons.io.IOUtils;
@@ -24,7 +28,12 @@ import org.springframework.remoting.soap.SoapFaultException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import com.emc.d2fs.common.AttributeHelp;
 import com.emc.d2fs.models.attribute.Attribute;
 import com.emc.d2fs.models.context.Context;
 import com.emc.d2fs.models.destroyresult.Destroyresult;
@@ -41,6 +50,8 @@ import com.emc.d2fs.services.checkout_service.TestCheckoutRequest;
 import com.emc.d2fs.services.checkout_service.TestCheckoutResponse;
 import com.emc.d2fs.services.content_service.GetDQLContentRequest;
 import com.emc.d2fs.services.content_service.GetDQLContentResponse;
+import com.emc.d2fs.services.creation_service.CreatePropertiesRequest;
+import com.emc.d2fs.services.creation_service.CreatePropertiesResponse;
 import com.emc.d2fs.services.destroy_service.DestroyRequest;
 import com.emc.d2fs.services.destroy_service.DestroyResponse;
 import com.emc.d2fs.services.download_service.GetDispatchDownloadUrlRequest;
@@ -54,6 +65,7 @@ import com.emc.documentum.constants.DCD2Constants;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
+import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 
 @Component("DCD2APIWrapper")
@@ -160,6 +172,45 @@ public class DCD2APIWrapper {
 		GetDQLContentResponse response = port.getDQLContent(r);
 		return response.getDocItems().getItems();
 
+	}
+	public Item createFolder(String parentId,String folderName) throws FolderCreationException, RepositoryNotAvailableException
+	{
+		try{
+		ModelPort port = getPort();
+		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
+		// Validate user credentials
+		CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
+		checkLoginRequest.setContext(context);
+		CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
+		if (!checkLoginResponse.isResult())
+			System.out.println("login failed");
+		
+		List<Attribute> attributes = new ArrayList<Attribute>();
+		attributes.add(AttributeHelp.createAttribute("object_name",  folderName));
+		attributes.add(AttributeHelp.createAttribute("r_object_type", "dm_folder"));       
+		attributes.add(AttributeHelp.createAttribute("contentId", parentId));
+
+		attributes.add(AttributeHelp.createAttribute("list", AttributeHelp.join( AttributeHelp.getAttributeNames(attributes), AttributeHelp.SEPARATOR_VALUE)));  // D2 wants "list" to be list of attribute names (type specific)   
+
+		CreatePropertiesRequest request = new CreatePropertiesRequest();
+		request.setContext(context);
+		request.getAttributes().addAll(attributes);
+		CreatePropertiesResponse response = port.createProperties(request);
+		DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		Document doc = db.parse(new InputSource(new StringReader(response.getResult())));
+		Element  success = doc.getDocumentElement();
+		String newId = success.getAttribute("new_id");
+		return getObjectById(newId);
+		}catch(SoapFaultException e)
+		{
+			throw new FolderCreationException("Folder with this name already Exists.");
+		} catch (ParserConfigurationException e) {
+			throw new FolderCreationException("Folder Creation Failed");
+		} catch (SAXException e) {
+			throw new FolderCreationException("Folder Creation Failed");
+		} catch (IOException e) {
+			throw new FolderCreationException("Folder Creation Failed");
+		}
 	}
 	public Item checkoutDocument(String documentId) throws DocumentCheckoutException, RepositoryNotAvailableException
 	{

@@ -96,9 +96,8 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	}
 
 	@Override
-	public DocumentumFolder createFolderByParentId(String ParentId, String folderName) throws FolderCreationException {
-		// TODO Auto-generated method stub
-		return null;
+	public DocumentumFolder createFolderByParentId(String ParentId, String folderName) throws FolderCreationException, RepositoryNotAvailableException {
+		return DCD2Transformation.convertD2DocItemObject(dcAPI.createFolder(ParentId, folderName));
 	}
 
 	@Override
