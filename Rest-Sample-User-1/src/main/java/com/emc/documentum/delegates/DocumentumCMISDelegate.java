@@ -50,7 +50,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	@Override
 	public DocumentumDocument createDocument(DocumentCreation docCreation) throws DocumentumException {
 
-		Folder folder = dcAPI.getFolderByPath(docCreation.getFolderPath());
+		Folder folder = (Folder) dcAPI.getObjectById(docCreation.getParentId());
 		return CMISTransformation.convertCMISDocument(dcAPI.createDocument(folder, docCreation.getProperties()));
 	}
 
