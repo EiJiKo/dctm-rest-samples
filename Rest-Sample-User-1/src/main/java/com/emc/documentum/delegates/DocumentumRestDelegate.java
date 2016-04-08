@@ -21,7 +21,6 @@ import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
-import com.emc.documentum.exceptions.FolderNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.model.JsonObject;
 import com.emc.documentum.transformation.CoreRestTransformation;
@@ -100,12 +99,12 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		JsonObject document;
 		JsonObject folder;
 		try {
-			folder = dcAPI.getFolderByPath(docCreation.getFolderPath());
+			folder = dcAPI.getObjectById(docCreation.getParentId());
 			document = dcAPI.createDocument(folder, docCreation.getProperties());
 			return CoreRestTransformation.convertJsonObject(document, DocumentumDocument.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
-		} catch (FolderNotFoundException | DocumentCreationException e) {
+		} catch ( DocumentCreationException e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			throw e;
 		} catch (InstantiationException | IllegalAccessException e) {

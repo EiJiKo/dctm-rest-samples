@@ -4,16 +4,16 @@ import java.util.HashMap;
 
 public class DocumentCreation {
 
-	private String folderPath;
+	private String parentId;
 
 	private HashMap<String, Object> properties;
 
-	public String getFolderPath() {
-		return folderPath;
+	public String getParentId() {
+		return parentId;
 	}
 
-	public void setFolderPath(String folderPath) {
-		this.folderPath = folderPath;
+	public void setParentId(String parentId) {
+		this.parentId = parentId;
 	}
 
 	public HashMap<String, Object> getProperties() {
@@ -26,7 +26,7 @@ public class DocumentCreation {
 
 	@Override
 	public String toString() {
-		return "DocumentCreation [folderPath=" + folderPath + ", properties=" + properties + "]";
+		return "DocumentCreation [parentId=" + parentId + ", properties=" + properties + "]";
 	}
 
 }
