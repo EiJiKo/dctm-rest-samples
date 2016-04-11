@@ -1,6 +1,8 @@
 package com.emc.documentum.services.rest;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,8 @@ import net.minidev.json.parser.ParseException;
 @RestController
 public class FileManagerController extends BaseController{
 
+	Logger log = Logger.getLogger(FileManagerController.class.getName());
+	
 	DocumentumDelegate dcDelegate;
 	
 	@Autowired
@@ -55,24 +59,23 @@ public class FileManagerController extends BaseController{
 			jsonRequest = (JSONObject) JSONValue.parseWithException(jsonString);
 			jsonRequestParams = (JSONObject) jsonRequest.get("params");
 			String folderId = (String) jsonRequestParams.get("folderId");
-			System.out.println(jsonRequestParams);
-			System.out.println("folder id " + folderId);
+			log.info(jsonRequestParams.toJSONString());
+			log.info("folder id " + folderId);
 			
 			if (folderId == null || folderId.equals("")) {
-				System.out.println("-----getting cabinets : " + folderId);				
+				log.info("-----getting cabinets : " + folderId);				
 				ArrayList<DocumentumFolder> cabinets = dcDelegate.getAllCabinets() ;
 				resultJson = transformFoldersToJson(cabinets) ;
 			}
 			else
 			{
-				System.out.println("-----getting children for folder ID : " + folderId);
+				log.info("-----getting children for folder ID : " + folderId);
 				ArrayList<DocumentumObject> folders = dcDelegate.getChildren(folderId);
 				resultJson = transformChildrenFromDocumentumObjects(folders) ;
-				//JsonFeed feed = dcRestDelegate.getPaginatedResult(folderId, 0, 0);
-				//resultJson = transformJsonFeedToJson(feed) ;
 			}
 			return resultJson.toJSONString();
 		} catch (Exception e) {
+			log.log(Level.SEVERE, e.toString(), e );
 			e.printStackTrace();
 		}
 		return null ;
@@ -113,8 +116,8 @@ public class FileManagerController extends BaseController{
 			jsonRequest = (JSONObject) JSONValue.parseWithException(jsonString);
 			String parentFolderId = (String) jsonRequest.get("parentFolderId");
 			String folderName = (String) jsonRequest.get("name");
-			System.out.println(jsonRequest);
-			System.out.println("parent Folder  id " + parentFolderId);
+			log.info(jsonRequest.toJSONString());
+			log.info("parent Folder  id " + parentFolderId);
 			DocumentumFolder folder = dcDelegate.createFolderByParentId(parentFolderId, folderName) ;
 			return commonResponse();
 		} catch (DocumentumException | ParseException e ) {
