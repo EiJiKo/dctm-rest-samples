@@ -12,6 +12,7 @@ import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
+import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.client.api.OperationContext;
 import org.apache.chemistry.opencmis.client.api.QueryResult;
 import org.apache.chemistry.opencmis.client.api.QueryStatement;
@@ -237,7 +238,7 @@ public class DCCMISAPIWrapper {
 		ContentStream contentStream = session.getObjectFactory().createContentStream(
 				document.getContentStream().getFileName(), content.length, document.getContentStream().getMimeType(),
 				new ByteArrayInputStream(content));
-		document.checkIn(false, null, contentStream, "minor version");
-		return document;
+		ObjectId newDocumentId = document.checkIn(false, null, contentStream, "minor version");
+		return (Document) session.getObject(newDocumentId);
 	}
 }
