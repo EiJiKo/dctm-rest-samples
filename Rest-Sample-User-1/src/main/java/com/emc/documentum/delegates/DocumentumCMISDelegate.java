@@ -163,14 +163,22 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	@Override
 	public DocumentumFolder createFolder(String parentId, HashMap<String, Object> properties)
 			throws FolderCreationException, RepositoryNotAvailableException, DocumentumException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public DocumentumDocument createDocument(String parentId, DocumentumDocument docCreation) {
-		// TODO Auto-generated method stub
-		return null;
+	public DocumentumDocument createDocument(String parentId, DocumentumDocument document)
+			throws RepositoryNotAvailableException {
+		Folder folder = (Folder) dcAPI.getObjectById(parentId);
+		HashMap<String, Object> properties = document.getPropertiesAsMap();
+		if (!properties.containsKey("cmis:objectTypeId")) {
+			properties.put("cmis:objectTypeId", "cmis:document");
+		}
+
+		if (!properties.containsKey("cmis:name")) {
+			properties.put("cmis:name", document.getName());
+		}
+		return CMISTransformation.convertCMISDocument(dcAPI.createDocument(folder, properties));
 	}
 
 }

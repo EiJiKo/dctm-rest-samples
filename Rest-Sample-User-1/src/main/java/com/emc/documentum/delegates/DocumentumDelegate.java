@@ -70,5 +70,5 @@ public interface DocumentumDelegate {
 
 	DocumentumFolder createFolder(String parentId, HashMap<String, Object> properties) throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException, DocumentumException;
 
-	DocumentumDocument createDocument(String parentId, DocumentumDocument docCreation) throws DocumentCreationException;
+	DocumentumDocument createDocument(String parentId, DocumentumDocument docCreation) throws DocumentCreationException, RepositoryNotAvailableException;
 }
