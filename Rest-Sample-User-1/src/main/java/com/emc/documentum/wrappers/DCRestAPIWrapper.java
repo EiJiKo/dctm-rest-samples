@@ -71,7 +71,7 @@ public class DCRestAPIWrapper {
 
 	}
 
-	private HttpHeaders createHeaders(String username, String password) {
+	private HttpHeaders createHeaders(final String username, final String password) {
 		return new HttpHeaders() {
 			private static final long serialVersionUID = -3310695110391522574L;
 
