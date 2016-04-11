@@ -2,6 +2,7 @@ package com.emc.documentum.wrappers;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -9,6 +10,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.ws.soap.SOAPFaultException;
 
 import org.apache.commons.io.IOUtils;
@@ -24,7 +28,12 @@ import org.springframework.remoting.soap.SoapFaultException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import com.emc.d2fs.common.AttributeHelp;
 import com.emc.d2fs.models.attribute.Attribute;
 import com.emc.d2fs.models.context.Context;
 import com.emc.d2fs.models.destroyresult.Destroyresult;
@@ -41,6 +50,8 @@ import com.emc.d2fs.services.checkout_service.TestCheckoutRequest;
 import com.emc.d2fs.services.checkout_service.TestCheckoutResponse;
 import com.emc.d2fs.services.content_service.GetDQLContentRequest;
 import com.emc.d2fs.services.content_service.GetDQLContentResponse;
+import com.emc.d2fs.services.creation_service.CreatePropertiesRequest;
+import com.emc.d2fs.services.creation_service.CreatePropertiesResponse;
 import com.emc.d2fs.services.destroy_service.DestroyRequest;
 import com.emc.d2fs.services.destroy_service.DestroyResponse;
 import com.emc.d2fs.services.download_service.GetDispatchDownloadUrlRequest;
@@ -54,6 +65,8 @@ import com.emc.documentum.constants.DCD2Constants;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
+import com.emc.documentum.exceptions.DocumentNotFoundException;
+import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 
 @Component("DCD2APIWrapper")
@@ -65,6 +78,7 @@ public class DCD2APIWrapper {
 
 	ModelPortService service = new ModelPortService();
 	ModelPort port;
+
 	public List<Item> getAllCabinets() throws RepositoryNotAvailableException {
 		try {
 			ModelPort port = getPort();
@@ -88,7 +102,8 @@ public class DCD2APIWrapper {
 		}
 
 	}
-	public List<Item> getAllCabinets(int pageNumber,int pageSize) throws RepositoryNotAvailableException {
+
+	public List<Item> getAllCabinets(int pageNumber, int pageSize) throws RepositoryNotAvailableException {
 		try {
 			ModelPort port = getPort();
 			Context context = getContext(port, data.repo, data.username, data.password, data.UID);
@@ -102,14 +117,14 @@ public class DCD2APIWrapper {
 			r.setContext(context);
 			r.setDql("select * from dm_cabinet");
 			GetDQLContentResponse response = port.getDQLContent(r);
-			if (response.getDocItems() != null && !response.getDocItems().getItems().isEmpty()){
-			List<Item> returnedNodes =new ArrayList<Item>();
-			List<Item> responseNodes = response.getDocItems().getItems();
-			for (int i = ((pageNumber - 1) * pageSize); i < responseNodes.size() && i < (pageNumber * pageSize); i++)
-				returnedNodes.add(responseNodes.get(i));
-			return returnedNodes;
-			}
-			else
+			if (response.getDocItems() != null && !response.getDocItems().getItems().isEmpty()) {
+				List<Item> returnedNodes = new ArrayList<Item>();
+				List<Item> responseNodes = response.getDocItems().getItems();
+				for (int i = ((pageNumber - 1) * pageSize); i < responseNodes.size()
+						&& i < (pageNumber * pageSize); i++)
+					returnedNodes.add(responseNodes.get(i));
+				return returnedNodes;
+			} else
 				throw new RepositoryNotAvailableException(data.repo);
 
 		} catch (Exception e) {
@@ -117,8 +132,8 @@ public class DCD2APIWrapper {
 		}
 
 	}
-	public Item getObjectById(String id) throws RepositoryNotAvailableException
-	{
+
+	public Item getObjectById(String id) throws RepositoryNotAvailableException {
 		try {
 			ModelPort port = getPort();
 			Context context = getContext(port, data.repo, data.username, data.password, data.UID);
@@ -130,8 +145,7 @@ public class DCD2APIWrapper {
 				System.out.println("login failed");
 			GetDQLContentRequest r = new GetDQLContentRequest();
 			r.setContext(context);
-			r.setDql(String.format("select * from dm_sysobject where r_object_id =  '%s'",
-					id));
+			r.setDql(String.format("select * from dm_sysobject where r_object_id =  '%s'", id));
 			GetDQLContentResponse response = port.getDQLContent(r);
 			if (response.getDocItems() != null && !response.getDocItems().getItems().isEmpty())
 				return response.getDocItems().getItems().get(0);
@@ -142,6 +156,33 @@ public class DCD2APIWrapper {
 			throw new RepositoryNotAvailableException(data.repo);
 		}
 
+	}
+	public List<Item> getDocumentByName(String documentName) throws RepositoryNotAvailableException, DocumentNotFoundException
+	{
+		try{
+		ModelPort port = getPort();
+		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
+		// Validate user credential
+		CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
+		checkLoginRequest.setContext(context);
+		CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
+		if (!checkLoginResponse.isResult())
+			System.out.println("login failed");
+		GetDQLContentRequest r = new GetDQLContentRequest();
+		r.setContext(context);
+		r.setDql(String.format("select * from dm_sysObject where lower(object_name) like  lower('%s')", '%' + documentName + '%'));
+		GetDQLContentResponse response = port.getDQLContent(r);
+		if (response.getDocItems() != null && !response.getDocItems().getItems().isEmpty())
+			return response.getDocItems().getItems();
+		else
+			throw new DocumentNotFoundException(documentName);
+
+	} catch(DocumentNotFoundException e)
+		{
+			throw e;
+		}catch (Exception e) {
+		throw new RepositoryNotAvailableException(data.repo);
+	}
 	}
 	public List<Item> getChildren(String folderId) {
 		ModelPort port = getPort();
@@ -159,10 +200,49 @@ public class DCD2APIWrapper {
 				+ "')) union select *,r_lock_owner from dm_document where FOLDER(ID('" + folderId + "'))");
 		GetDQLContentResponse response = port.getDQLContent(r);
 		return response.getDocItems().getItems();
-
 	}
-	public Item checkoutDocument(String documentId) throws DocumentCheckoutException, RepositoryNotAvailableException
-	{
+
+	public Item createFolder(String parentId, String folderName)
+			throws FolderCreationException, RepositoryNotAvailableException {
+		try {
+			ModelPort port = getPort();
+			Context context = getContext(port, data.repo, data.username, data.password, data.UID);
+			// Validate user credentials
+			CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
+			checkLoginRequest.setContext(context);
+			CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
+			if (!checkLoginResponse.isResult())
+				System.out.println("login failed");
+
+			List<Attribute> attributes = new ArrayList<Attribute>();
+			attributes.add(AttributeHelp.createAttribute("object_name", folderName));
+			attributes.add(AttributeHelp.createAttribute("r_object_type", "dm_folder"));
+			attributes.add(AttributeHelp.createAttribute("contentId", parentId));
+
+			attributes.add(AttributeHelp.createAttribute("list",
+					AttributeHelp.join(AttributeHelp.getAttributeNames(attributes), AttributeHelp.SEPARATOR_VALUE)));
+
+			CreatePropertiesRequest request = new CreatePropertiesRequest();
+			request.setContext(context);
+			request.getAttributes().addAll(attributes);
+			CreatePropertiesResponse response = port.createProperties(request);
+			DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			Document doc = db.parse(new InputSource(new StringReader(response.getResult())));
+			Element success = doc.getDocumentElement();
+			String newId = success.getAttribute("new_id");
+			return getObjectById(newId);
+		} catch (SoapFaultException e) {
+			throw new FolderCreationException("Folder with this name already Exists.");
+		} catch (ParserConfigurationException e) {
+			throw new FolderCreationException("Folder Creation Failed");
+		} catch (SAXException e) {
+			throw new FolderCreationException("Folder Creation Failed");
+		} catch (IOException e) {
+			throw new FolderCreationException("Folder Creation Failed");
+		}
+	}
+
+	public Item checkoutDocument(String documentId) throws DocumentCheckoutException, RepositoryNotAvailableException {
 		ModelPort port = getPort();
 		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
 		// Validate user credentials
@@ -175,7 +255,7 @@ public class DCD2APIWrapper {
 		checkoutTest.setContext(context);
 		checkoutTest.setId(documentId);
 		TestCheckoutResponse checkoutTestResponse = port.testCheckout(checkoutTest);
-		String[] testResult =  checkoutTestResponse.getResult().split(" ");
+		String[] testResult = checkoutTestResponse.getResult().split(" ");
 		if (testResult.length > 1) {
 			String isCheckout = checkoutTestResponse.getResult().split(" ")[1];
 			if (isCheckout.indexOf("true") != -1) {
@@ -186,41 +266,36 @@ public class DCD2APIWrapper {
 		request.setContext(context);
 		request.setId(documentId);
 		CheckoutResponse response = port.checkout(request);
-		if(response.isDone())
-		{
+		if (response.isDone()) {
 			return getObjectById(documentId);
-		}
-		else
+		} else
 			throw new DocumentCheckoutException("document check out failed.");
 	}
-	public Item cancelCheckout(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException
-	{
-		try{
-		ModelPort port = getPort();
-		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
-		// Validate user credentials
-		CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
-		checkLoginRequest.setContext(context);
-		CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
-		if (!checkLoginResponse.isResult())
-			System.out.println("login failed");
-		CancelCheckoutRequest r = new CancelCheckoutRequest();
-		r.setContext(context);
-		r.setId(documentId);
-		CancelCheckoutResponse s = port.cancelCheckout(r);
-		if(s.isDone())
-		{
-			return getObjectById(documentId);
-		}
-		else
-		{
-			throw new DocumentCheckoutException("cancel check out failed.");
-		}}
-		catch(SOAPFaultException e)
-		{
+
+	public Item cancelCheckout(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException {
+		try {
+			ModelPort port = getPort();
+			Context context = getContext(port, data.repo, data.username, data.password, data.UID);
+			// Validate user credentials
+			CheckLoginRequest checkLoginRequest = new CheckLoginRequest();
+			checkLoginRequest.setContext(context);
+			CheckLoginResponse checkLoginResponse = port.checkLogin(checkLoginRequest);
+			if (!checkLoginResponse.isResult())
+				System.out.println("login failed");
+			CancelCheckoutRequest r = new CancelCheckoutRequest();
+			r.setContext(context);
+			r.setId(documentId);
+			CancelCheckoutResponse s = port.cancelCheckout(r);
+			if (s.isDone()) {
+				return getObjectById(documentId);
+			} else {
+				throw new DocumentCheckoutException("cancel check out failed.");
+			}
+		} catch (SOAPFaultException e) {
 			throw new DocumentCheckoutException("cancel check out failed.");
 		}
 	}
+
 	public List<Item> getChildren(String folderId, int pageNumber, int pageSize) {
 		ModelPort port = getPort();
 		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
@@ -243,8 +318,8 @@ public class DCD2APIWrapper {
 		return returnedNodes;
 
 	}
-	public void deleteObject(String objectId,boolean deleteChildren) throws CanNotDeleteFolderException
-	{
+
+	public void deleteObject(String objectId, boolean deleteChildren) throws CanNotDeleteFolderException {
 		ModelPort port = getPort();
 		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
 		// Validate user credentials
@@ -255,33 +330,33 @@ public class DCD2APIWrapper {
 			System.out.println("login failed");
 		Attribute deepFolders = new Attribute();
 		deepFolders.setName("deepFolders");
-		deepFolders.setType(0);   // DF_BOOLEAN DfType: see AttributeUtils in JavaDoc
-		deepFolders.setValue(deleteChildren ? "true": "false");
+		deepFolders.setType(0); // DF_BOOLEAN DfType: see AttributeUtils in
+								// JavaDoc
+		deepFolders.setValue(deleteChildren ? "true" : "false");
 
 		// "version" Attribute
 		Attribute version = new Attribute();
 		version.setName("version");
-		version.setType(1);     // DF_INTEGER
-		version.setValue("2");  // ALL_VERSIONS
-		
-		
+		version.setType(1); // DF_INTEGER
+		version.setValue("2"); // ALL_VERSIONS
+
 		// Create DestroyRequest
 		DestroyRequest destroyRequest = new DestroyRequest();
 		destroyRequest.setContext(context);
 		destroyRequest.setId(objectId);
 
 		// add attributes to request
-		List<Attribute> attributes = destroyRequest.getAttributes(); 
+		List<Attribute> attributes = destroyRequest.getAttributes();
 		attributes.add(deepFolders);
 		attributes.add(version);
 		DestroyResponse destroyResponse = port.destroy(destroyRequest);
 		Destroyresult destroyResult = destroyResponse.getDestroyresult();
-		if(!destroyResult.isIsDestroyed())
-		{
+		if (!destroyResult.isIsDestroyed()) {
 			throw new CanNotDeleteFolderException(objectId);
 		}
-			
+
 	}
+
 	public byte[] getDocumentContent(String documentId) {
 
 		try {
@@ -343,7 +418,7 @@ public class DCD2APIWrapper {
 	}
 
 	private ModelPort getPort() {
-		if(port == null)
+		if (port == null)
 			port = service.getModelPortSoap11();
 		return port;
 	}
@@ -366,7 +441,7 @@ public class DCD2APIWrapper {
 		context.setWebAppURL(host);
 		return context;
 	}
-	
+
 	private HttpHeaders createHeaders(String username, String password) {
 		return new HttpHeaders() {
 			private static final long serialVersionUID = -3310695110391522574L;
@@ -378,5 +453,9 @@ public class DCD2APIWrapper {
 			}
 		};
 
+	}
+	public Context getContext()
+	{
+		return getContext(getPort(), data.repo, data.username, data.password, data.UID);
 	}
 }

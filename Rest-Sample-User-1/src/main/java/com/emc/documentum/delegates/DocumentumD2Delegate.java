@@ -49,19 +49,19 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	@Override
 	public DocumentumObject getObjectById(String cabinetId)
 			throws CabinetNotFoundException, RepositoryNotAvailableException {
-		return DCD2Transformation.convertD2DocItemObject(dcAPI.getObjectById(cabinetId));
+		return DCD2Transformation.convertD2DocItemObject(dcAPI.getObjectById(cabinetId),dcAPI.getContext());
 		
 	}
 
 	@Override
 	public ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException {
-		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getAllCabinets());
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getAllCabinets(),dcAPI.getContext());
 	
 	}
 
 	@Override
 	public ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException {
-		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getChildren(folderId));
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getChildren(folderId),dcAPI.getContext());
 	}
 
 	@Override
@@ -71,15 +71,18 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getDocumentByName(String name) throws RepositoryNotAvailableException {
-		// TODO Auto-generated method stub
-		return null;
+	public ArrayList<DocumentumObject> getDocumentByName(String name) throws RepositoryNotAvailableException{
+		try{
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getDocumentByName(name),dcAPI.getContext());
+		}catch(DocumentNotFoundException e)
+		{
+			return new ArrayList<DocumentumObject>();
+		}
 	}
 
 	@Override
 	public DocumentumDocument checkoutDocument(String documentId) throws DocumentCheckoutException, RepositoryNotAvailableException {
-		DocumentumDocument document = DCD2Transformation.convertD2DocItemObject(dcAPI.checkoutDocument(documentId));
-		document.setCheckedOut(true);
+		DocumentumDocument document = DCD2Transformation.convertD2DocItemObject(dcAPI.checkoutDocument(documentId),dcAPI.getContext());
 		return document;
 	}
 
@@ -96,9 +99,8 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	}
 
 	@Override
-	public DocumentumFolder createFolderByParentId(String ParentId, String folderName) throws FolderCreationException {
-		// TODO Auto-generated method stub
-		return null;
+	public DocumentumFolder createFolderByParentId(String ParentId, String folderName) throws FolderCreationException, RepositoryNotAvailableException {
+		return DCD2Transformation.convertD2DocItemObject(dcAPI.createFolder(ParentId, folderName),dcAPI.getContext());
 	}
 
 	@Override
@@ -111,14 +113,14 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	public ArrayList<DocumentumObject> getChildren(String folderId, int pageNumber, int pageSize)
 			throws RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
-		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getChildren(folderId,pageNumber,pageSize));
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getChildren(folderId,pageNumber,pageSize),dcAPI.getContext());
 	}
 
 	@Override
 	public ArrayList<DocumentumFolder> getAllCabinets(int pageNumber, int pageSize)
 			throws RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
-		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getAllCabinets(pageNumber,pageSize));
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getAllCabinets(pageNumber,pageSize),dcAPI.getContext());
 	}
 
 	@Override
@@ -128,13 +130,19 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	
 	public DocumentumDocument cancelCheckout(String documentId)
 			throws RepositoryNotAvailableException, DocumentCheckoutException {
-			return DCD2Transformation.convertD2DocItemObject(dcAPI.cancelCheckout(documentId));
+			return DCD2Transformation.convertD2DocItemObject(dcAPI.cancelCheckout(documentId),dcAPI.getContext());
 	}
 
 	@Override
 	public DocumentumFolder createFolder(String parentId, HashMap<String, Object> properties)
 			throws FolderCreationException, RepositoryNotAvailableException, DocumentumException {
 		throw new UnsupportedOperationException("Method not Implemented");
+	}
+
+	@Override
+	public DocumentumDocument createDocument(String parentId, DocumentumDocument docCreation) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.emc.d2fs.models.attribute.Attribute;
+import com.emc.d2fs.models.context.Context;
 import com.emc.d2fs.models.item.Item;
 import com.emc.d2fs.models.node.Node;
 import com.emc.documentum.constants.Cardinality;
@@ -19,11 +20,15 @@ public class DCD2Transformation {
 
 	}
 
-	public static <T extends DocumentumObject> T convertD2NodeObject(Node d2Object) {
+	public static <T extends DocumentumObject> T convertD2NodeObject(Node d2Object,Context context) {
 		T object = null;
 		object = (T) createDocumentumObject(d2Object.getIcon());
 		object.setId(d2Object.getId());
 		object.setName(d2Object.getLabel());
+		String lockUser = (d2Object.getLocked() == null || d2Object.getLocked().equals("None")) ? null : (d2Object.getLocked().equals("You") ? context.getLogin() : d2Object.getLocked() );
+		boolean isLocked = lockUser == null;
+		object.setLockUser(lockUser);
+		object.setCheckedOut(isLocked);
 		// object.setType(d2Object.getType());
 		if (d2Object.getAttributes() != null) {
 			object.setProperties(convertD2PropertiesList(d2Object.getAttributes()));
@@ -31,11 +36,15 @@ public class DCD2Transformation {
 		return object;
 	}
 
-	public static <T extends DocumentumObject> T convertD2DocItemObject(Item d2Object) {
+	public static <T extends DocumentumObject> T convertD2DocItemObject(Item d2Object,Context context) {
 		T object = null;
 		object = (T) createDocumentumObject(d2Object.getIcon());
 		object.setId(d2Object.getId());
 		// object.setType(d2Object.getType());
+		String lockUser = (d2Object.getLocked() == null || d2Object.getLocked().equals("None")) ? null : (d2Object.getLocked().equals("You") ? context.getLogin() : d2Object.getLocked() );
+		boolean isLocked = lockUser != null;
+		object.setLockUser(lockUser);
+		object.setCheckedOut(isLocked);
 		if (d2Object.getAttributes() != null) {
 			object.setProperties(convertD2PropertiesList(d2Object.getAttributes()));
 			for (DocumentumProperty property : object.getProperties()) {
@@ -50,21 +59,21 @@ public class DCD2Transformation {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends DocumentumObject> ArrayList<T> convertD2DocItemObjectList(List<Item> list) {
+	public static <T extends DocumentumObject> ArrayList<T> convertD2DocItemObjectList(List<Item> list,Context context) {
 		ArrayList<T> documentumObject = new ArrayList<T>();
 		for (Item d2object : list) {
-			documentumObject.add((T) convertD2DocItemObject(d2object));
+			documentumObject.add((T) convertD2DocItemObject(d2object,context));
 		}
 		return documentumObject;
 	}
 
 	private static DocumentumObject createDocumentumObject(String baseTypeId) {
 		DocumentumObject documentumObject;
-		if(baseTypeId.contains("dm_folder")){
-			documentumObject = new DocumentumFolder();
+		if(baseTypeId.contains("dm_cabinet")){
+			documentumObject = new DocumentumCabinet(); 
 		}
-		else if (baseTypeId.contains("dm_cabinet")){
-			documentumObject = new DocumentumCabinet();
+		else if (baseTypeId.contains("dm_folder")){
+			documentumObject = new DocumentumFolder();
 		}
 		else if (baseTypeId.contains("dm_document")) 
 		{
@@ -77,10 +86,10 @@ public class DCD2Transformation {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends DocumentumObject> ArrayList<T> convertD2NodeObjectList(List<Node> list) {
+	public static <T extends DocumentumObject> ArrayList<T> convertD2NodeObjectList(List<Node> list,Context context) {
 		ArrayList<T> documentumObject = new ArrayList<T>();
 		for (Node d2object : list) {
-			documentumObject.add((T) convertD2NodeObject(d2object));
+			documentumObject.add((T) convertD2NodeObject(d2object,context));
 		}
 		return documentumObject;
 	}
