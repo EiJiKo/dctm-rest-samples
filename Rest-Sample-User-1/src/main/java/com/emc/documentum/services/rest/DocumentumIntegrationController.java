@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,8 +48,7 @@ public class DocumentumIntegrationController {
 	@ApiOperation(value = "Create Folder", notes = "Create a folder named {folderName} under the folder/cabinet identified using {parentId}")
 	@RequestMapping(value = "/folder/create/{parentId}/{folderName}", method = RequestMethod.POST)
 	public DocumentumFolder createFolderUsingParentId(@PathVariable(value = "api") String api,
-			@PathVariable(value = "parentId") String parentId,
-			@PathVariable(value = "folderName") String folderName)
+			@PathVariable(value = "parentId") String parentId, @PathVariable(value = "folderName") String folderName)
 			throws DocumentumException, DelegateNotFoundException {
 		try {
 			return delegateProvider.getDelegate(api).createFolderByParentId(parentId, folderName);
@@ -56,13 +57,11 @@ public class DocumentumIntegrationController {
 			throw e;
 		}
 	}
-	
-	
-	@ApiOperation(value = "Create Folder under a parent", notes = "Create a folder under a parent identifed by {parentId}",hidden=true)
+
+	@ApiOperation(value = "Create Folder under a parent", notes = "Create a folder under a parent identifed by {parentId}", hidden = true)
 	@RequestMapping(value = "/folder/create/{parentId}", method = RequestMethod.POST)
 	public DocumentumFolder createFolder(@PathVariable(value = "api") String api,
-			@PathVariable(value = "parentId") String parentId,
-			@RequestBody HashMap<String, Object> properties)
+			@PathVariable(value = "parentId") String parentId, @RequestBody HashMap<String, Object> properties)
 			throws DocumentumException, DelegateNotFoundException {
 		try {
 			return delegateProvider.getDelegate(api).createFolder(parentId, properties);
@@ -72,16 +71,26 @@ public class DocumentumIntegrationController {
 		}
 	}
 
+//	@ApiOperation(value = "Create Document", notes = "Create a Contentless document")
+//	@RequestMapping(value = "/document/create", method = RequestMethod.POST)
+//	public DocumentumDocument createDocument(@PathVariable(value = "api") String api,
+//			@Valid @RequestBody DocumentCreation docCreation) throws DocumentumException, DelegateNotFoundException {
+//		try {
+//			return (delegateProvider.getDelegate(api)).createDocument(docCreation);
+//		} catch (DocumentumException e) {
+//			// TODO Customize Error Handling
+//			throw e;
+//		}
+//	}
+
 	@ApiOperation(value = "Create Document", notes = "Create a Contentless document")
-	@RequestMapping(value = "/document/create", method = RequestMethod.POST)
+	@RequestMapping(value = "/folder/{folderId}/document", method = RequestMethod.POST)
 	public DocumentumDocument createDocument(@PathVariable(value = "api") String api,
-			@RequestBody DocumentCreation docCreation) throws DocumentumException, DelegateNotFoundException {
-		try {
-			return (delegateProvider.getDelegate(api)).createDocument(docCreation);
-		} catch (DocumentumException e) {
-			// TODO Customize Error Handling
-			throw e;
-		}
+			@Valid @RequestBody DocumentumDocument document , @PathVariable(value="folderId") String folderId) throws DocumentumException, DelegateNotFoundException {
+		translationUtility.translateToRepo(document, api);
+		DocumentumDocument createdDocument = (delegateProvider.getDelegate(api)).createDocument(folderId,document);
+		translationUtility.translateFromRepo(createdDocument, api);
+		return createdDocument;
 	}
 
 	@ApiOperation(value = "Get Cabinet By Name", notes = "Get a Cabinet by its name")

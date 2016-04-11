@@ -104,7 +104,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 			return CoreRestTransformation.convertJsonObject(document, DocumentumDocument.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
-		} catch ( DocumentCreationException e) {
+		} catch (DocumentCreationException e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			throw e;
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -165,7 +165,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	@Override
 	public ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException {
 		try {
-			//TODO cabinets pagination should be set on front end ...
+			// TODO cabinets pagination should be set on front end ...
 			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getAllCabinets(1, 20), DocumentumFolder.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
@@ -223,21 +223,20 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public DocumentumDocument checkoutDocument(String documentId)
-			throws DocumentumException {
+	public DocumentumDocument checkoutDocument(String documentId) throws DocumentumException {
 		try {
-			return CoreRestTransformation.convertJsonObject(dcAPI.checkOutDocument(documentId),DocumentumDocument.class);
+			return CoreRestTransformation.convertJsonObject(dcAPI.checkOutDocument(documentId),
+					DocumentumDocument.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
-		}catch (InstantiationException | IllegalAccessException e) {
+		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 			throw new DocumentumException("Unable to instantiate class of type " + DocumentumDocument.class.getName());
 		}
 	}
 
 	@Override
-	public DocumentumDocument checkinDocument(String documentId, byte[] content)
-			throws DocumentumException {
+	public DocumentumDocument checkinDocument(String documentId, byte[] content) throws DocumentumException {
 		try {
 			return CoreRestTransformation.convertJsonObject(dcAPI.checkinDocument(documentId, content),
 					DocumentumDocument.class);
@@ -292,12 +291,13 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public void deleteObject(String objectId , boolean deleteChildrenOrNot) throws CanNotDeleteFolderException {
-		dcAPI.deleteObject(objectId , deleteChildrenOrNot) ;
+	public void deleteObject(String objectId, boolean deleteChildrenOrNot) throws CanNotDeleteFolderException {
+		dcAPI.deleteObject(objectId, deleteChildrenOrNot);
 	}
-	
+
 	@Override
-	public DocumentumObject cancelCheckout(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException {
+	public DocumentumObject cancelCheckout(String documentId)
+			throws RepositoryNotAvailableException, DocumentCheckoutException {
 		try {
 			return CoreRestTransformation.convertJsonObject(dcAPI.cancelCheckout(documentId));
 		} catch (ResourceAccessException e) {
@@ -309,6 +309,21 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	public DocumentumFolder createFolder(String parentId, HashMap<String, Object> properties)
 			throws FolderCreationException, RepositoryNotAvailableException, DocumentumException {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public DocumentumDocument createDocument(String parentId,DocumentumDocument document) throws DocumentCreationException {
+		JsonObject parent = dcAPI.getObjectById(parentId);
+		HashMap<String,Object> properties = document.getPropertiesAsMap();
+		if(!properties.containsKey("r_object_type")){
+			properties.put("r_object_type", "dm_document");
+		}
+		
+		if(!properties.containsKey("object_name")){
+			properties.put("object_name", document.getName());
+		}
+		
+		return (DocumentumDocument) CoreRestTransformation.convertJsonObject(dcAPI.createDocument(parent, properties));
 	}
 
 }

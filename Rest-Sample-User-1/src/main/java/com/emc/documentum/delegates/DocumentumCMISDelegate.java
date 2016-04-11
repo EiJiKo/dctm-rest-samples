@@ -144,17 +144,17 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	public ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException {
 		return getAllCabinets(1, 20);
 	}
-	
+
 	@Override
-	public void deleteObject(String objectId , boolean deleteChildrenOrNot) throws CanNotDeleteFolderException {
+	public void deleteObject(String objectId, boolean deleteChildrenOrNot) throws CanNotDeleteFolderException {
 		try {
 			CmisObject object = dcAPI.getObjectById(objectId);
-			dcAPI.deleteObject(object , deleteChildrenOrNot);
+			dcAPI.deleteObject(object, deleteChildrenOrNot);
 		} catch (RepositoryNotAvailableException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public DocumentumDocument cancelCheckout(String documentId)
 			throws RepositoryNotAvailableException, DocumentCheckoutException {
 		return CMISTransformation.convertCMISDocument(dcAPI.cancelCheckout(documentId));
@@ -163,6 +163,12 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	@Override
 	public DocumentumFolder createFolder(String parentId, HashMap<String, Object> properties)
 			throws FolderCreationException, RepositoryNotAvailableException, DocumentumException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DocumentumDocument createDocument(String parentId, DocumentumDocument docCreation) {
 		// TODO Auto-generated method stub
 		return null;
 	}

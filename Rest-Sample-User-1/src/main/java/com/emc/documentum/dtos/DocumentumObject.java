@@ -2,7 +2,9 @@ package com.emc.documentum.dtos;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -102,6 +104,15 @@ public class DocumentumObject implements Serializable {
 
 	public void setProperties(ArrayList<DocumentumProperty> properties) {
 		this.properties = properties;
+	}
+	
+	@JsonIgnore
+	public HashMap<String,Object> getPropertiesAsMap(){
+		HashMap<String,Object> propertiesMap = new HashMap<>();
+		for(DocumentumProperty property : properties){
+			propertiesMap.put(property.getLocalName(), property.getValue());
+		}
+		return propertiesMap;
 	}
 
 }
