@@ -200,7 +200,6 @@ public class DCD2APIWrapper {
 				+ "')) union select *,r_lock_owner from dm_document where FOLDER(ID('" + folderId + "'))");
 		GetDQLContentResponse response = port.getDQLContent(r);
 		return response.getDocItems().getItems();
-
 	}
 
 	public Item createFolder(String parentId, String folderName)
@@ -454,5 +453,9 @@ public class DCD2APIWrapper {
 			}
 		};
 
+	}
+	public Context getContext()
+	{
+		return getContext(getPort(), data.repo, data.username, data.password, data.UID);
 	}
 }
