@@ -76,9 +76,16 @@ public class DCD2APIWrapper {
 	@Autowired
 	DCD2Constants data;
 
-	ModelPortService service = new ModelPortService();
+	ModelPortService service;
 	ModelPort port;
 
+	private ModelPortService getService() {
+		if(service == null){
+			service = new ModelPortService();
+		}
+		
+		return service;
+	}
 	public List<Item> getAllCabinets() throws RepositoryNotAvailableException {
 		try {
 			ModelPort port = getPort();
@@ -419,7 +426,7 @@ public class DCD2APIWrapper {
 
 	private ModelPort getPort() {
 		if (port == null)
-			port = service.getModelPortSoap11();
+			port = getService().getModelPortSoap11();
 		return port;
 	}
 
@@ -442,7 +449,7 @@ public class DCD2APIWrapper {
 		return context;
 	}
 
-	private HttpHeaders createHeaders(String username, String password) {
+	private HttpHeaders createHeaders(final String username, final String password) {
 		return new HttpHeaders() {
 			private static final long serialVersionUID = -3310695110391522574L;
 
