@@ -71,9 +71,13 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getDocumentByName(String name) throws RepositoryNotAvailableException {
-		// TODO Auto-generated method stub
-		return null;
+	public ArrayList<DocumentumObject> getDocumentByName(String name) throws RepositoryNotAvailableException{
+		try{
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getDocumentByName(name));
+		}catch(DocumentNotFoundException e)
+		{
+			return new ArrayList<DocumentumObject>();
+		}
 	}
 
 	@Override
@@ -96,9 +100,8 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	}
 
 	@Override
-	public DocumentumFolder createFolderByParentId(String ParentId, String folderName) throws FolderCreationException {
-		// TODO Auto-generated method stub
-		return null;
+	public DocumentumFolder createFolderByParentId(String ParentId, String folderName) throws FolderCreationException, RepositoryNotAvailableException {
+		return DCD2Transformation.convertD2DocItemObject(dcAPI.createFolder(ParentId, folderName));
 	}
 
 	@Override
