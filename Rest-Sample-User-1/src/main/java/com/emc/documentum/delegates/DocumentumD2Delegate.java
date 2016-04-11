@@ -139,4 +139,10 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 		throw new UnsupportedOperationException("Method not Implemented");
 	}
 
+	@Override
+	public DocumentumDocument createDocument(String parentId, DocumentumDocument docCreation) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

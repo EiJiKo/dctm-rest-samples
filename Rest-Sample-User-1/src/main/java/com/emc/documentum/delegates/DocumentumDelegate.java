@@ -11,6 +11,7 @@ import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckinException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
+import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
@@ -67,5 +68,7 @@ public interface DocumentumDelegate {
 	
 	DocumentumObject cancelCheckout(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException;
 
-	DocumentumFolder createFolder(String parentId, HashMap<String, Object> properties) throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException, DocumentumException;;
+	DocumentumFolder createFolder(String parentId, HashMap<String, Object> properties) throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException, DocumentumException;
+
+	DocumentumDocument createDocument(String parentId, DocumentumDocument docCreation) throws DocumentCreationException, RepositoryNotAvailableException;
 }
