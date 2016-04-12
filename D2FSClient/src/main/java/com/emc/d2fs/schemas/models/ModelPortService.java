@@ -15,7 +15,7 @@ import javax.xml.ws.Service;
  * 
  */
 @WebServiceClient(name = "ModelPortService", 
-                  wsdlLocation = "file:d2fs.wsdl.xml",
+                  wsdlLocation = "classpath:d2fs.wsdl.xml",
                   targetNamespace = "http://www.emc.com/d2fs/schemas/models") 
 public class ModelPortService extends Service {
 
@@ -26,7 +26,7 @@ public class ModelPortService extends Service {
     static {
         URL url = null;
         try {
-            url = new URL("file:d2fs.wsdl.xml");
+            url = new URL("classpath:d2fs.wsdl.xml");
         } catch (MalformedURLException e) {
             java.util.logging.Logger.getLogger(ModelPortService.class.getName())
                 .log(java.util.logging.Level.INFO, 
