@@ -8,10 +8,10 @@ import org.springframework.context.ApplicationContext;
 
 @SpringBootApplication
 @EnableAutoConfiguration
-public class RestSampleUser1Application{
+public class IntegrationLayer{
 
 	public static void main(String[] args) {
-		ApplicationContext ctx = SpringApplication.run(RestSampleUser1Application.class, args);
+		ApplicationContext ctx = SpringApplication.run(IntegrationLayer.class, args);
 		System.out.println(ctx.getApplicationName());
 	}
 }
