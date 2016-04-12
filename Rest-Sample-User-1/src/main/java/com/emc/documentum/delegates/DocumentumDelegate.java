@@ -7,6 +7,7 @@ import com.emc.documentum.dtos.DocumentCreation;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
+import com.emc.documentum.dtos.DocumentumProperty;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckinException;
@@ -113,4 +114,6 @@ public interface DocumentumDelegate {
 	DocumentumFolder createFolder(String parentId, HashMap<String, Object> properties) throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException, DocumentumException;
 
 	DocumentumDocument createDocument(String parentId, DocumentumDocument docCreation) throws DocumentCreationException, RepositoryNotAvailableException;
+	
+	ArrayList<DocumentumProperty> getObjectProperties(String objectId) throws RepositoryNotAvailableException;
 }

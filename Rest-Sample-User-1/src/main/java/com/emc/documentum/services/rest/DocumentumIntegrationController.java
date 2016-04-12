@@ -21,6 +21,7 @@ import com.emc.documentum.dtos.DocumentCreation;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
+import com.emc.documentum.dtos.DocumentumProperty;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DelegateNotFoundException;
@@ -197,5 +198,14 @@ public class DocumentumIntegrationController {
 			throws RepositoryNotAvailableException, DocumentCheckoutException, DelegateNotFoundException {
 		log.entering("checkin document ", documentId);
 		return (delegateProvider.getDelegate(api)).cancelCheckout(documentId);
+	}
+	
+	@ApiOperation(value = "Get Object Properties", notes = "Gets the properties of a specific object")
+	@RequestMapping(value = "get/object/properties/id/{objectId}", method = RequestMethod.GET)
+	public ArrayList<DocumentumProperty> GetObjectProperties(@PathVariable(value = "api") String api,
+			@PathVariable(value = "objectId") String objectId)
+			throws RepositoryNotAvailableException, DocumentCheckoutException, DelegateNotFoundException {
+		log.entering("Getting object properties ", objectId);
+		return (delegateProvider.getDelegate(api)).getObjectProperties(objectId);
 	}
 }
