@@ -92,8 +92,8 @@ public abstract class IntegrationLayerTests {
 		Assert.assertTrue("Checkout Failed. checked out object's lock user equals null", checkoutResponse.getBody().getLockUser()!=null );
 		logger.info("document Checked out by user " + checkoutResponse.getBody().getLockUser());
 		ResponseEntity<DocumentumDocument> cancelCheckoutResponse = cancelCheckoutDocument(documentCreationResponse.getBody().getId());
-		Assert.assertTrue("cancel Checkout Failed. checked out object's isCheckedOut flag equals true", checkoutResponse.getBody().isCheckedOut());
-		Assert.assertTrue("cancel Checkout Failed. checked out object's lock user not equal null", checkoutResponse.getBody().getLockUser()!=null);
+		Assert.assertTrue("cancel Checkout Failed. checked out object's isCheckedOut flag equals true", !cancelCheckoutResponse.getBody().isCheckedOut());
+		Assert.assertTrue("cancel Checkout Failed. checked out object's lock user not equal null", cancelCheckoutResponse.getBody().getLockUser()==null);
 		logger.info("document cancel checkout successful  ");
 		ResponseEntity<Void> responseEntity = deleteObject(documentCreationResponse.getBody().getId());
 		Assert.assertTrue("unable to delete Document", responseEntity.getStatusCode() == HttpStatus.OK);
