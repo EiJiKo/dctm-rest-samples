@@ -14,6 +14,7 @@ import com.emc.documentum.dtos.DocumentumCabinet;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
+import com.emc.documentum.dtos.DocumentumProperty;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
@@ -324,6 +325,11 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		}
 		
 		return (DocumentumDocument) CoreRestTransformation.convertJsonObject(dcAPI.createDocument(parent, properties));
+	}
+
+	@Override
+	public ArrayList<DocumentumProperty> getObjectProperties(String objectId) throws RepositoryNotAvailableException{
+		return CoreRestTransformation.convertJsonObject(dcAPI.getObjectById(objectId)).getProperties();
 	}
 
 }

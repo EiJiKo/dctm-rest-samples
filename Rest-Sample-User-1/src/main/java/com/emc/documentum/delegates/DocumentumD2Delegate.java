@@ -10,6 +10,7 @@ import com.emc.documentum.dtos.DocumentCreation;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
+import com.emc.documentum.dtos.DocumentumProperty;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
@@ -143,6 +144,11 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	public DocumentumDocument createDocument(String parentId, DocumentumDocument docCreation) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public ArrayList<DocumentumProperty> getObjectProperties(String objectId) throws RepositoryNotAvailableException{
+		return DCD2Transformation.convertD2PropertiesList(dcAPI.getObjectProperties(objectId));
 	}
 
 }
