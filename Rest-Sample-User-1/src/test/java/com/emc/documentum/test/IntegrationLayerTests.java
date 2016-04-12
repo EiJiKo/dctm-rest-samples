@@ -1,6 +1,7 @@
 package com.emc.documentum.test;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +21,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import com.emc.documentum.RestSampleUser1Application;
+import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
+import com.emc.documentum.dtos.DocumentumProperty;
 
 /**
  * Unit Tests for Integration Layer
@@ -72,6 +76,30 @@ public abstract class IntegrationLayerTests {
 		Assert.assertTrue("unable to delete Folder", responseEntity.getStatusCode() == HttpStatus.OK);
 		logger.info("Delete response equal " + responseEntity.getStatusCode());
 	}
+	@Test
+	public void testCreateDocumentCheckoutThenCancelCheckout()
+	{
+		DocumentumFolder [] cabinets = retrieveCabinets();
+		if(cabinets.length == 0 || cabinets == null){
+			Assert.fail("No Cabinets Available");
+		}
+		String documentName = "MySampleCreatedDocument" + (Math.random() * 10000);
+		ResponseEntity<DocumentumDocument> documentCreationResponse = createDocument(documentName,cabinets[0].getId());
+		Assert.assertTrue("Unable to Create Document",documentCreationResponse.getBody().getId()!=null);
+		logger.info("Created Document with Id:- " + documentCreationResponse.getBody().getId());
+		ResponseEntity<DocumentumDocument> checkoutResponse = checkoutDocument(documentCreationResponse.getBody().getId());
+		Assert.assertTrue("Checkout Failed. checked out object's isCheckedOut flag equals false", checkoutResponse.getBody().isCheckedOut());
+		Assert.assertTrue("Checkout Failed. checked out object's lock user equals null", checkoutResponse.getBody().getLockUser()!=null );
+		logger.info("document Checked out by user " + checkoutResponse.getBody().getLockUser());
+		ResponseEntity<DocumentumDocument> cancelCheckoutResponse = cancelCheckoutDocument(documentCreationResponse.getBody().getId());
+		Assert.assertTrue("cancel Checkout Failed. checked out object's isCheckedOut flag equals true", checkoutResponse.getBody().isCheckedOut());
+		Assert.assertTrue("cancel Checkout Failed. checked out object's lock user not equal null", checkoutResponse.getBody().getLockUser()!=null);
+		logger.info("document cancel checkout successful  ");
+		ResponseEntity<Void> responseEntity = deleteObject(documentCreationResponse.getBody().getId());
+		Assert.assertTrue("unable to delete Document", responseEntity.getStatusCode() == HttpStatus.OK);
+		logger.info("Delete response equal " + responseEntity.getStatusCode());
+	}
+	
 
 	private DocumentumFolder[] retrieveCabinets() {
 		ResponseEntity<DocumentumFolder[]> entity = new TestRestTemplate().getForEntity(
@@ -89,6 +117,37 @@ public abstract class IntegrationLayerTests {
 		ResponseEntity<Void> entity = new TestRestTemplate().exchange(
 				"http://localhost:" + this.port + "/" + getAPI() + "/services/delete/object/id/" + objectId, HttpMethod.DELETE,
 				null, Void.class);
+		return entity;
+	}
+	private ResponseEntity<DocumentumDocument> createDocument(String documentName,String folderId)
+	{
+		DocumentumDocument document = buildDocumentumDocument(documentName, "dm_document", null);
+		ResponseEntity<DocumentumDocument> entity = new TestRestTemplate().exchange(
+				"http://localhost:" + this.port + "/" + getAPI() + "/services/folder/"+folderId+"/document" , HttpMethod.POST,
+				new HttpEntity<DocumentumDocument>(document), DocumentumDocument.class);
+		return entity;
+	}
+	private DocumentumDocument buildDocumentumDocument(String documentName,String type,ArrayList<DocumentumProperty> properties)
+	{
+		DocumentumDocument document = new DocumentumDocument();
+		document.setName(documentName);
+		document.setType(type);
+		document.setProperties(properties);
+		return document;
+	}
+	private ResponseEntity<DocumentumDocument> checkoutDocument(String documentId)
+	{
+		
+		ResponseEntity<DocumentumDocument> entity = new TestRestTemplate().exchange(
+				"http://localhost:" + this.port + "/" + getAPI() + "/services/get/document/checkout/id/"+documentId , HttpMethod.POST,
+				null, DocumentumDocument.class);
+		return entity;
+	}
+	private ResponseEntity<DocumentumDocument> cancelCheckoutDocument(String documentId)
+	{
+		ResponseEntity<DocumentumDocument> entity = new TestRestTemplate().exchange(
+				"http://localhost:" + this.port + "/" + getAPI() + "/services/get/document/cancelCheckout/id/"+documentId , HttpMethod.POST,
+				null, DocumentumDocument.class);
 		return entity;
 	}
 }
