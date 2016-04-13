@@ -153,6 +153,38 @@ public class FileManagerController extends BaseController{
 			return errorResponse(e.getMessage()) ;
 		}
 	}
+	
+	
+	@RequestMapping(value = "/api/getProperties/{objectId}")
+	public ArrayList<DocumentumProperty> getProperties(@PathVariable(value="objectId")String objectId , @RequestHeader(value="API_BASE", defaultValue="Rest") String delegateKey) {
+		try {
+			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
+			return dcDelegate.getObjectProperties(objectId) ;
+		} catch (RepositoryNotAvailableException e) {
+			e.printStackTrace();
+		} catch (DelegateNotFoundException e) {
+			e.printStackTrace();
+		}
+		return null ;
+	}
+	
+	
+	@RequestMapping(value = "/api/searchDocumentByName/{name}")
+	public String getDocumentsByName(@PathVariable(value="name")String name , @RequestHeader(value="API_BASE", defaultValue="Rest") String delegateKey) {
+		try {
+			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
+			ArrayList<DocumentumObject> searchResult = dcDelegate.getDocumentByName(name) ;
+			JSONObject resultJson = transformChildrenFromDocumentumObjects(searchResult) ;
+			return resultJson.toJSONString();
+
+		} catch (RepositoryNotAvailableException e) {
+			e.printStackTrace();
+		} catch (DelegateNotFoundException e) {
+			e.printStackTrace();
+		}
+		return null ;
+	}
+	
 
 	@RequestMapping(value = "/api/permissionsUrl", method = RequestMethod.POST)
 	public String permissionsUrl() {
