@@ -1,5 +1,6 @@
 package com.emc.documentum.test;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.IntegrationTest;
@@ -74,7 +75,10 @@ public class FileManagerTest {
 		String documentContent = "document/content/" ;
 		String documentOpen = "document/open/" ;
 		ResponseEntity<String> documentContentEntity = new TestRestTemplate().getForEntity( BASE_URL + documentContent + DOCUMENT_ID , null , String.class);
+		Assert.assertNotNull(documentContentEntity);
 		ResponseEntity<String> documentOpenEntity = new TestRestTemplate().getForEntity( BASE_URL + documentOpen + DOCUMENT_ID  , null , String.class);
+		Assert.assertNotNull(documentOpenEntity);
+
 	}
 
 	@Test
@@ -83,7 +87,8 @@ public class FileManagerTest {
 		String renameUrl = "renameUrl" ;
 		ResponseEntity<JSONObject> renameUrlEntity = new TestRestTemplate().postForEntity( BASE_URL + renameUrl , null , JSONObject.class);
 		JSONObject body = renameUrlEntity.getBody() ;
-		body.get("result") ;
+		String s = (String) body.get("result") ;
+		Assert.assertNotNull(s);
 		//JSONObject result = (JSONObject) body.get("result") ;
 		//"/api/copyUrl" "/api/removeUrl" "/api/editUrl"  "/api/permissionsUrl" "/api/extractUrl" "/api/uploadUrl")
 	}	
