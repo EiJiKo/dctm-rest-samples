@@ -3,7 +3,6 @@ package com.emc.documentum.wrappers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.remoting.soap.SoapFaultException;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -238,7 +235,7 @@ public class DCD2APIWrapper {
 			Element success = doc.getDocumentElement();
 			String newId = success.getAttribute("new_id");
 			return getObjectById(newId);
-		} catch (SoapFaultException e) {
+		} catch (SOAPFaultException e) {
 			throw new FolderCreationException("Folder with this name already Exists.");
 		} catch (ParserConfigurationException e) {
 			throw new FolderCreationException("Folder Creation Failed");
