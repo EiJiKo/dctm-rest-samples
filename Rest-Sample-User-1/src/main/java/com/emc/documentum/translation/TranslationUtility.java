@@ -63,21 +63,23 @@ public class TranslationUtility {
 			boolean directionFromRepo) {
 		ArrayList<DocumentumProperty> objectProperties = object.getProperties();
 		String translation = null;
+		BidiMap<String, String> map = mapWrapper.bidiMapsMap.get(repositoryIdentifier + ".mapping.properties");
+		if(map == null){
+			return object;
+		}
 		for (int i = 0; i < objectProperties.size(); i++) {
 
-			BidiMap<String, String> map = mapWrapper.bidiMapsMap.get(repositoryIdentifier + ".mapping.properties");
+			
 			if (directionFromRepo) {
 				translation = map.get(objectProperties.get(i).getLocalName());
 			} else {
 				translation = map.getKey(objectProperties.get(i).getLocalName());
 			}
 
-			if (translation == null) {
-				translation = objectProperties.get(i).getLocalName();
+			if (translation != null) {
+				objectProperties.get(i).setLocalName(translation);
 			}
-
-			// set the translation in object ...
-			objectProperties.get(i).setLocalName(translation);
+			
 		}
 		return object;
 	}
