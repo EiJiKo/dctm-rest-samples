@@ -35,7 +35,7 @@ public interface DocumentumDelegate {
 	DocumentumFolder createFolder(String cabinetName, String folderName)
 			throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException, DocumentumException;
 
-	
+	@Deprecated
 	DocumentumDocument createDocument(DocumentCreation docCreation) throws DocumentumException;
 
 	/**
@@ -100,7 +100,7 @@ public interface DocumentumDelegate {
 	DocumentumDocument checkoutDocument(String documentId) throws RepositoryNotAvailableException, DocumentCheckoutException, DocumentumException;
 	
 	DocumentumDocument checkinDocument(String documentId,byte[]content) throws RepositoryNotAvailableException, DocumentCheckinException, DocumentumException;
-	ArrayList<DocumentumFolder> getPaginatedResult(String folderId , int startIndex , int pageSize) throws RepositoryNotAvailableException;
+	//ArrayList<DocumentumFolder> getPaginatedResult(String folderId , int startIndex , int pageSize) throws RepositoryNotAvailableException;
 
 	DocumentumFolder createFolderByParentId(String ParentId, String folderName)
 			throws FolderCreationException, RepositoryNotAvailableException, DocumentumException;

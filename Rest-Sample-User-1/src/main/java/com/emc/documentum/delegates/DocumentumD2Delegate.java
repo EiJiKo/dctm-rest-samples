@@ -93,11 +93,6 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 		return null;
 	}
 
-	@Override
-	public ArrayList<DocumentumFolder> getPaginatedResult(String folderId, int startIndex, int pageSize) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public DocumentumFolder createFolderByParentId(String ParentId, String folderName) throws FolderCreationException, RepositoryNotAvailableException {
