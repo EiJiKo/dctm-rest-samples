@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.emc.documentum.constants.DocumentumProperties;
@@ -29,7 +30,7 @@ import com.emc.documentum.wrappers.corerest.util.RestTransformation;
 @Component("DocumentCoreRestDelegate")
 public class DocumentCoreRestDelegate implements DocumentumDelegate {
 
-	@Autowired
+	@Autowired @Lazy
 	DctmRestClientX restClientX;
 
 	@Override

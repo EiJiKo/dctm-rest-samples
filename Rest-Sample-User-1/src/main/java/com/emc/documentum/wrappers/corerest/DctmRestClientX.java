@@ -13,6 +13,7 @@ import java.util.Map;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,7 @@ import com.emc.documentum.wrappers.corerest.model.PlainRestObject;
 import com.emc.documentum.wrappers.corerest.util.QueryParams;
 
 @Component("DctmRestClientX")
+@Lazy
 @PropertySource("classpath:application.properties")
 public class DctmRestClientX implements InitializingBean {
 
@@ -275,10 +277,11 @@ public class DctmRestClientX implements InitializingBean {
 		// get home doc
 		System.out.println(data.contextRootUri + "/services");
 		ResponseEntity<Map> homedoc = restTemplate.get(data.contextRootUri + "/services", Map.class);
+		
 		Map rootResources = (Map) homedoc.getBody().get("resources");
 		Map repositoriesEntry = (Map) rootResources.get(LinkRelation.REPOSITORIES);
 		String repositoriesUri = (String) repositoriesEntry.get("href");
-
+		
 		// get repositories
 		ResponseEntity<JsonFeed> repositories = restTemplate.get(repositoriesUri, JsonFeed.class, QueryParams.INLINE,
 				"true");
