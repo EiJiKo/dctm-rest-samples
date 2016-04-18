@@ -337,6 +337,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	public ArrayList<DocumentumObject> getDocumentAnnotations(String documentId) throws DocumentumException {
 		return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getDocumentAnnotations(documentId));
 	}
+	@Override
 	public DocumentumObject createDocumentAnnotation(String documentId,byte[] content,HashMap<String, Object>properties) throws DocumentumException
 	{
 		String annotationNameProperty = (String) properties.get("annotation_name"); 

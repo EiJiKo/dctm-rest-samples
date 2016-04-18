@@ -153,10 +153,10 @@ public class RestTransformation {
 
 	private static void convertCoreRSContent(Content content, DocumentumObject documentumObject) {
 
-		documentumObject.setId(content.getPropertyByName("r_object_id").toString());
-		documentumObject.setName(content.getPropertyByName("object_name").toString());
-		setDocumentumObjectProperties(documentumObject, content.getProperties());
+		documentumObject.setId(content.getPropertyByName("r_object_id") ==null ? null :  content.getPropertyByName("r_object_id").toString());
+		documentumObject.setName(content.getPropertyByName("object_name") == null ? null : content.getPropertyByName("object_name").toString());
 		Object lockUser = content.getPropertyByName("r_lock_owner");
+		setDocumentumObjectProperties(documentumObject, content.getProperties());
 		if (lockUser != null && lockUser.toString().length() > 0) {
 			documentumObject.setCheckedOut(true);
 			documentumObject.setLockUser(lockUser.toString());

@@ -1,4 +1,4 @@
-package com.emc.documentum.constants;
+package com.emc.documentum.wrappers.corerest.constants;
 
 public class LinkRelation {
     public static final String SELF = "self";

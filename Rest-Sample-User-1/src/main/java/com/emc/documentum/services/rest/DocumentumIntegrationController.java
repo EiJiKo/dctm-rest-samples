@@ -221,10 +221,10 @@ public class DocumentumIntegrationController {
 	}
 	
 	@ApiOperation(value = "create document annotation", notes = "creates annotation for a specific document")
-	@RequestMapping(value = "/document/{documentId}/annotations", method = RequestMethod.POST)
+	@RequestMapping(value = "/document/{documentId}/annotations", method = RequestMethod.POST,consumes = {"multipart/form-data"})
 	public DocumentumObject createDocumentAnnotations(@PathVariable(value = "api") String api,
 			@PathVariable(value = "documentId") String documentId,
-			 @RequestPart("properties") HashMap<String,Object> properties,
+			@RequestPart("properties") HashMap<String,Object> properties,
 			@RequestPart("binary") MultipartFile file)
 			throws DocumentumException, DelegateNotFoundException {
 		log.entering("creating document annotation ", documentId);
