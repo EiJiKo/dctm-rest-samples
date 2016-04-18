@@ -244,10 +244,10 @@ public class FileManagerController extends BaseController{
 	public String paginationService(@PathVariable(value="folderId")String folderId , @PathVariable(value="startIndex")String startIndex , @PathVariable(value="pageSize")String pageSize){		
 		//TODO to be implemented
 		JSONObject resultJson = null ;
-		ArrayList<DocumentumFolder> folders;
+		ArrayList<DocumentumObject> folders;
 		try {
-			folders = dcDelegate.getPaginatedResult(folderId, 0, 0);
-			resultJson = transformFoldersToJson(folders) ;
+			folders = dcDelegate.getChildren(folderId, 0,0);
+			resultJson = transformChildrenFromDocumentumObjects(folders) ;
 			return resultJson.toJSONString() ;
 		} catch (RepositoryNotAvailableException e) {
 			// TODO Auto-generated catch block

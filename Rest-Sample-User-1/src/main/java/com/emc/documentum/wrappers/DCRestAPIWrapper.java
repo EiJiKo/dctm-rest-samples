@@ -97,7 +97,7 @@ public class DCRestAPIWrapper {
 	public JsonObject createFolder(JsonObject parent, String folderName) throws FolderCreationException {
 
 		RestTemplate restTemplate = new RestTemplate();
-		String folderUri = parent.getHref(LinkRelation.folder);
+		String folderUri = parent.getHref(LinkRelation.FOLDERS);
 		Properties creationProperties = new Properties();
 		creationProperties.addProperty("object_name", folderName);
 		HttpHeaders httpHeader = createHeaders(data.username, data.password);
@@ -140,7 +140,7 @@ public class DCRestAPIWrapper {
 	public JsonObject createDocument(JsonObject parent, HashMap<String, Object> properties)
 			throws DocumentCreationException {
 		RestTemplate restTemplate = new RestTemplate();
-		String folderUri = parent.getHref(LinkRelation.document);
+		String folderUri = parent.getHref(LinkRelation.DOCUMENTS);
 		Properties creationProperties = new Properties();
 		creationProperties.setProperties(properties);
 		HttpHeaders httpHeader = createHeaders(data.username, data.password);
@@ -320,7 +320,7 @@ public class DCRestAPIWrapper {
 
 	public byte[] getDocumentContentById(String documentId) throws DocumentNotFoundException {
 		JsonObject document = getObjectById(documentId);
-		JsonLink link = getLink(document.getLinks(), LinkRelation.mainContent);
+		JsonLink link = getLink(document.getLinks(), LinkRelation.PRIMARY_CONTENT);
 		JsonObject content = getObjectByUri(link.getHref());
 		return getContentBase64Content(content);
 	}

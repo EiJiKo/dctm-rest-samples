@@ -251,7 +251,6 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 
 	}
 
-	@Override
 	public ArrayList<DocumentumFolder> getPaginatedResult(String folderId, int startIndex, int pageSize)
 			throws RepositoryNotAvailableException {
 		try {
