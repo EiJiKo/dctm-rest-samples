@@ -22,12 +22,11 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriUtils;
 
-import com.emc.documentum.constants.AppRuntime;
-import com.emc.documentum.constants.DocumentumProperties;
-import com.emc.documentum.constants.LinkRelation;
 import com.emc.documentum.exceptions.DocumentCheckinException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
-import com.emc.documentum.model.Properties;
+import com.emc.documentum.wrappers.corerest.constants.AppRuntime;
+import com.emc.documentum.wrappers.corerest.constants.DocumentumProperties;
+import com.emc.documentum.wrappers.corerest.constants.LinkRelation;
 import com.emc.documentum.wrappers.corerest.model.ByteArrayResource;
 import com.emc.documentum.wrappers.corerest.model.HrefObject;
 import com.emc.documentum.wrappers.corerest.model.JsonEntry;
@@ -153,7 +152,7 @@ public class DctmRestClientX implements InitializingBean {
 				QueryParams.MEDIA_URL_POLICY, "local").getBody();
 		ResponseEntity<byte[]> content = streamingTemplate.get(contentMeta.getHref(LinkRelation.CONTENT_MEDIA),
 				byte[].class);
-		return new ByteArrayResource((base64encoded?Base64.encodeBase64(content.getBody()):content.getBody()),
+		return new ByteArrayResource((base64encoded ? Base64.encodeBase64(content.getBody()) : content.getBody()),
 				(String) contentMeta.getPropertyByName(DocumentumProperties.OBJECT_NAME),
 				(String) contentMeta.getPropertyByName(DocumentumProperties.DOS_EXTENSION),
 				content.getHeaders().getContentType(), content.getHeaders().getContentLength());
@@ -166,13 +165,13 @@ public class DctmRestClientX implements InitializingBean {
 			throw new DocumentCheckinException("document is not checked out");
 		}
 
-		Properties creationProperties = new Properties();
 		HashMap<String, Object> properties = new HashMap<>();
-		creationProperties.setProperties(properties);
+		// TODO receive properties from Client Side
+		PlainRestObject checkInProperties = new PlainRestObject(properties);
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		MultiValueMap<String, String> partHeaders1 = new LinkedMultiValueMap<>();
 		partHeaders1.set("Content-Type", DctmRestTemplate.DCTM_VND_JSON_TYPE.toString());
-		parts.add("metadata", new HttpEntity<>(creationProperties, partHeaders1));
+		parts.add("metadata", new HttpEntity<>(checkInProperties, partHeaders1));
 		parts.add("binary", Base64.decodeBase64(data));
 		ResponseEntity<JsonObject> result = streamingTemplate.post(link, parts, JsonObject.class);
 		return result.getBody();
@@ -181,10 +180,11 @@ public class DctmRestClientX implements InitializingBean {
 	public JsonObject createContentfulDocument(JsonObject folder, byte[] data, String filename, String mime) {
 		PlainRestObject doc = new PlainRestObject("dm_document",
 				singleProperty(DocumentumProperties.OBJECT_NAME, filename));
-		return createContentfulDocument(folder, data, filename, mime,doc);
+		return createContentfulDocument(folder, data, filename, mime, doc);
 	}
-	
-	public JsonObject createContentfulDocument(JsonObject folder, byte[] data, String filename, String mime, PlainRestObject doc) {
+
+	public JsonObject createContentfulDocument(JsonObject folder, byte[] data, String filename, String mime,
+			PlainRestObject doc) {
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		MultiValueMap<String, String> partHeaders1 = new LinkedMultiValueMap<>();
 		partHeaders1.set("Content-Type", DctmRestTemplate.DCTM_VND_JSON_TYPE.toString());
@@ -199,23 +199,20 @@ public class DctmRestClientX implements InitializingBean {
 		return result.getBody();
 	}
 
-	 public JsonObject updateContent(JsonObject doc, byte[] data) {
-	        String format = (String) doc.getPropertyByName(DocumentumProperties.CONTENT_TYPE);
-	        ResponseEntity<JsonObject> result = streamingTemplate.post(doc.getHref(LinkRelation.CONTENTS),
-	                data,
-	                JsonObject.class,
-	                QueryParams.OVERWRITE, "true",
-	                QueryParams.FORMAT, format);
-	        return result.getBody();
-	    }
-	 
+	public JsonObject updateContent(JsonObject doc, byte[] data) {
+		String format = (String) doc.getPropertyByName(DocumentumProperties.CONTENT_TYPE);
+		ResponseEntity<JsonObject> result = streamingTemplate.post(doc.getHref(LinkRelation.CONTENTS), data,
+				JsonObject.class, QueryParams.OVERWRITE, "true", QueryParams.FORMAT, format);
+		return result.getBody();
+	}
+
 	private JsonObject querySingleObjectById(String id) {
 		String dql = String.format(DQL_QUERY_BY_ID, DEFAULT_VIEW, id);
 		return querySingleObject(dql);
 	}
-	
-	public List<JsonEntry> queryMultipleObjectsByName(String name){
-		String dql = String.format(DQL_QUERY_BY_NAME, DEFAULT_VIEW,name);
+
+	public List<JsonEntry> queryMultipleObjectsByName(String name) {
+		String dql = String.format(DQL_QUERY_BY_NAME, DEFAULT_VIEW, name);
 		return queryMultipleObjects(dql);
 	}
 
@@ -224,12 +221,13 @@ public class DctmRestClientX implements InitializingBean {
 		ResponseEntity<JsonFeed> response = restTemplate.get(dqlUrl, JsonFeed.class, QueryParams.DQL,
 				constructDqlParam(dql));
 		List<JsonEntry> entries = response.getBody().getEntries();
-		if (entries == null || entries.size() == 0)
+		if (entries == null || entries.size() == 0) {
 			throw new RuntimeException("No object for dql: " + dql);
-		
+		}
+
 		return entries;
 	}
-	
+
 	private JsonObject querySingleObjectByPath(String path) {
 		String dql = null;
 		if (path.lastIndexOf("/") == 0) {
@@ -247,8 +245,9 @@ public class DctmRestClientX implements InitializingBean {
 		ResponseEntity<JsonFeed> response = restTemplate.get(dqlUrl, JsonFeed.class, QueryParams.DQL,
 				constructDqlParam(dql));
 		List<JsonEntry> entries = response.getBody().getEntries();
-		if (entries == null || entries.size() == 0)
+		if (entries == null || entries.size() == 0) {
 			throw new RuntimeException("No object for dql: " + dql);
+		}
 		if (entries.size() > 1) {
 			throw new RuntimeException("Ambiguous objects for dql: " + dql);
 		}
@@ -277,11 +276,11 @@ public class DctmRestClientX implements InitializingBean {
 		// get home doc
 		System.out.println(data.contextRootUri + "/services");
 		ResponseEntity<Map> homedoc = restTemplate.get(data.contextRootUri + "/services", Map.class);
-		
+
 		Map rootResources = (Map) homedoc.getBody().get("resources");
 		Map repositoriesEntry = (Map) rootResources.get(LinkRelation.REPOSITORIES);
 		String repositoriesUri = (String) repositoriesEntry.get("href");
-		
+
 		// get repositories
 		ResponseEntity<JsonFeed> repositories = restTemplate.get(repositoriesUri, JsonFeed.class, QueryParams.INLINE,
 				"true");
