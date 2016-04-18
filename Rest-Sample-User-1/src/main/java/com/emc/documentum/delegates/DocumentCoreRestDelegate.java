@@ -210,4 +210,18 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 		return RestTransformation.convertJsonObject(restClientX.getObjectById(objectId)).getProperties();
 	}
 
+	@Override
+	public ArrayList<DocumentumObject> getDocumentAnnotations(String objectId)
+			throws RepositoryNotAvailableException, DocumentumException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DocumentumObject createDocumentAnnotation(String documentId, byte[] content,
+			HashMap<String, Object> properties) throws DocumentumException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
