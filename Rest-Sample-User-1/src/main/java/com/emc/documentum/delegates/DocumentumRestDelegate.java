@@ -2,6 +2,7 @@ package com.emc.documentum.delegates;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -331,4 +332,23 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		return CoreRestTransformation.convertJsonObject(dcAPI.getObjectById(objectId)).getProperties();
 	}
 
+	@Override
+	public ArrayList<DocumentumObject> getDocumentAnnotations(String documentId) throws DocumentumException {
+		return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getDocumentAnnotations(documentId));
+	}
+	public DocumentumObject createDocumentAnnotation(String documentId,byte[] content,HashMap<String, Object>properties) throws DocumentumException
+	{
+		String annotationNameProperty = (String) properties.get("annotation_name"); 
+		String annotationName = (annotationNameProperty == null) ? documentId+"_Annot_"+((int)(Math.random()*10000)): annotationNameProperty;
+		
+		String folderIdproperty = (String) properties.get("folder_id");
+		String folderId =folderIdproperty == null ? (String) ((List)(getObjectById(documentId).getPropertiesAsMap().get("i_folder_id"))).get(0): folderIdproperty;
+		
+		String formatProperty = (String) properties.get("format");
+		String format = formatProperty == null ? "crtext" : formatProperty;
+		
+		DocumentumObject note = CoreRestTransformation.convertJsonObject(dcAPI.createAnnotationWithContent(folderId, annotationName, content, format));
+		dcAPI.createRelationShip("dm_relation", documentId, note.getId(), "DM_ANNOTATE", true);
+		return note;
+	}
 }

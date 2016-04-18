@@ -37,12 +37,14 @@ import com.emc.documentum.exceptions.DocumentCheckinException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
+import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
 import com.emc.documentum.model.JsonEntry;
 import com.emc.documentum.model.JsonFeed;
 import com.emc.documentum.model.JsonLink;
 import com.emc.documentum.model.JsonObject;
+import com.emc.documentum.model.PlainRestObject;
 import com.emc.documentum.model.Properties;
 import com.emc.documentum.model.UserModel;
 
@@ -465,7 +467,70 @@ public class DCRestAPIWrapper {
 		}
 		return folders;
 	}
-
+	public List<JsonEntry> getDocumentAnnotations(String documentId) throws DocumentumException
+	{
+ 		JsonObject document = getObjectById(documentId);
+		JsonLink link = getLink(document.getLinks(), LinkRelation.objectRelations);
+		if(link == null)
+		{
+			throw new DocumentumException("object is not a document");
+		}
+		RestTemplate restTemplate = new RestTemplate();
+		List<MediaType> mediaTypes = new ArrayList<MediaType>();
+		mediaTypes.add(MediaType.ALL);
+		HttpHeaders httpHeader = createHeaders(data.username, data.password);
+		httpHeader.setAccept(mediaTypes);
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		params.add("inline", "true" );
+		params.add("filter", "starts-with(relation_name,'DM_ANNOTATE')");
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(link.getHref()).queryParams(params).build();
+		ResponseEntity<JsonFeed> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET,
+				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
+		return response.getBody().getEntries();
+	}
+	public JsonObject createAnnotationWithContent(String folderId,String objectName,byte[] content,String format) throws DocumentumException
+	{
+		JsonObject folder = getObjectById(folderId);
+		JsonLink link = getLink(folder.getLinks(), LinkRelation.object);
+		if (link == null) {
+			throw new DocumentumException(folderId + " is not a folder");
+		}
+		Properties creationProperties = new Properties();
+		HashMap<String, Object> properties = new HashMap<>();
+		 properties.put("object_name", objectName);
+		 properties.put("a_content_type", format);
+		 properties.put("r_object_type", "dm_note");
+		creationProperties.setProperties(properties);
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
+		HttpHeaders httpHeader = createHeaders(data.username, data.password);
+		httpHeader.add("Content-Type", "multipart/form-data");
+		HttpHeaders firstPartHeader = new HttpHeaders();
+		firstPartHeader.set("Content-Type", "application/vnd.emc.documentum+json");
+		parts.add("metadata", new HttpEntity<Object>(creationProperties, firstPartHeader));
+		parts.add("binary", content);
+		RestTemplate template = new RestTemplate();
+		ResponseEntity<JsonObject> response = template.exchange(link.getHref(), HttpMethod.POST,
+				new HttpEntity<Object>(parts, httpHeader), JsonObject.class);
+		return response.getBody();
+	}
+	
+	public JsonObject createRelationShip(String relationType,String parentId,String childId, String relationName,boolean permanentLink)
+	{
+		HashMap<String,Object> properties = new HashMap<>();
+		properties.put("relation_name", relationName);
+		properties.put("parent_id", parentId);
+		properties.put("child_id", childId);
+		properties.put("permanent_link", permanentLink);
+		PlainRestObject relation = new PlainRestObject(relationType, properties);
+		String relationsURI = data.relationsURI;
+		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders header = createHeaders(data.username, data.password);
+		header.add("Content-Type", "application/vnd.emc.documentum+json");
+		ResponseEntity<JsonObject> response = restTemplate.exchange(relationsURI, HttpMethod.POST,
+				new HttpEntity<Object>(relation,header), JsonObject.class);
+		return response.getBody();
+	}
+	
 	private ResponseEntity<JsonFeed> executeDQL(String query) {
 		RestTemplate restTemplate = new RestTemplate();
 		// log.log(level, msg, thrown);
@@ -483,4 +548,5 @@ public class DCRestAPIWrapper {
 				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonObject.class);
 		return response;
 	}
+	
 }

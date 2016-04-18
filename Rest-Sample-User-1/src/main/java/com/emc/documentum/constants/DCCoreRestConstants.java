@@ -28,5 +28,7 @@ public class DCCoreRestConstants {
 	public  String fetchCabinetURI;
 	@Value("http://${documentum.corerest.host}:8080/dctm-rest/repositories/${documentum.corerest.repo}/folders")
 	public  String fetchFolderURI;
+	@Value("http://${documentum.corerest.host}:8080/dctm-rest/repositories/${documentum.corerest.repo}/relations")
+	public  String relationsURI;
 
 }

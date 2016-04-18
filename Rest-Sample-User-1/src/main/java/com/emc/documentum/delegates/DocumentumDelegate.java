@@ -116,4 +116,8 @@ public interface DocumentumDelegate {
 	DocumentumDocument createDocument(String parentId, DocumentumDocument docCreation) throws DocumentCreationException, RepositoryNotAvailableException;
 	
 	ArrayList<DocumentumProperty> getObjectProperties(String objectId) throws RepositoryNotAvailableException;
+	
+	ArrayList<DocumentumObject> getDocumentAnnotations(String objectId) throws RepositoryNotAvailableException, DocumentumException;
+	
+	DocumentumObject createDocumentAnnotation(String documentId,byte[] content,HashMap<String, Object> properties) throws DocumentumException;
 }
