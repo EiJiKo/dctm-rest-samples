@@ -100,9 +100,17 @@ public class CoreRestTransformation {
 
 	private static DocumentumObject ConvertCoreRSJsonEntry(JsonEntry jsonEntry) {
 		Content content = jsonEntry.getContent();
-		String linkUrl = DCRestAPIWrapper.getLink(content.getLinks(), "self").getHref();
-		String[] linkParts = linkUrl.split("/");
-		String baseType = linkParts[linkParts.length - 2];
+		String baseType = null ;
+		if(content.getLinks() != null )
+		{
+			String linkUrl = DCRestAPIWrapper.getLink(content.getLinks(), "self").getHref();
+			String[] linkParts = linkUrl.split("/");
+			baseType = linkParts[linkParts.length - 2];
+		}
+		else
+		{
+			baseType = "other" ;
+		}
 		DocumentumObject documentumObject = createDocumentumObject(baseType);
 		convertCoreRSContent(content, documentumObject);
 		return documentumObject;

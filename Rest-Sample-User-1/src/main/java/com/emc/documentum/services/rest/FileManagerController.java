@@ -222,6 +222,19 @@ public class FileManagerController extends BaseController{
 			return errorResponse(" Cann't check in document ") ;
 		}
 	}
+	
+	
+	@RequestMapping(value = "/api/renditions/{documentId}", method = RequestMethod.POST)
+	public String getRenditions(@PathVariable(value = "documentId") String documentId , @RequestHeader(value="API_BASE" , defaultValue="Rest") String delegateKey) {		
+		try {
+			dcDelegate = delegateProvider.getDelegate(delegateKey) ;	
+			ArrayList<DocumentumObject> renditions = dcDelegate.getRenditionsByDocumentId(documentId);
+			return commonResponse();
+		} catch (DelegateNotFoundException e) {
+			e.printStackTrace();
+			return errorResponse(delegateKey + " Repository is not available ") ;
+		}
+	}
 
 
 	@RequestMapping(value = "/api/checkin/{documentId}", method = RequestMethod.POST)

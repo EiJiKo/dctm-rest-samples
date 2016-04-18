@@ -31,6 +31,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.emc.documentum.constants.DCCoreRestConstants;
 import com.emc.documentum.constants.LinkRelation;
 import com.emc.documentum.dtos.DocumentumFolder;
+import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckinException;
@@ -467,6 +468,23 @@ public class DCRestAPIWrapper {
 		}
 		return folders;
 	}
+	
+	public List<JsonEntry> getRenditionById(String renditionId) {
+		// TODO put queries in one class ... 
+		String query = String.format("select * from dmr_content where r_object_id ='%s'" , renditionId);
+		ResponseEntity<JsonFeed> response = executeDQL(query);
+		JsonFeed feed = response.getBody();
+		return feed.getEntries() ;
+	}
+	
+	public List<JsonEntry> getRenditionsByDocumentId(String folderId) {
+		// TODO put queries in one class ... 
+		String query = String.format("select * from dmr_content where any parent_id='%s' and full_format='pdf'" , folderId);
+		ResponseEntity<JsonFeed> response = executeDQL(query);
+		JsonFeed feed = response.getBody();
+		return feed.getEntries() ;
+	}
+	
 	public List<JsonEntry> getDocumentAnnotations(String documentId) throws DocumentumException
 	{
  		JsonObject document = getObjectById(documentId);

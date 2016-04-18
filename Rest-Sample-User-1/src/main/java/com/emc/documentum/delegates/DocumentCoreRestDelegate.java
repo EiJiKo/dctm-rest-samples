@@ -224,4 +224,10 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 		return null;
 	}
 
+	@Override
+	public ArrayList<DocumentumObject> getRenditionsByDocumentId(String doumentId) {
+		// TODO Auto-generated method stub
+		return null ;
+	}
+
 }

@@ -120,4 +120,6 @@ public interface DocumentumDelegate {
 	ArrayList<DocumentumObject> getDocumentAnnotations(String objectId) throws RepositoryNotAvailableException, DocumentumException;
 	
 	DocumentumObject createDocumentAnnotation(String documentId,byte[] content,HashMap<String, Object> properties) throws DocumentumException;
+		
+	ArrayList<DocumentumObject> getRenditionsByDocumentId(String doumentId) ;
 }

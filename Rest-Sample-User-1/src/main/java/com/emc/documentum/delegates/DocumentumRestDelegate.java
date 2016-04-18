@@ -24,6 +24,7 @@ import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
+import com.emc.documentum.model.JsonEntry;
 import com.emc.documentum.model.JsonObject;
 import com.emc.documentum.transformation.CoreRestTransformation;
 import com.emc.documentum.wrappers.DCRestAPIWrapper;
@@ -350,5 +351,11 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		DocumentumObject note = CoreRestTransformation.convertJsonObject(dcAPI.createAnnotationWithContent(folderId, annotationName, content, format));
 		dcAPI.createRelationShip("dm_relation", documentId, note.getId(), "DM_ANNOTATE", true);
 		return note;
+	}
+
+	@Override
+	public ArrayList<DocumentumObject> getRenditionsByDocumentId(String doumentId) {	
+		List<JsonEntry> list = dcAPI.getRenditionsByDocumentId(doumentId);
+		return CoreRestTransformation.convertCoreRSEntryList(list);
 	}
 }
