@@ -16,10 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriUtils;
 
 import com.emc.documentum.constants.AppRuntime;
@@ -158,7 +161,13 @@ public class DctmRestClientX implements InitializingBean {
 				(String) contentMeta.getPropertyByName(DocumentumProperties.DOS_EXTENSION),
 				content.getHeaders().getContentType(), content.getHeaders().getContentLength());
 	}
-
+	public List<JsonEntry> getDocumentAnnotations(String documentId)
+	{
+		JsonObject document = getObjectById(documentId);
+		ResponseEntity<JsonFeed> result = restTemplate.get(document.getHref(LinkRelation.OBJECT_RELATIONS), JsonFeed.class, QueryParams.INLINE,"true",QueryParams.FILTER,"starts-with(relation_name,'DM_ANNOTATE')");
+		return result.getBody().getEntries();
+		
+	}
 	public JsonObject checkinDocument(String documentId, byte[] data) throws DocumentCheckinException {
 		JsonObject document = getObjectById(documentId);
 		String link = document.getHref(LinkRelation.checkInNextMajor);
@@ -181,10 +190,10 @@ public class DctmRestClientX implements InitializingBean {
 	public JsonObject createContentfulDocument(JsonObject folder, byte[] data, String filename, String mime) {
 		PlainRestObject doc = new PlainRestObject("dm_document",
 				singleProperty(DocumentumProperties.OBJECT_NAME, filename));
-		return createContentfulDocument(folder, data, filename, mime,doc);
+		return createContentfulDocument(folder, data, mime,doc);
 	}
 	
-	public JsonObject createContentfulDocument(JsonObject folder, byte[] data, String filename, String mime, PlainRestObject doc) {
+	public JsonObject createContentfulDocument(JsonObject folder, byte[] data, String mime, PlainRestObject doc) {
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		MultiValueMap<String, String> partHeaders1 = new LinkedMultiValueMap<>();
 		partHeaders1.set("Content-Type", DctmRestTemplate.DCTM_VND_JSON_TYPE.toString());
@@ -198,7 +207,27 @@ public class DctmRestClientX implements InitializingBean {
 				JsonObject.class);
 		return result.getBody();
 	}
+	public JsonObject createContentfulObject(JsonObject folder,byte[] data,String mime,PlainRestObject object)
+	{
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+		MultiValueMap<String, String> partHeaders1 = new LinkedMultiValueMap<>();
+		partHeaders1.set("Content-Type", DctmRestTemplate.DCTM_VND_JSON_TYPE.toString());
+		parts.add("metadata", new HttpEntity<>(object, partHeaders1));
 
+		MultiValueMap<String, String> partHeaders2 = new LinkedMultiValueMap<>();
+		partHeaders2.set("Content-Type", mime);
+		parts.add("binary", new HttpEntity<>(data, partHeaders2));
+
+		ResponseEntity<JsonObject> result = streamingTemplate.post(folder.getHref(LinkRelation.OBJECTS), parts,
+				JsonObject.class);
+		return result.getBody();
+	}
+	public JsonObject createRelationShip(PlainRestObject relationObject)
+	{
+		ResponseEntity<JsonObject> result = streamingTemplate.post(repository.getHref(LinkRelation.OBJECT_RELATIONS), relationObject,
+				JsonObject.class);
+		return result.getBody();
+	}
 	 public JsonObject updateContent(JsonObject doc, byte[] data) {
 	        String format = (String) doc.getPropertyByName(DocumentumProperties.CONTENT_TYPE);
 	        ResponseEntity<JsonObject> result = streamingTemplate.post(doc.getHref(LinkRelation.CONTENTS),

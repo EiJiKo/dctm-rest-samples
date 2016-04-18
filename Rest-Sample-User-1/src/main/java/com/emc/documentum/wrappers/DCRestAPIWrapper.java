@@ -470,7 +470,7 @@ public class DCRestAPIWrapper {
 	public List<JsonEntry> getDocumentAnnotations(String documentId) throws DocumentumException
 	{
  		JsonObject document = getObjectById(documentId);
-		JsonLink link = getLink(document.getLinks(), LinkRelation.objectRelations);
+		JsonLink link = getLink(document.getLinks(), LinkRelation.OBJECT_RELATIONS);
 		if(link == null)
 		{
 			throw new DocumentumException("object is not a document");

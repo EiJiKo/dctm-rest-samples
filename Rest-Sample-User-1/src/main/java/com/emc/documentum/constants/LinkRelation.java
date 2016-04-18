@@ -20,7 +20,7 @@ public class LinkRelation {
 	public static final String checkInNextMajor = "http://identifiers.emc.com/linkrel/checkin-next-major";
 	public static final String cancelCheckout = "http://identifiers.emc.com/linkrel/cancel-checkout";
 	
-	public static final String objectRelations = "http://identifiers.emc.com/linkrel/relations";
+	public static final String OBJECT_RELATIONS = "http://identifiers.emc.com/linkrel/relations";
 	
 	public static final String object = "http://identifiers.emc.com/linkrel/objects";
 }
