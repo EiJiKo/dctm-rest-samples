@@ -151,4 +151,17 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 		return DCD2Transformation.convertD2PropertiesList(dcAPI.getObjectProperties(objectId));
 	}
 
+	@Override
+	public ArrayList<DocumentumObject> getDocumentAnnotations(String objectId) throws RepositoryNotAvailableException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DocumentumObject createDocumentAnnotation(String documentId, byte[] content,
+			HashMap<String, Object> properties) throws DocumentumException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

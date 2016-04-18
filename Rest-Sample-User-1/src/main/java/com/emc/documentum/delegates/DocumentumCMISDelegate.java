@@ -187,4 +187,18 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 		return CMISTransformation.convertCMISObject(dcAPI.getObjectById(objectId)).getProperties();
 	}
 
+	@Override
+	public ArrayList<DocumentumObject> getDocumentAnnotations(String objectId)
+			throws RepositoryNotAvailableException, DocumentumException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DocumentumObject createDocumentAnnotation(String documentId, byte[] content,
+			HashMap<String, Object> properties) throws DocumentumException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -1,5 +1,6 @@
 package com.emc.documentum.services.rest;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -13,11 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.emc.documentum.delegate.provider.APIDelegateProvider;
 import com.emc.documentum.delegates.DocumentumDelegate;
-import com.emc.documentum.dtos.DocumentCreation;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
@@ -208,4 +210,29 @@ public class DocumentumIntegrationController {
 		log.entering("Getting object properties ", objectId);
 		return (delegateProvider.getDelegate(api)).getObjectProperties(objectId);
 	}
+	
+	@ApiOperation(value = "Get document annotations", notes = "Gets the annotations of a specific document")
+	@RequestMapping(value = "get/document/annotations/id/{documentId}", method = RequestMethod.GET)
+	public ArrayList<DocumentumObject> GetDocumentAnnotations(@PathVariable(value = "api") String api,
+			@PathVariable(value = "documentId") String documentId)
+			throws DocumentumException, DelegateNotFoundException {
+		log.entering("Getting document annotations ", documentId);
+		return (delegateProvider.getDelegate(api)).getDocumentAnnotations(documentId);
+	}
+	
+	@ApiOperation(value = "create document annotation", notes = "creates annotation for a specific document")
+	@RequestMapping(value = "/document/{documentId}/annotations", method = RequestMethod.POST)
+	public DocumentumObject createDocumentAnnotations(@PathVariable(value = "api") String api,
+			@PathVariable(value = "documentId") String documentId,
+			 @RequestPart("properties") HashMap<String,Object> properties,
+			@RequestPart("binary") MultipartFile file)
+			throws DocumentumException, DelegateNotFoundException {
+		log.entering("creating document annotation ", documentId);
+		try {
+			return (delegateProvider.getDelegate(api)).createDocumentAnnotation(documentId, file.getBytes(), properties);
+		} catch (IOException e) {
+			throw new DocumentumException("Error occurred while reading binary part", e);
+		}
+	}
+	
 }

@@ -153,8 +153,8 @@ public class CoreRestTransformation {
 
 	private static void convertCoreRSContent(Content content, DocumentumObject documentumObject) {
 
-		documentumObject.setId(content.getPropertyByName("r_object_id").toString());
-		documentumObject.setName(content.getPropertyByName("object_name").toString());
+		documentumObject.setId(content.getPropertyByName("r_object_id") ==null ? null :  content.getPropertyByName("r_object_id").toString());
+		documentumObject.setName(content.getPropertyByName("object_name") == null ? null : content.getPropertyByName("object_name").toString());
 		setDocumentumObjectProperties(documentumObject, content.getProperties());
 		Object lockUser = content.getPropertyByName("r_lock_owner");
 		if (lockUser != null && lockUser.toString().length() > 0) {
