@@ -37,4 +37,8 @@ public class APIDelegateProvider {
 		}
 		throw new DelegateNotFoundException(delegateIdentifier);
 	}
+	
+	public String[] getAllDelegates(){
+		return apiDelegates.keySet().toArray(new String [0]);
+	}
 }
