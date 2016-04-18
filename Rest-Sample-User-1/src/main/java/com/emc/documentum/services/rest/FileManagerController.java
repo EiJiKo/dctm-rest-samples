@@ -16,16 +16,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.emc.documentum.delegate.provider.DelegateProvider;
 import com.emc.documentum.delegates.DocumentumDelegate;
+import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.dtos.DocumentumProperty;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DelegateNotFoundException;
+import com.emc.documentum.exceptions.DocumentCheckinException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.model.JsonObject;
 
+import io.swagger.annotations.ApiOperation;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
@@ -200,7 +203,44 @@ public class FileManagerController extends BaseController{
 	public String uploadUrl() {
 		return commonResponse();
 	}
+
 	
+	@RequestMapping(value = "/api/checkout/{documentId}", method = RequestMethod.POST)
+	public String checkoutDocument(@PathVariable(value = "documentId") String documentId , @RequestHeader(value="API_BASE" , defaultValue="Rest") String delegateKey) {		
+		try {
+			dcDelegate = delegateProvider.getDelegate(delegateKey) ;	
+			DocumentumDocument document = dcDelegate.checkoutDocument(documentId) ;
+			return commonResponse();
+		} catch (DelegateNotFoundException e) {
+			e.printStackTrace();
+			return errorResponse(delegateKey + " Repository is not available ") ;
+		} catch (RepositoryNotAvailableException e) {
+			e.printStackTrace();
+			return errorResponse(delegateKey + " Repository is not available ") ;
+		} catch (DocumentumException e) {
+			e.printStackTrace();
+			return errorResponse(" Cann't check in document ") ;
+		}
+	}
+
+
+	@RequestMapping(value = "/api/checkin/{documentId}", method = RequestMethod.POST)
+	public String checkinDocument(@PathVariable(value = "documentId") String documentId , @RequestHeader(value="API_BASE" , defaultValue="Rest") String delegateKey , @RequestBody byte[] content) {
+		try {
+			dcDelegate = delegateProvider.getDelegate(delegateKey) ;	
+			DocumentumDocument document = dcDelegate.checkinDocument(documentId, content) ;
+			return commonResponse();
+		} catch (DelegateNotFoundException e) {
+			e.printStackTrace();
+			return errorResponse(delegateKey + " Repository is not available ") ;
+		} catch (RepositoryNotAvailableException e) {
+			e.printStackTrace();
+			return errorResponse(delegateKey + " Repository is not available ") ;
+		} catch (DocumentumException e) {
+			e.printStackTrace();
+			return errorResponse(" Cann't check in document ") ;
+		}
+	}
 
 	@RequestMapping(value= "/api/document/content/{documentId}" , produces = "application/pdf")
 	public byte[] getDocumentContentById(@PathVariable(value="documentId")String documentId , @RequestHeader(value="API_BASE" , defaultValue="Rest") String delegateKey) throws DocumentNotFoundException{
