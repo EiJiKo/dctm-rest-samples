@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.emc.documentum.constants.DocumentumProperties;
+import com.emc.documentum.constants.LinkRelation;
 import com.emc.documentum.dtos.DocumentCreation;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
@@ -221,11 +222,26 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 	@Override
 	public DocumentumObject createDocumentAnnotation(String documentId, byte[] content,
 			HashMap<String, Object> properties) throws DocumentumException {
+		JsonObject document = restClientX.getObjectById(documentId);
+		String selfUrl = document.getHref(LinkRelation.SELF);
+		String []urlParts = selfUrl.split("/");
+		if(!urlParts[urlParts.length-2].equals("documents")){
+			throw new DocumentumException(documentId+ " is not a document");
+		}
+		
 		String annotationNameProperty = (String) properties.get("annotation_name"); 
 		String annotationName = (annotationNameProperty == null) ? documentId+"_Annot_"+((int)(Math.random()*10000)): annotationNameProperty;
 		
 		String folderIdproperty = (String) properties.get("folder_id");
-		JsonObject folder = folderIdproperty == null ?  restClientX.getObjectById((String)((List)(restClientX.getObjectById(documentId).getPropertyByName(DocumentumProperties.PARENT_FOLDER_ID))).get(0)): restClientX.getObjectById(folderIdproperty);
+		JsonObject folder;
+		if(folderIdproperty == null)
+		{
+			String folderUrl = document.getHref(LinkRelation.PARENT);
+			urlParts = folderUrl.split("/");
+			folderIdproperty = urlParts[urlParts.length-1];
+		}
+		folder = restClientX.getObjectById(folderIdproperty);
+
 		
 		String formatProperty = (String) properties.get("format");
 		String format = formatProperty == null ? "crtext" : formatProperty;
