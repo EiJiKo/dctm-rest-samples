@@ -234,5 +234,13 @@ public class DocumentumIntegrationController {
 			throw new DocumentumException("Error occurred while reading binary part", e);
 		}
 	}
+	@ApiOperation(value = "get document renditions", notes = "gets renditions for a specific document")
+	@RequestMapping(value = "get/document/{documentId}/renditions", method = RequestMethod.GET)
+	public ArrayList<DocumentumObject> getDocumentRenditions(@PathVariable(value = "api") String api,
+			@PathVariable(value = "documentId") String documentId)
+			throws DocumentumException, DelegateNotFoundException {
+		log.entering("getting  document renditions ", documentId);
+			return (delegateProvider.getDelegate(api)).getRenditionsByDocumentId(documentId); 
+	}
 	
 }
