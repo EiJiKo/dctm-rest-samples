@@ -161,9 +161,7 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 
 	@Override
 	public ArrayList<DocumentumObject> getRenditionsByDocumentId(String doumentId) {
-		// TODO Auto-generated method stub
-		return null ;
-		
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getDocumentRenditions(doumentId), dcAPI.getContext());
 	}
 
 }

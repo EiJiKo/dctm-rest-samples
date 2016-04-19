@@ -31,6 +31,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.emc.d2fs.common.AttributeHelp;
+import com.emc.d2fs.constants.D2fsConstants;
 import com.emc.d2fs.models.attribute.Attribute;
 import com.emc.d2fs.models.context.Context;
 import com.emc.d2fs.models.destroyresult.Destroyresult;
@@ -51,6 +52,8 @@ import com.emc.d2fs.services.creation_service.CreatePropertiesRequest;
 import com.emc.d2fs.services.creation_service.CreatePropertiesResponse;
 import com.emc.d2fs.services.destroy_service.DestroyRequest;
 import com.emc.d2fs.services.destroy_service.DestroyResponse;
+import com.emc.d2fs.services.details_service.GetDetailContentRequest;
+import com.emc.d2fs.services.details_service.GetDetailContentResponse;
 import com.emc.d2fs.services.download_service.GetDispatchDownloadUrlRequest;
 import com.emc.d2fs.services.download_service.GetDispatchDownloadUrlResponse;
 import com.emc.d2fs.services.property_service.GetPropertiesRequest;
@@ -419,6 +422,20 @@ public class DCD2APIWrapper {
 		req.setId(objectId);
 		GetPropertiesResponse res = port.getProperties(req);
 		return res.getAttributes();
+	}
+	public List<Item> getDocumentRenditions(String documentId)
+	{
+		ModelPort port = getPort();
+		Context context = getContext(port, data.repo, data.username, data.password, data.UID);
+
+		GetDetailContentRequest q = new GetDetailContentRequest();
+		q.setContext(context);
+		q.setDetailName(D2fsConstants.RENDITIONS);
+		q.setId(documentId);
+		GetDetailContentResponse w = port.getDetailContent(q);
+		if(w.getDocItems()!=null)
+			return w.getDocItems().getItems();
+		return new ArrayList<Item>();
 	}
 
 	private ModelPort getPort() {
