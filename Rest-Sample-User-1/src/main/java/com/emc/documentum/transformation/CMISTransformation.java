@@ -70,7 +70,7 @@ public class CMISTransformation {
 		object.setName(cmisObject.getName());
 		Property<Boolean> checkedOut = cmisObject.getProperty("cmis:isVersionSeriesCheckedOut");
 		if (checkedOut != null && checkedOut.getFirstValue() != false) {
-			object.setCheckedOut((Boolean)checkedOut.getValue());
+			object.setCheckedOut((Boolean) checkedOut.getValue());
 			object.setLockUser(cmisObject.getProperty("cmis:versionSeriesCheckedOutBy").getValueAsString());
 		}
 		mapPropertyList(object, cmisObject.getProperties());
@@ -88,7 +88,7 @@ public class CMISTransformation {
 		// }
 		Property<Boolean> checkedOut = cmisDocument.getProperty("cmis:isVersionSeriesCheckedOut");
 		if (checkedOut != null && checkedOut.getFirstValue() != false) {
-			document.setCheckedOut((Boolean)checkedOut.getValue());
+			document.setCheckedOut((Boolean) checkedOut.getValue());
 			document.setLockUser(cmisDocument.getProperty("cmis:versionSeriesCheckedOutBy").getValueAsString());
 		}
 		mapPropertyList(document, cmisDocument.getProperties());
@@ -99,7 +99,7 @@ public class CMISTransformation {
 		DocumentumFolder folder = new DocumentumFolder();
 		folder.setId(cmisFolder.getId());
 		folder.setPath(cmisFolder.getPath());
-		folder.setName(cmisFolder.getDescription());
+		folder.setName(cmisFolder.getName());
 		mapPropertyList(folder, cmisFolder.getProperties());
 
 		return folder;
