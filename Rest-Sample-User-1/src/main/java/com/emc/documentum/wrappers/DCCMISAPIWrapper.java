@@ -106,9 +106,10 @@ public class DCCMISAPIWrapper {
 		}
 	}
 
-	public ArrayList<CmisObject> getChildren(String folderId, int pageNumber, int pageSize) throws RepositoryNotAvailableException {
+	public ArrayList<CmisObject> getChildren(String folderId, int pageNumber, int pageSize)
+			throws RepositoryNotAvailableException {
 		try {
-			Session session = getSession(data.username, data.password, data.repo);			
+			Session session = getSession(data.username, data.password, data.repo);
 			Folder rootFolder = (Folder) session.getObject(folderId);
 			ItemIterable<CmisObject> children = rootFolder.getChildren();
 			ArrayList<CmisObject> navigationObjects = new ArrayList<>();
@@ -160,23 +161,20 @@ public class DCCMISAPIWrapper {
 			throw new RepositoryNotAvailableException("CMIS", e);
 		}
 	}
-	
 
-	public void deleteObject(CmisObject object , boolean deleteChildrenOrNot) throws RepositoryNotAvailableException, CanNotDeleteFolderException {
-		try {			
-			if(object.getType().getLocalName().equals("dm_folder") && deleteChildrenOrNot)
-			{
+	public void deleteObject(CmisObject object, boolean deleteChildrenOrNot)
+			throws RepositoryNotAvailableException, CanNotDeleteFolderException {
+		try {
+			if (object.getType().getLocalName().equals("dm_folder") && deleteChildrenOrNot) {
 				((Folder) object).deleteTree(true, UnfileObject.DELETE, true);
-			}
-			else
-			{
+			} else {
 				object.delete();
 			}
 		} catch (CmisConnectionException e) {
 			throw new RepositoryNotAvailableException("CMIS", e);
-		}catch (CmisConstraintException ex){
+		} catch (CmisConstraintException ex) {
 			ex.printStackTrace();
-			throw new CanNotDeleteFolderException(object.getId()) ;
+			throw new CanNotDeleteFolderException(object.getId());
 		}
 	}
 
@@ -210,25 +208,23 @@ public class DCCMISAPIWrapper {
 		Document document = (Document) session.getObject(documentId);
 		AllowableActions actions = document.getAllowableActions();
 		boolean canCheckout = actions.getAllowableActions().contains(Action.CAN_CHECK_OUT);
-		if(!canCheckout)
-		{
+		if (!canCheckout) {
 			throw new DocumentCheckoutException("document already checked out");
 		}
 		Document checkoutDocument = (Document) session.getObject(document.checkOut());
 		return checkoutDocument;
 	}
-	public Document cancelCheckout(String documentId) throws DocumentCheckoutException
-	{
+
+	public Document cancelCheckout(String documentId) throws DocumentCheckoutException {
 		Session session = getSession(data.username, data.password, data.repo);
 		Document document = (Document) session.getObject(documentId);
 		AllowableActions actions = document.getAllowableActions();
-		boolean canCancelCheckout =  actions.getAllowableActions().contains(Action.CAN_CANCEL_CHECK_OUT);
-		if(!canCancelCheckout)
-		{
+		boolean canCancelCheckout = actions.getAllowableActions().contains(Action.CAN_CANCEL_CHECK_OUT);
+		if (!canCancelCheckout) {
 			throw new DocumentCheckoutException("document is not Checked out");
 		}
 		document.cancelCheckOut();
-	
+
 		return document;
 	}
 
@@ -237,8 +233,8 @@ public class DCCMISAPIWrapper {
 		Document document = (Document) session.getObject(documentId);
 		ContentStream contentStream = session.getObjectFactory().createContentStream(
 				document.getContentStream().getFileName(), content.length, document.getContentStream().getMimeType(),
-				new ByteArrayInputStream(content));
-		ObjectId newDocumentId = document.checkIn(false, null, contentStream, "minor version");
+				new ByteArrayInputStream(Base64.decodeBase64(content)));
+		ObjectId newDocumentId = document.checkIn(true, null, contentStream, "Major version");
 		return (Document) session.getObject(newDocumentId);
 	}
 }
