@@ -83,7 +83,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException {
+	public ArrayList<DocumentumObject> getChildren(String folderId) throws DocumentumException {
 		return CMISTransformation.convertCmisObjectList(dcAPI.getChildren(folderId, 1, 20), DocumentumObject.class);
 	}
 
@@ -137,7 +137,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 
 	@Override
 	public ArrayList<DocumentumObject> getChildren(String folderId, int pageNumber, int pageSize)
-			throws RepositoryNotAvailableException {
+			throws DocumentumException {
 		return CMISTransformation.convertCmisObjectList(dcAPI.getChildren(folderId, pageNumber, pageSize),
 				DocumentumObject.class);
 

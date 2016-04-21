@@ -37,7 +37,9 @@ import org.springframework.stereotype.Component;
 import com.emc.documentum.constants.DCCMISConstants;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
+import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
+import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.model.UserModel;
@@ -107,10 +109,15 @@ public class DCCMISAPIWrapper {
 	}
 
 	public ArrayList<CmisObject> getChildren(String folderId, int pageNumber, int pageSize)
-			throws RepositoryNotAvailableException {
+			throws DocumentumException {
 		try {
 			Session session = getSession(data.username, data.password, data.repo);
-			Folder rootFolder = (Folder) session.getObject(folderId);
+			CmisObject object = session.getObject(folderId);
+			if(!object.getBaseType().getLocalName().equals("dm_folder"))
+			{
+				throw new DocumentumException(folderId+ " is not a folder.");
+			}
+			Folder rootFolder = (Folder) object;
 			ItemIterable<CmisObject> children = rootFolder.getChildren();
 			ArrayList<CmisObject> navigationObjects = new ArrayList<>();
 			for (CmisObject o : children.skipTo(--pageNumber * pageSize).getPage(pageSize)) {
@@ -126,7 +133,12 @@ public class DCCMISAPIWrapper {
 			throws DocumentNotFoundException, RepositoryNotAvailableException {
 		try {
 			Session session = getSession(data.username, data.password, data.repo);
-			Document document = (Document) session.getObject(documentId);
+			CmisObject object = session.getObject(documentId);
+			if(!object.getBaseType().getLocalName().equals("dm_document"))
+			{
+				throw new DocumentNotFoundException(documentId +" is not a document.");
+			}
+			Document document = (Document) object;
 
 			System.out.println(document.getContentStreamLength());
 			System.out.println(document.getContentStream().getLength());

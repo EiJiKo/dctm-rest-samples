@@ -73,7 +73,7 @@ public interface DocumentumDelegate {
 	 * @return
 	 * @throws RepositoryNotAvailableException
 	 */
-	ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException;
+	ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException, DocumentumException;
 	
 	/**
 	 * Returns an Array of Documentum Objects containing the children of the Folder with the given FolderId
@@ -82,8 +82,9 @@ public interface DocumentumDelegate {
 	 * @param pageSize The size of the page to be returned
 	 * @return
 	 * @throws RepositoryNotAvailableException
+	 * @throws DocumentumException 
 	 */
-	ArrayList<DocumentumObject> getChildren(String folderId, int pageNumber, int pageSize) throws RepositoryNotAvailableException;
+	ArrayList<DocumentumObject> getChildren(String folderId, int pageNumber, int pageSize) throws RepositoryNotAvailableException, DocumentumException;
 	
 
 	/**
