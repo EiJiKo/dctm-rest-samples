@@ -203,38 +203,50 @@ public class DCCMISAPIWrapper {
 		}
 	}
 
-	public Document checkoutDocument(String documentId) throws DocumentCheckoutException {
-		Session session = getSession(data.username, data.password, data.repo);
-		Document document = (Document) session.getObject(documentId);
-		AllowableActions actions = document.getAllowableActions();
-		boolean canCheckout = actions.getAllowableActions().contains(Action.CAN_CHECK_OUT);
-		if (!canCheckout) {
-			throw new DocumentCheckoutException("document already checked out");
+	public Document checkoutDocument(String documentId) throws DocumentCheckoutException, RepositoryNotAvailableException {
+		try {
+			Session session = getSession(data.username, data.password, data.repo);
+
+			Document document = (Document) session.getObject(documentId);
+			AllowableActions actions = document.getAllowableActions();
+			boolean canCheckout = actions.getAllowableActions().contains(Action.CAN_CHECK_OUT);
+			if (!canCheckout) {
+				throw new DocumentCheckoutException("document already checked out");
+			}
+			Document checkoutDocument = (Document) session.getObject(document.checkOut());
+			return checkoutDocument;
+		} catch (CmisConnectionException e) {
+			throw new RepositoryNotAvailableException("CMIS", e);
 		}
-		Document checkoutDocument = (Document) session.getObject(document.checkOut());
-		return checkoutDocument;
 	}
 
-	public Document cancelCheckout(String documentId) throws DocumentCheckoutException {
-		Session session = getSession(data.username, data.password, data.repo);
-		Document document = (Document) session.getObject(documentId);
-		AllowableActions actions = document.getAllowableActions();
-		boolean canCancelCheckout = actions.getAllowableActions().contains(Action.CAN_CANCEL_CHECK_OUT);
-		if (!canCancelCheckout) {
-			throw new DocumentCheckoutException("document is not Checked out");
+	public Document cancelCheckout(String documentId) throws DocumentCheckoutException, RepositoryNotAvailableException {
+		try {
+			Session session = getSession(data.username, data.password, data.repo);
+			Document document = (Document) session.getObject(documentId);
+			AllowableActions actions = document.getAllowableActions();
+			boolean canCancelCheckout = actions.getAllowableActions().contains(Action.CAN_CANCEL_CHECK_OUT);
+			if (!canCancelCheckout) {
+				throw new DocumentCheckoutException("document is not Checked out");
+			}
+			document.cancelCheckOut();
+			return document;
+		} catch (CmisConnectionException e) {
+			throw new RepositoryNotAvailableException("CMIS", e);
 		}
-		document.cancelCheckOut();
-
-		return document;
 	}
 
-	public Document checkinDocument(String documentId, byte[] content) {
-		Session session = getSession(data.username, data.password, data.repo);
-		Document document = (Document) session.getObject(documentId);
-		ContentStream contentStream = session.getObjectFactory().createContentStream(
-				document.getContentStream().getFileName(), content.length, document.getContentStream().getMimeType(),
-				new ByteArrayInputStream(Base64.decodeBase64(content)));
-		ObjectId newDocumentId = document.checkIn(true, null, contentStream, "Major version");
-		return (Document) session.getObject(newDocumentId);
+	public Document checkinDocument(String documentId, byte[] content) throws RepositoryNotAvailableException {
+		try {
+			Session session = getSession(data.username, data.password, data.repo);
+			Document document = (Document) session.getObject(documentId);
+			ContentStream contentStream = session.getObjectFactory().createContentStream(
+					document.getContentStream().getFileName(), content.length,
+					document.getContentStream().getMimeType(), new ByteArrayInputStream(Base64.decodeBase64(content)));
+			ObjectId newDocumentId = document.checkIn(true, null, contentStream, "Major version");
+			return (Document) session.getObject(newDocumentId);
+		} catch (CmisConnectionException e) {
+			throw new RepositoryNotAvailableException("CMIS", e);
+		}
 	}
 }
