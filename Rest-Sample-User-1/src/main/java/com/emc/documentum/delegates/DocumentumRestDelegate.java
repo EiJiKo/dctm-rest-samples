@@ -38,7 +38,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.emc.documentum.delegates.DocumentumDelegate#createFolder(java.lang.
 	 * String, java.lang.String)
@@ -65,7 +65,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.emc.documentum.delegates.DocumentumDelegate#createFolder(java.lang.
 	 * String, java.lang.String)
@@ -91,7 +91,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.emc.documentum.delegates.DocumentumDelegate#createDocument(com.emc.
 	 * documentum.dtos.DocumentCreation)
@@ -118,7 +118,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.emc.documentum.delegates.DocumentumDelegate#getCabinetByName(java.
 	 * lang.String)
@@ -141,7 +141,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.emc.documentum.delegates.DocumentumDelegate#getObjectById(java.lang.
 	 * String)
@@ -162,7 +162,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.emc.documentum.delegates.DocumentumDelegate#getAllCabinets()
 	 */
 	@Override
@@ -179,26 +179,19 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.emc.documentum.delegates.DocumentumDelegate#getChildren(java.lang.
 	 * String)
 	 */
 	@Override
 	public ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException {
-		try {
-			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getChildren(folderId, 1, 20));
-		} catch (ResourceAccessException e) {
-			throw new RepositoryNotAvailableException("CoreRest");
-		} catch (Exception e) {
-			// TODO Object Not Found Exception
-			throw e;
-		}
+		return this.getChildren(folderId, 1, 20);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.emc.documentum.delegates.DocumentumDelegate#getDocumentContentById(
 	 * java.lang.String)
@@ -314,22 +307,23 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public DocumentumDocument createDocument(String parentId,DocumentumDocument document) throws DocumentCreationException {
+	public DocumentumDocument createDocument(String parentId, DocumentumDocument document)
+			throws DocumentCreationException {
 		JsonObject parent = dcAPI.getObjectById(parentId);
-		HashMap<String,Object> properties = document.getPropertiesAsMap();
-		if(!properties.containsKey("r_object_type")){
+		HashMap<String, Object> properties = document.getPropertiesAsMap();
+		if (!properties.containsKey("r_object_type")) {
 			properties.put("r_object_type", "dm_document");
 		}
-		
-		if(!properties.containsKey("object_name")){
+
+		if (!properties.containsKey("object_name")) {
 			properties.put("object_name", document.getName());
 		}
-		
+
 		return (DocumentumDocument) CoreRestTransformation.convertJsonObject(dcAPI.createDocument(parent, properties));
 	}
 
 	@Override
-	public ArrayList<DocumentumProperty> getObjectProperties(String objectId) throws RepositoryNotAvailableException{
+	public ArrayList<DocumentumProperty> getObjectProperties(String objectId) throws RepositoryNotAvailableException {
 		return CoreRestTransformation.convertJsonObject(dcAPI.getObjectById(objectId)).getProperties();
 	}
 
@@ -337,25 +331,30 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	public ArrayList<DocumentumObject> getDocumentAnnotations(String documentId) throws DocumentumException {
 		return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getDocumentAnnotations(documentId));
 	}
+
 	@Override
-	public DocumentumObject createDocumentAnnotation(String documentId,byte[] content,HashMap<String, Object>properties) throws DocumentumException
-	{
-		String annotationNameProperty = (String) properties.get("annotation_name"); 
-		String annotationName = (annotationNameProperty == null) ? documentId+"_Annot_"+((int)(Math.random()*10000)): annotationNameProperty;
-		
+	public DocumentumObject createDocumentAnnotation(String documentId, byte[] content,
+			HashMap<String, Object> properties) throws DocumentumException {
+		String annotationNameProperty = (String) properties.get("annotation_name");
+		String annotationName = (annotationNameProperty == null)
+				? documentId + "_Annot_" + ((int) (Math.random() * 10000)) : annotationNameProperty;
+
 		String folderIdproperty = (String) properties.get("folder_id");
-		String folderId =folderIdproperty == null ? (String) ((List)(getObjectById(documentId).getPropertiesAsMap().get("i_folder_id"))).get(0): folderIdproperty;
-		
+		String folderId = folderIdproperty == null
+				? (String) ((List) (getObjectById(documentId).getPropertiesAsMap().get("i_folder_id"))).get(0)
+				: folderIdproperty;
+
 		String formatProperty = (String) properties.get("format");
 		String format = formatProperty == null ? "crtext" : formatProperty;
-		
-		DocumentumObject note = CoreRestTransformation.convertJsonObject(dcAPI.createAnnotationWithContent(folderId, annotationName, content, format));
+
+		DocumentumObject note = CoreRestTransformation
+				.convertJsonObject(dcAPI.createAnnotationWithContent(folderId, annotationName, content, format));
 		dcAPI.createRelationShip("dm_relation", documentId, note.getId(), "DM_ANNOTATE", true);
 		return note;
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getRenditionsByDocumentId(String doumentId) {	
+	public ArrayList<DocumentumObject> getRenditionsByDocumentId(String doumentId) {
 		List<JsonEntry> list = dcAPI.getRenditionsByDocumentId(doumentId);
 		return CoreRestTransformation.convertCoreRSEntryList(list);
 	}

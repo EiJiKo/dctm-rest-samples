@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 
 import com.emc.documentum.constants.Cardinality;
 import com.emc.documentum.constants.DocumentumProperties;
-import com.emc.documentum.constants.LinkRelation;
 import com.emc.documentum.dtos.DocumentumCabinet;
 import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
@@ -33,20 +32,21 @@ public class RestTransformation {
 
 	}
 
-	private static void setDocumentumObjectProperties(DocumentumObject documentumObject, HashMap<String,Object> properties){
+	private static void setDocumentumObjectProperties(DocumentumObject documentumObject,
+			HashMap<String, Object> properties) {
 		ArrayList<DocumentumProperty> objectProperties = documentumObject.getProperties();
 		Iterator<Entry<String, Object>> it = properties.entrySet().iterator();
-	    while (it.hasNext()) {
-	    	Map.Entry<String, Object> pair = it.next();
-	    	Object value = pair.getValue();
-	    	Cardinality cardinality = Cardinality.Single;
-	    	if(value instanceof List<?>){
-	    		cardinality = Cardinality.List;
-	    	}
-	    	objectProperties.add(new DocumentumProperty(pair.getKey(), pair.getValue(),cardinality));
-	    }
+		while (it.hasNext()) {
+			Map.Entry<String, Object> pair = it.next();
+			Object value = pair.getValue();
+			Cardinality cardinality = Cardinality.Single;
+			if (value instanceof List<?>) {
+				cardinality = Cardinality.List;
+			}
+			objectProperties.add(new DocumentumProperty(pair.getKey(), pair.getValue(), cardinality));
+		}
 	}
-	
+
 	private static void mapJsonObjectProperties(JsonObject jsonObject, DocumentumObject documentumObject) {
 		documentumObject.setId((String) jsonObject.getPropertyByName(DocumentumProperties.OBJECT_ID));
 		documentumObject.setName((String) jsonObject.getPropertyByName("object_name"));
@@ -60,12 +60,8 @@ public class RestTransformation {
 	}
 
 	private static DocumentumObject getDocumentumObject(JsonObject jsonObject) {
-		JsonLink link = getLink(jsonObject.getLinks(), "canonical");
-		if(link == null){
-			link = getLink(jsonObject.getLinks(), LinkRelation.SELF);
-		}
-		String[] linkParts = link.getHref().split("/");
-		String baseType = linkParts[linkParts.length - 2];
+
+		String baseType = jsonObject.getBaseType();
 		DocumentumObject documentumObject = createDocumentumObject(baseType);
 		return documentumObject;
 	}
@@ -100,9 +96,7 @@ public class RestTransformation {
 
 	private static DocumentumObject ConvertCoreRSJsonEntry(JsonEntry jsonEntry) {
 		Content content = jsonEntry.getContent();
-		String linkUrl = getLink(content.getLinks(), LinkRelation.SELF).getHref();
-		String[] linkParts = linkUrl.split("/");
-		String baseType = linkParts[linkParts.length - 2];
+		String baseType = content.getBaseType();
 		DocumentumObject documentumObject = createDocumentumObject(baseType);
 		convertCoreRSContent(content, documentumObject);
 		return documentumObject;
@@ -131,9 +125,7 @@ public class RestTransformation {
 
 	private static <T extends DocumentumObject> T convertCoreRSJsonEntry(JsonEntry jsonEntry, Class<T> type) {
 		Content content = jsonEntry.getContent();
-		String linkUrl = getLink(content.getLinks(), LinkRelation.SELF).getHref();
-		String[] linkParts = linkUrl.split("/");
-		String baseType = linkParts[linkParts.length - 2];
+		String baseType = content.getBaseType();
 		DocumentumObject documentumObject;
 		try {
 			documentumObject = type.newInstance();
@@ -153,8 +145,10 @@ public class RestTransformation {
 
 	private static void convertCoreRSContent(Content content, DocumentumObject documentumObject) {
 
-		documentumObject.setId(content.getPropertyByName("r_object_id") ==null ? null :  content.getPropertyByName("r_object_id").toString());
-		documentumObject.setName(content.getPropertyByName("object_name") == null ? null : content.getPropertyByName("object_name").toString());
+		documentumObject.setId(content.getPropertyByName("r_object_id") == null ? null
+				: content.getPropertyByName("r_object_id").toString());
+		documentumObject.setName(content.getPropertyByName("object_name") == null ? null
+				: content.getPropertyByName("object_name").toString());
 		Object lockUser = content.getPropertyByName("r_lock_owner");
 		setDocumentumObjectProperties(documentumObject, content.getProperties());
 		if (lockUser != null && lockUser.toString().length() > 0) {
@@ -162,7 +156,7 @@ public class RestTransformation {
 			documentumObject.setLockUser(lockUser.toString());
 		}
 	}
-	
+
 	public static JsonLink getLink(List<JsonLink> links, String linkRelation) {
 		for (JsonLink link : links) {
 			if (link.getRel().equals(linkRelation)) {
