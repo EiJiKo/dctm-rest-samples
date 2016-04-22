@@ -3,6 +3,7 @@ package com.emc.documentum.wrappers;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -29,12 +30,14 @@ import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConnectionException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConstraintException;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.emc.documentum.constants.DCCMISConstants;
+import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentCreationException;
@@ -259,6 +262,19 @@ public class DCCMISAPIWrapper {
 			return (Document) session.getObject(newDocumentId);
 		} catch (CmisConnectionException e) {
 			throw new RepositoryNotAvailableException("CMIS", e);
+		}
+	}
+	public CmisObject renameObject(String objectId,String newName) throws RepositoryNotAvailableException, DocumentNotFoundException
+	{
+		try {
+			Session session = getSession(data.username, data.password, data.repo);
+			CmisObject object = session.getObject(objectId);
+			object.updateProperties(Collections.<String,String>singletonMap("cmis:name", newName));
+			return session.getObject(objectId);
+		} catch (CmisConnectionException e) {
+			throw new RepositoryNotAvailableException("CMIS", e);
+		}catch (CmisRuntimeException e) {
+			throw new DocumentNotFoundException(objectId + " not found.");
 		}
 	}
 }

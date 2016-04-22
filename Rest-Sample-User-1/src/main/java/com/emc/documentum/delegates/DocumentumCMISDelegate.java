@@ -216,8 +216,8 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public DocumentumObject renameObject(String documentId, String newName) {
-		throw new UnsupportedOperationException();
+	public DocumentumObject renameObject(String documentId, String newName) throws RepositoryNotAvailableException, DocumentNotFoundException {
+		return CMISTransformation.convertCMISObject(dcAPI.renameObject(documentId, newName));
 	}
 
 }
