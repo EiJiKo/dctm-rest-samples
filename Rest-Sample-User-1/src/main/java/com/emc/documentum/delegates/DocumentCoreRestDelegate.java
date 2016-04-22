@@ -37,7 +37,7 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 
 	@Override
 	public String getIdentifier() {
-		return "rest";
+		return "corerest";
 	}
 
 	@Override

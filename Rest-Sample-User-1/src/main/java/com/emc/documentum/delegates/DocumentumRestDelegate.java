@@ -36,6 +36,11 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	@Autowired
 	DCRestAPIWrapper dcAPI;
 
+	@Override
+	public String getIdentifier() {
+		return "rest";
+	}
+
 	/*
 	 * (non-Javadoc)
 	 *
@@ -252,11 +257,6 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
 		}
-	}
-
-	@Override
-	public String getIdentifier() {
-		return "corerest";
 	}
 
 	@Override
