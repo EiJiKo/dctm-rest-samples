@@ -192,15 +192,22 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public DocumentumDocument createDocument(String parentId, DocumentumDocument docCreation)
+	public DocumentumDocument createDocument(String parentId, DocumentumDocument document)
 			throws DocumentCreationException, RepositoryNotAvailableException {
 		JsonObject folder = restClientX.getObjectById(parentId);
 		byte[] data = "".getBytes();
+		HashMap<String, Object> properties = document.getPropertiesAsMap();
+
+		if (!properties.containsKey("r_object_type")) {
+			properties.put("r_object_type", "dm_document");
+		}
+
+		if (!properties.containsKey("object_name")) {
+			properties.put("object_name", document.getName());
+		}
 		try {
-			return RestTransformation.convertJsonObject(
-					restClientX.createContentfulDocument(folder, data, "text/*",
-							new PlainRestObject("dm_document", docCreation.getPropertiesAsMap())),
-					DocumentumDocument.class);
+			return RestTransformation.convertJsonObject(restClientX.createContentfulDocument(folder, data, "text/*",
+					new PlainRestObject("dm_document", properties)), DocumentumDocument.class);
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 			throw new DocumentCreationException(
