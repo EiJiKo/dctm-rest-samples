@@ -20,10 +20,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.util.UriUtils;
 
 import com.emc.documentum.exceptions.DocumentCheckinException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
+import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.wrappers.corerest.constants.AppRuntime;
 import com.emc.documentum.wrappers.corerest.constants.DocumentumProperties;
 import com.emc.documentum.wrappers.corerest.constants.LinkRelation;
@@ -304,20 +306,25 @@ public class DctmRestClientX implements InitializingBean {
 		streamingTemplate = new DctmRestTemplate(data.username, data.password, true);
 		// get home doc
 		System.out.println(data.contextRootUri + "/services");
-		ResponseEntity<Map> homedoc = restTemplate.get(data.contextRootUri + "/services", Map.class);
+		try {
+			ResponseEntity<Map> homedoc = restTemplate.get(data.contextRootUri + "/services", Map.class);
 
-		Map rootResources = (Map) homedoc.getBody().get("resources");
-		Map repositoriesEntry = (Map) rootResources.get(LinkRelation.REPOSITORIES);
-		String repositoriesUri = (String) repositoriesEntry.get("href");
+			Map rootResources = (Map) homedoc.getBody().get("resources");
+			Map repositoriesEntry = (Map) rootResources.get(LinkRelation.REPOSITORIES);
+			String repositoriesUri = (String) repositoriesEntry.get("href");
 
-		// get repositories
-		ResponseEntity<JsonFeed> repositories = restTemplate.get(repositoriesUri, JsonFeed.class, QueryParams.INLINE,
-				"true");
-		for (JsonEntry repo : repositories.getBody().getEntries()) {
-			if (data.repo.equals(repo.getTitle())) {
-				repository = repo.getContentObject();
-				break;
+			// get repositories
+			ResponseEntity<JsonFeed> repositories = restTemplate.get(repositoriesUri, JsonFeed.class,
+					QueryParams.INLINE, "true");
+			for (JsonEntry repo : repositories.getBody().getEntries()) {
+				if (data.repo.equals(repo.getTitle())) {
+					repository = repo.getContentObject();
+					break;
+				}
 			}
+		} catch (ResourceAccessException e) {
+			e.printStackTrace();
+			throw new RepositoryNotAvailableException("CoreRest", e);
 		}
 	}
 }

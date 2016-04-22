@@ -358,4 +358,10 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		List<JsonEntry> list = dcAPI.getRenditionsByDocumentId(doumentId);
 		return CoreRestTransformation.convertCoreRSEntryList(list);
 	}
+
+	@Override
+	public DocumentumObject renameObject(String documentId, String newName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

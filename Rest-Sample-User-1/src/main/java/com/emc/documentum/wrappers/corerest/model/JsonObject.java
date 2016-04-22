@@ -79,6 +79,7 @@ public class JsonObject {
 		return null;
 	}
 
+	@JsonIgnore
 	public String getHref(String folder) {
 		for (JsonLink link : links) {
 			if (link.getRel().equals(folder)) {
@@ -104,6 +105,7 @@ public class JsonObject {
 		return null;
 	}
 
+	@JsonIgnore
 	public boolean isDocument() {
 		return getBaseType().equals("documents");
 	}

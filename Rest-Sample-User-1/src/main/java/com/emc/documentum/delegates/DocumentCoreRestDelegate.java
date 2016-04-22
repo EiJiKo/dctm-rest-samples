@@ -1,6 +1,7 @@
 package com.emc.documentum.delegates;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -266,6 +267,17 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 	public ArrayList<DocumentumObject> getRenditionsByDocumentId(String doumentId) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public DocumentumObject renameObject(String objectId, String newName) throws DocumentNotFoundException {
+		JsonObject object = restClientX.getObjectById(objectId);
+		if (object == null) {
+			throw new DocumentNotFoundException(objectId);
+		}
+		JsonObject updatedObject = restClientX.update(object,
+				Collections.<String, Object>singletonMap(DocumentumProperties.OBJECT_NAME, newName));
+		return RestTransformation.convertJsonObject(updatedObject);
 	}
 
 }
