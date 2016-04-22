@@ -252,7 +252,7 @@ public class DocumentumIntegrationController {
 	@RequestMapping(value = "object/{objectId}/rename", method = RequestMethod.POST)
 	public DocumentumObject renameObject(@PathVariable(value = "api") String api,
 			@PathVariable(value = "objectId") String objectId, @RequestBody String newName)
-			throws DocumentNotFoundException, DelegateNotFoundException {
+			throws DocumentNotFoundException, DelegateNotFoundException, RepositoryNotAvailableException {
 		return (delegateProvider.getDelegate(api)).renameObject(objectId, newName);
 	}
 

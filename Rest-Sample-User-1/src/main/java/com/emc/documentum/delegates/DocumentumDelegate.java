@@ -148,5 +148,5 @@ public interface DocumentumDelegate {
 
 	ArrayList<DocumentumObject> getRenditionsByDocumentId(String doumentId);
 
-	DocumentumObject renameObject(String objectId, String newName) throws DocumentNotFoundException;
+	DocumentumObject renameObject(String objectId, String newName) throws DocumentNotFoundException, RepositoryNotAvailableException;
 }
