@@ -150,4 +150,7 @@ public interface DocumentumDelegate {
 
 	DocumentumObject renameObject(String objectId, String newName) throws DocumentNotFoundException, RepositoryNotAvailableException;
 
+	DocumentumObject copyObject(String objectId,String targetFolderId) throws DocumentumException, RepositoryNotAvailableException;
+	
+	DocumentumObject moveObject(String objectId,String targetFolderId) throws DocumentumException, RepositoryNotAvailableException;
 }

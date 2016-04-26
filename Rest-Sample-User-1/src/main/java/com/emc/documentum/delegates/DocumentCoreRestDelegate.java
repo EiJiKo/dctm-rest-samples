@@ -293,4 +293,18 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 		
 	}
 
+	@Override
+	public DocumentumObject copyObject(String objectId, String targetFolderId)
+			throws DocumentumException, RepositoryNotAvailableException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DocumentumObject moveObject(String objectId, String targetFolderId)
+			throws DocumentumException, RepositoryNotAvailableException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
