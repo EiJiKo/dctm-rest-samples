@@ -109,6 +109,10 @@ public class JsonObject {
 	public boolean isDocument() {
 		return getBaseType().equals("documents");
 	}
+	@JsonIgnore public boolean isFolder()
+	{
+		return getBaseType().equals("folders");
+	}
 
 	@JsonIgnore
 	public String getBaseType() {

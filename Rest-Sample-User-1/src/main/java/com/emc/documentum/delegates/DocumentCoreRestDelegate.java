@@ -297,16 +297,37 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 			throws DocumentumException, RepositoryNotAvailableException {
 		JsonObject object = restClientX.getObjectById(objectId);
 		if (object == null) {
-			throw new ObjectNotFoundException(objectId);
+			throw new ObjectNotFoundException("object " + objectId +" not found.");
 		}
-		return null;
+		JsonObject targetFolder = restClientX.getObjectById(targetFolderId);
+		if(targetFolderId == null)
+		{
+			throw new ObjectNotFoundException("target folder " + targetFolderId +" not found.");
+		}
+		if(!targetFolder.isFolder())
+		{
+			throw new DocumentumException(targetFolderId +" is not a folder.");
+		}
+		return RestTransformation.convertJsonObject(restClientX.copy(object, targetFolder));
 	}
 
 	@Override
 	public DocumentumObject moveObject(String objectId, String targetFolderId)
 			throws DocumentumException, RepositoryNotAvailableException {
-		// TODO Auto-generated method stub
-		return null;
+		JsonObject object = restClientX.getObjectById(objectId);
+		if (object == null) {
+			throw new ObjectNotFoundException("object " + objectId +" not found.");
+		}
+		JsonObject targetFolder = restClientX.getObjectById(targetFolderId);
+		if(targetFolderId == null)
+		{
+			throw new ObjectNotFoundException("target folder " + targetFolderId +" not found.");
+		}
+		if(!targetFolder.isFolder())
+		{
+			throw new DocumentumException(targetFolderId +" is not a folder.");
+		}
+		return RestTransformation.convertJsonObject(restClientX.move(object, targetFolder));
 	}
 
 }
