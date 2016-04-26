@@ -1,8 +1,8 @@
 package com.emc.documentum.delegates;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -24,7 +24,6 @@ import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
-import com.emc.documentum.transformation.CoreRestTransformation;
 import com.emc.documentum.wrappers.corerest.DctmRestClientX;
 import com.emc.documentum.wrappers.corerest.model.JsonObject;
 import com.emc.documentum.wrappers.corerest.model.PlainRestObject;
@@ -33,12 +32,13 @@ import com.emc.documentum.wrappers.corerest.util.RestTransformation;
 @Component("DocumentCoreRestDelegate")
 public class DocumentCoreRestDelegate implements DocumentumDelegate {
 
-	@Autowired @Lazy
+	@Autowired
+	@Lazy
 	DctmRestClientX restClientX;
 
 	@Override
 	public String getIdentifier() {
-		return "rest";
+		return "corerest";
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 	@Override
 	public byte[] getDocumentContentById(String documentId)
 			throws DocumentNotFoundException, RepositoryNotAvailableException {
-		return restClientX.getContentById(documentId,true).getData();
+		return restClientX.getContentById(documentId, true).getData();
 	}
 
 	@Override
@@ -192,15 +192,22 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public DocumentumDocument createDocument(String parentId, DocumentumDocument docCreation)
+	public DocumentumDocument createDocument(String parentId, DocumentumDocument document)
 			throws DocumentCreationException, RepositoryNotAvailableException {
 		JsonObject folder = restClientX.getObjectById(parentId);
 		byte[] data = "".getBytes();
+		HashMap<String, Object> properties = document.getPropertiesAsMap();
+
+		if (!properties.containsKey("r_object_type")) {
+			properties.put("r_object_type", "dm_document");
+		}
+
+		if (!properties.containsKey("object_name")) {
+			properties.put("object_name", document.getName());
+		}
 		try {
-			return RestTransformation.convertJsonObject(
-					restClientX.createContentfulDocument(folder, data,"text/*" ,
-							new PlainRestObject("dm_document", docCreation.getPropertiesAsMap())),
-					DocumentumDocument.class);
+			return RestTransformation.convertJsonObject(restClientX.createContentfulDocument(folder, data, "text/*",
+					new PlainRestObject("dm_document", properties)), DocumentumDocument.class);
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 			throw new DocumentCreationException(
@@ -223,51 +230,61 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 	public DocumentumObject createDocumentAnnotation(String documentId, byte[] content,
 			HashMap<String, Object> properties) throws DocumentumException {
 		JsonObject document = restClientX.getObjectById(documentId);
-		String selfUrl = document.getHref(LinkRelation.SELF);
-		String []urlParts = selfUrl.split("/");
-		if(!urlParts[urlParts.length-2].equals("documents")){
-			throw new DocumentumException(documentId+ " is not a document");
+
+		if (!document.isDocument()) {
+			throw new DocumentumException(documentId + " is not a document");
 		}
-		
-		String annotationNameProperty = (String) properties.get("annotation_name"); 
-		String annotationName = (annotationNameProperty == null) ? documentId+"_Annot_"+((int)(Math.random()*10000)): annotationNameProperty;
-		
+
+		String annotationNameProperty = (String) properties.get("annotation_name");
+		String annotationName = (annotationNameProperty == null)
+				? documentId + "_Annot_" + ((int) (Math.random() * 10000)) : annotationNameProperty;
+
 		String folderIdproperty = (String) properties.get("folder_id");
 		JsonObject folder;
-		if(folderIdproperty == null)
-		{
+		if (folderIdproperty == null) {
 			String folderUrl = document.getHref(LinkRelation.PARENT);
-			urlParts = folderUrl.split("/");
-			folderIdproperty = urlParts[urlParts.length-1];
+			String[] urlParts = folderUrl.split("/");
+			folderIdproperty = urlParts[urlParts.length - 1];
 		}
 		folder = restClientX.getObjectById(folderIdproperty);
 
-		
 		String formatProperty = (String) properties.get("format");
 		String format = formatProperty == null ? "crtext" : formatProperty;
 		HashMap<String, Object> creationProperties = new HashMap<>();
 		creationProperties.put(DocumentumProperties.OBJECT_NAME, annotationName);
 		creationProperties.put(DocumentumProperties.CONTENT_TYPE, format);
-		PlainRestObject noteCreation = new PlainRestObject("dm_note",creationProperties);
-		
-		DocumentumObject note = RestTransformation.convertJsonObject(restClientX.createContentfulObject(folder,content,"text/*",noteCreation ));
-		
+		PlainRestObject noteCreation = new PlainRestObject("dm_note", creationProperties);
+
+		DocumentumObject note = RestTransformation
+				.convertJsonObject(restClientX.createContentfulObject(folder, content, "text/*", noteCreation));
+
 		HashMap<String, Object> relationShipProperties = new HashMap<>();
 		relationShipProperties.put("relation_name", "DM_ANNOTATE");
 		relationShipProperties.put("parent_id", documentId);
 		relationShipProperties.put("child_id", note.getId());
 		relationShipProperties.put("permanent_link", true);
 		PlainRestObject relationshipCreation = new PlainRestObject("dm_relation", relationShipProperties);
-		
+
 		restClientX.createRelationShip(relationshipCreation);
-		
+
 		return note;
 	}
 
 	@Override
 	public ArrayList<DocumentumObject> getRenditionsByDocumentId(String doumentId) {
 		// TODO Auto-generated method stub
-		return null ;
+		return null;
+	}
+
+	@Override
+	public DocumentumObject renameObject(String objectId, String newName) throws DocumentNotFoundException {
+		JsonObject object = restClientX.getObjectById(objectId);
+		if (object == null) {
+			throw new DocumentNotFoundException(objectId);
+		}
+		JsonObject updatedObject = restClientX.update(object,
+				Collections.<String, Object>singletonMap(DocumentumProperties.OBJECT_NAME, newName));
+		return RestTransformation.convertJsonObject(updatedObject);
 	}
 
 	@Override

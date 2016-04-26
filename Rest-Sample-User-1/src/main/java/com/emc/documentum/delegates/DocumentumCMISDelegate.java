@@ -19,6 +19,7 @@ import com.emc.documentum.dtos.DocumentumProperty;
 import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
+import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
@@ -35,6 +36,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	@Autowired
 	DCCMISAPIWrapper dcAPI;
 
+	@Override
 	public DocumentumFolder createFolder(String cabinetName, String folderName)
 			throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException {
 		try {
@@ -82,7 +84,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException {
+	public ArrayList<DocumentumObject> getChildren(String folderId) throws DocumentumException {
 		return CMISTransformation.convertCmisObjectList(dcAPI.getChildren(folderId, 1, 20), DocumentumObject.class);
 	}
 
@@ -100,23 +102,27 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public DocumentumDocument checkoutDocument(String documentId) throws DocumentCheckoutException {
+	public DocumentumDocument checkoutDocument(String documentId)
+			throws DocumentCheckoutException, RepositoryNotAvailableException {
 		log.info("checkout document" + documentId);
 		return CMISTransformation.convertCMISDocument(dcAPI.checkoutDocument(documentId));
 
 	}
 
 	@Override
-	public DocumentumDocument checkinDocument(String documentId, byte[] content) {
+	public DocumentumDocument checkinDocument(String documentId, byte[] content)
+			throws RepositoryNotAvailableException {
 		return CMISTransformation.convertCMISDocument(dcAPI.checkinDocument(documentId, content));
 	}
-
-
 
 	@Override
 	public DocumentumFolder createFolderByParentId(String ParentId, String folderName) throws FolderCreationException {
 		try {
-			Folder parentFolder = (Folder) dcAPI.getObjectById(ParentId);
+			CmisObject object = dcAPI.getObjectById(ParentId);
+			if (!object.getBaseType().getLocalName().equals("dm_folder")) {
+				throw new FolderCreationException(ParentId + " is not a folder.");
+			}
+			Folder parentFolder = (Folder) object;
 			return CMISTransformation.convertCMISFolder(dcAPI.createFolder(parentFolder, folderName));
 		} catch (RepositoryNotAvailableException e) {
 			e.printStackTrace();
@@ -131,7 +137,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 
 	@Override
 	public ArrayList<DocumentumObject> getChildren(String folderId, int pageNumber, int pageSize)
-			throws RepositoryNotAvailableException {
+			throws DocumentumException {
 		return CMISTransformation.convertCmisObjectList(dcAPI.getChildren(folderId, pageNumber, pageSize),
 				DocumentumObject.class);
 
@@ -152,6 +158,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 		}
 	}
 
+	@Override
 	public DocumentumDocument cancelCheckout(String documentId)
 			throws RepositoryNotAvailableException, DocumentCheckoutException {
 		return CMISTransformation.convertCMISDocument(dcAPI.cancelCheckout(documentId));
@@ -165,8 +172,12 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 
 	@Override
 	public DocumentumDocument createDocument(String parentId, DocumentumDocument document)
-			throws RepositoryNotAvailableException {
-		Folder folder = (Folder) dcAPI.getObjectById(parentId);
+			throws DocumentCreationException, RepositoryNotAvailableException {
+		CmisObject object = dcAPI.getObjectById(parentId);
+		if (!object.getBaseType().getLocalName().equals("dm_folder")) {
+			throw new DocumentCreationException(parentId + " is not a folder.");
+		}
+		Folder folder = (Folder) object;
 		HashMap<String, Object> properties = document.getPropertiesAsMap();
 		if (!properties.containsKey("cmis:objectTypeId")) {
 			properties.put("cmis:objectTypeId", "cmis:document");
@@ -179,7 +190,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public ArrayList<DocumentumProperty> getObjectProperties(String objectId) throws RepositoryNotAvailableException{
+	public ArrayList<DocumentumProperty> getObjectProperties(String objectId) throws RepositoryNotAvailableException {
 		return CMISTransformation.convertCMISObject(dcAPI.getObjectById(objectId)).getProperties();
 	}
 
@@ -200,8 +211,13 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	@Override
 	public ArrayList<DocumentumObject> getRenditionsByDocumentId(String doumentId) {
 		// TODO Auto-generated method stub
-		return null ;
-		
+		return null;
+
+	}
+
+	@Override
+	public DocumentumObject renameObject(String documentId, String newName) throws RepositoryNotAvailableException, DocumentNotFoundException {
+		return CMISTransformation.convertCMISObject(dcAPI.renameObject(documentId, newName));
 	}
 
 	@Override

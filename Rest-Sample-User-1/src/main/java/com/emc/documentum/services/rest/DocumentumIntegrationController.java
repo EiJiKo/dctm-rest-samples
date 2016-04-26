@@ -74,24 +74,28 @@ public class DocumentumIntegrationController {
 		}
 	}
 
-//	@ApiOperation(value = "Create Document", notes = "Create a Contentless document")
-//	@RequestMapping(value = "/document/create", method = RequestMethod.POST)
-//	public DocumentumDocument createDocument(@PathVariable(value = "api") String api,
-//			@Valid @RequestBody DocumentCreation docCreation) throws DocumentumException, DelegateNotFoundException {
-//		try {
-//			return (delegateProvider.getDelegate(api)).createDocument(docCreation);
-//		} catch (DocumentumException e) {
-//			// TODO Customize Error Handling
-//			throw e;
-//		}
-//	}
+	// @ApiOperation(value = "Create Document", notes = "Create a Contentless
+	// document")
+	// @RequestMapping(value = "/document/create", method = RequestMethod.POST)
+	// public DocumentumDocument createDocument(@PathVariable(value = "api")
+	// String api,
+	// @Valid @RequestBody DocumentCreation docCreation) throws
+	// DocumentumException, DelegateNotFoundException {
+	// try {
+	// return (delegateProvider.getDelegate(api)).createDocument(docCreation);
+	// } catch (DocumentumException e) {
+	// // TODO Customize Error Handling
+	// throw e;
+	// }
+	// }
 
 	@ApiOperation(value = "Create Document", notes = "Create a Contentless document")
 	@RequestMapping(value = "/folder/{folderId}/document", method = RequestMethod.POST)
 	public DocumentumDocument createDocument(@PathVariable(value = "api") String api,
-			@Valid @RequestBody DocumentumDocument document , @PathVariable(value="folderId") String folderId) throws DocumentumException, DelegateNotFoundException {
+			@Valid @RequestBody DocumentumDocument document, @PathVariable(value = "folderId") String folderId)
+			throws DocumentumException, DelegateNotFoundException {
 		translationUtility.translateToRepo(document, api);
-		DocumentumDocument createdDocument = (delegateProvider.getDelegate(api)).createDocument(folderId,document);
+		DocumentumDocument createdDocument = (delegateProvider.getDelegate(api)).createDocument(folderId, document);
 		translationUtility.translateFromRepo(createdDocument, api);
 		return createdDocument;
 	}
@@ -201,7 +205,7 @@ public class DocumentumIntegrationController {
 		log.entering("checkin document ", documentId);
 		return (delegateProvider.getDelegate(api)).cancelCheckout(documentId);
 	}
-	
+
 	@ApiOperation(value = "Get Object Properties", notes = "Gets the properties of a specific object")
 	@RequestMapping(value = "get/object/properties/id/{objectId}", method = RequestMethod.GET)
 	public ArrayList<DocumentumProperty> GetObjectProperties(@PathVariable(value = "api") String api,
@@ -210,7 +214,7 @@ public class DocumentumIntegrationController {
 		log.entering("Getting object properties ", objectId);
 		return (delegateProvider.getDelegate(api)).getObjectProperties(objectId);
 	}
-	
+
 	@ApiOperation(value = "Get document annotations", notes = "Gets the annotations of a specific document")
 	@RequestMapping(value = "get/document/annotations/id/{documentId}", method = RequestMethod.GET)
 	public ArrayList<DocumentumObject> GetDocumentAnnotations(@PathVariable(value = "api") String api,
@@ -219,28 +223,37 @@ public class DocumentumIntegrationController {
 		log.entering("Getting document annotations ", documentId);
 		return (delegateProvider.getDelegate(api)).getDocumentDMNotesByRelationName(documentId , "DM_ANNOTATE");
 	}
-	
+
 	@ApiOperation(value = "create document annotation", notes = "creates annotation for a specific document")
-	@RequestMapping(value = "/document/{documentId}/annotations", method = RequestMethod.POST,consumes = {"multipart/form-data"})
+	@RequestMapping(value = "/document/{documentId}/annotations", method = RequestMethod.POST, consumes = {
+			"multipart/form-data" })
 	public DocumentumObject createDocumentAnnotations(@PathVariable(value = "api") String api,
 			@PathVariable(value = "documentId") String documentId,
-			@RequestPart("properties") HashMap<String,Object> properties,
-			@RequestPart("binary") MultipartFile file)
+			@RequestPart("properties") HashMap<String, Object> properties, @RequestPart("binary") MultipartFile file)
 			throws DocumentumException, DelegateNotFoundException {
 		log.entering("creating document annotation ", documentId);
 		try {
-			return (delegateProvider.getDelegate(api)).createDocumentAnnotation(documentId, file.getBytes(), properties);
+			return (delegateProvider.getDelegate(api)).createDocumentAnnotation(documentId, file.getBytes(),
+					properties);
 		} catch (IOException e) {
 			throw new DocumentumException("Error occurred while reading binary part", e);
 		}
 	}
+
 	@ApiOperation(value = "get document renditions", notes = "gets renditions for a specific document")
 	@RequestMapping(value = "get/document/{documentId}/renditions", method = RequestMethod.GET)
 	public ArrayList<DocumentumObject> getDocumentRenditions(@PathVariable(value = "api") String api,
 			@PathVariable(value = "documentId") String documentId)
 			throws DocumentumException, DelegateNotFoundException {
 		log.entering("getting  document renditions ", documentId);
-			return (delegateProvider.getDelegate(api)).getRenditionsByDocumentId(documentId); 
+		return (delegateProvider.getDelegate(api)).getRenditionsByDocumentId(documentId);
 	}
-	
+
+	@RequestMapping(value = "object/{objectId}/rename", method = RequestMethod.POST)
+	public DocumentumObject renameObject(@PathVariable(value = "api") String api,
+			@PathVariable(value = "objectId") String objectId, @RequestBody String newName)
+			throws DocumentNotFoundException, DelegateNotFoundException, RepositoryNotAvailableException {
+		return (delegateProvider.getDelegate(api)).renameObject(objectId, newName);
+	}
+
 }

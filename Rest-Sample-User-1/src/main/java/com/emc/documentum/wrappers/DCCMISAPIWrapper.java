@@ -3,6 +3,7 @@ package com.emc.documentum.wrappers;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -29,15 +30,19 @@ import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConnectionException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConstraintException;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.emc.documentum.constants.DCCMISConstants;
+import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
+import com.emc.documentum.exceptions.DocumentCreationException;
 import com.emc.documentum.exceptions.DocumentNotFoundException;
+import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.model.UserModel;
@@ -107,10 +112,15 @@ public class DCCMISAPIWrapper {
 	}
 
 	public ArrayList<CmisObject> getChildren(String folderId, int pageNumber, int pageSize)
-			throws RepositoryNotAvailableException {
+			throws DocumentumException {
 		try {
 			Session session = getSession(data.username, data.password, data.repo);
-			Folder rootFolder = (Folder) session.getObject(folderId);
+			CmisObject object = session.getObject(folderId);
+			if(!object.getBaseType().getLocalName().equals("dm_folder"))
+			{
+				throw new DocumentumException(folderId+ " is not a folder.");
+			}
+			Folder rootFolder = (Folder) object;
 			ItemIterable<CmisObject> children = rootFolder.getChildren();
 			ArrayList<CmisObject> navigationObjects = new ArrayList<>();
 			for (CmisObject o : children.skipTo(--pageNumber * pageSize).getPage(pageSize)) {
@@ -126,7 +136,12 @@ public class DCCMISAPIWrapper {
 			throws DocumentNotFoundException, RepositoryNotAvailableException {
 		try {
 			Session session = getSession(data.username, data.password, data.repo);
-			Document document = (Document) session.getObject(documentId);
+			CmisObject object = session.getObject(documentId);
+			if(!object.getBaseType().getLocalName().equals("dm_document"))
+			{
+				throw new DocumentNotFoundException(documentId +" is not a document.");
+			}
+			Document document = (Document) object;
 
 			System.out.println(document.getContentStreamLength());
 			System.out.println(document.getContentStream().getLength());
@@ -203,38 +218,63 @@ public class DCCMISAPIWrapper {
 		}
 	}
 
-	public Document checkoutDocument(String documentId) throws DocumentCheckoutException {
-		Session session = getSession(data.username, data.password, data.repo);
-		Document document = (Document) session.getObject(documentId);
-		AllowableActions actions = document.getAllowableActions();
-		boolean canCheckout = actions.getAllowableActions().contains(Action.CAN_CHECK_OUT);
-		if (!canCheckout) {
-			throw new DocumentCheckoutException("document already checked out");
+	public Document checkoutDocument(String documentId) throws DocumentCheckoutException, RepositoryNotAvailableException {
+		try {
+			Session session = getSession(data.username, data.password, data.repo);
+
+			Document document = (Document) session.getObject(documentId);
+			AllowableActions actions = document.getAllowableActions();
+			boolean canCheckout = actions.getAllowableActions().contains(Action.CAN_CHECK_OUT);
+			if (!canCheckout) {
+				throw new DocumentCheckoutException("document already checked out");
+			}
+			Document checkoutDocument = (Document) session.getObject(document.checkOut());
+			return checkoutDocument;
+		} catch (CmisConnectionException e) {
+			throw new RepositoryNotAvailableException("CMIS", e);
 		}
-		Document checkoutDocument = (Document) session.getObject(document.checkOut());
-		return checkoutDocument;
 	}
 
-	public Document cancelCheckout(String documentId) throws DocumentCheckoutException {
-		Session session = getSession(data.username, data.password, data.repo);
-		Document document = (Document) session.getObject(documentId);
-		AllowableActions actions = document.getAllowableActions();
-		boolean canCancelCheckout = actions.getAllowableActions().contains(Action.CAN_CANCEL_CHECK_OUT);
-		if (!canCancelCheckout) {
-			throw new DocumentCheckoutException("document is not Checked out");
+	public Document cancelCheckout(String documentId) throws DocumentCheckoutException, RepositoryNotAvailableException {
+		try {
+			Session session = getSession(data.username, data.password, data.repo);
+			Document document = (Document) session.getObject(documentId);
+			AllowableActions actions = document.getAllowableActions();
+			boolean canCancelCheckout = actions.getAllowableActions().contains(Action.CAN_CANCEL_CHECK_OUT);
+			if (!canCancelCheckout) {
+				throw new DocumentCheckoutException("document is not Checked out");
+			}
+			document.cancelCheckOut();
+			return document;
+		} catch (CmisConnectionException e) {
+			throw new RepositoryNotAvailableException("CMIS", e);
 		}
-		document.cancelCheckOut();
-
-		return document;
 	}
 
-	public Document checkinDocument(String documentId, byte[] content) {
-		Session session = getSession(data.username, data.password, data.repo);
-		Document document = (Document) session.getObject(documentId);
-		ContentStream contentStream = session.getObjectFactory().createContentStream(
-				document.getContentStream().getFileName(), content.length, document.getContentStream().getMimeType(),
-				new ByteArrayInputStream(Base64.decodeBase64(content)));
-		ObjectId newDocumentId = document.checkIn(true, null, contentStream, "Major version");
-		return (Document) session.getObject(newDocumentId);
+	public Document checkinDocument(String documentId, byte[] content) throws RepositoryNotAvailableException {
+		try {
+			Session session = getSession(data.username, data.password, data.repo);
+			Document document = (Document) session.getObject(documentId);
+			ContentStream contentStream = session.getObjectFactory().createContentStream(
+					document.getContentStream().getFileName(), content.length,
+					document.getContentStream().getMimeType(), new ByteArrayInputStream(Base64.decodeBase64(content)));
+			ObjectId newDocumentId = document.checkIn(true, null, contentStream, "Major version");
+			return (Document) session.getObject(newDocumentId);
+		} catch (CmisConnectionException e) {
+			throw new RepositoryNotAvailableException("CMIS", e);
+		}
+	}
+	public CmisObject renameObject(String objectId,String newName) throws RepositoryNotAvailableException, DocumentNotFoundException
+	{
+		try {
+			Session session = getSession(data.username, data.password, data.repo);
+			CmisObject object = session.getObject(objectId);
+			object.updateProperties(Collections.<String,String>singletonMap("cmis:name", newName));
+			return session.getObject(objectId);
+		} catch (CmisConnectionException e) {
+			throw new RepositoryNotAvailableException("CMIS", e);
+		}catch (CmisRuntimeException e) {
+			throw new DocumentNotFoundException(objectId + " not found.");
+		}
 	}
 }

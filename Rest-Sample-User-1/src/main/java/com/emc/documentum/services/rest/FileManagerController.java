@@ -308,7 +308,10 @@ public class FileManagerController extends BaseController{
 			return resultJson.toJSONString() ;
 		} catch (RepositoryNotAvailableException e) {
 			e.printStackTrace();
-			return "";
+			return errorResponse(e.getMessage()) ;
+		} catch (DocumentumException e) {
+			e.printStackTrace();
+			return errorResponse(e.getMessage()) ;
 		}
 		
 	}

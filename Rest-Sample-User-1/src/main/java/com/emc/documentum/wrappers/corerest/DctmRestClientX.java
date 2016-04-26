@@ -16,17 +16,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.util.UriUtils;
 
 import com.emc.documentum.exceptions.DocumentCheckinException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
+import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.wrappers.corerest.constants.AppRuntime;
 import com.emc.documentum.wrappers.corerest.constants.DocumentumProperties;
 import com.emc.documentum.wrappers.corerest.constants.LinkRelation;
@@ -160,13 +159,16 @@ public class DctmRestClientX implements InitializingBean {
 				(String) contentMeta.getPropertyByName(DocumentumProperties.DOS_EXTENSION),
 				content.getHeaders().getContentType(), content.getHeaders().getContentLength());
 	}
-	public List<JsonEntry> getDocumentAnnotations(String documentId)
-	{
+
+	public List<JsonEntry> getDocumentAnnotations(String documentId) {
 		JsonObject document = getObjectById(documentId);
-		ResponseEntity<JsonFeed> result = restTemplate.get(document.getHref(LinkRelation.OBJECT_RELATIONS), JsonFeed.class, QueryParams.INLINE,"true",QueryParams.FILTER,"starts-with(relation_name,'DM_ANNOTATE')");
+		ResponseEntity<JsonFeed> result = restTemplate.get(document.getHref(LinkRelation.OBJECT_RELATIONS),
+				JsonFeed.class, QueryParams.INLINE, "true", QueryParams.FILTER,
+				"starts-with(relation_name,'DM_ANNOTATE')");
 		return result.getBody().getEntries();
-		
+
 	}
+
 	public JsonObject checkinDocument(String documentId, byte[] data) throws DocumentCheckinException {
 		JsonObject document = getObjectById(documentId);
 		String link = document.getHref(LinkRelation.checkInNextMajor);
@@ -189,11 +191,10 @@ public class DctmRestClientX implements InitializingBean {
 	public JsonObject createContentfulDocument(JsonObject folder, byte[] data, String filename, String mime) {
 		PlainRestObject doc = new PlainRestObject("dm_document",
 				singleProperty(DocumentumProperties.OBJECT_NAME, filename));
-		return createContentfulDocument(folder, data, mime,doc);
+		return createContentfulDocument(folder, data, mime, doc);
 	}
 
-	public JsonObject createContentfulDocument(JsonObject folder, byte[] data, String mime,
-			PlainRestObject doc) {
+	public JsonObject createContentfulDocument(JsonObject folder, byte[] data, String mime, PlainRestObject doc) {
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		MultiValueMap<String, String> partHeaders1 = new LinkedMultiValueMap<>();
 		partHeaders1.set("Content-Type", DctmRestTemplate.DCTM_VND_JSON_TYPE.toString());
@@ -207,8 +208,8 @@ public class DctmRestClientX implements InitializingBean {
 				JsonObject.class);
 		return result.getBody();
 	}
-	public JsonObject createContentfulObject(JsonObject folder,byte[] data,String mime,PlainRestObject object)
-	{
+
+	public JsonObject createContentfulObject(JsonObject folder, byte[] data, String mime, PlainRestObject object) {
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		MultiValueMap<String, String> partHeaders1 = new LinkedMultiValueMap<>();
 		partHeaders1.set("Content-Type", DctmRestTemplate.DCTM_VND_JSON_TYPE.toString());
@@ -222,22 +223,19 @@ public class DctmRestClientX implements InitializingBean {
 				JsonObject.class);
 		return result.getBody();
 	}
-	public JsonObject createRelationShip(PlainRestObject relationObject)
-	{
-		ResponseEntity<JsonObject> result = streamingTemplate.post(repository.getHref(LinkRelation.OBJECT_RELATIONS), relationObject,
-				JsonObject.class);
+
+	public JsonObject createRelationShip(PlainRestObject relationObject) {
+		ResponseEntity<JsonObject> result = streamingTemplate.post(repository.getHref(LinkRelation.OBJECT_RELATIONS),
+				relationObject, JsonObject.class);
 		return result.getBody();
 	}
-	 public JsonObject updateContent(JsonObject doc, byte[] data) {
-	        String format = (String) doc.getPropertyByName(DocumentumProperties.CONTENT_TYPE);
-	        ResponseEntity<JsonObject> result = streamingTemplate.post(doc.getHref(LinkRelation.CONTENTS),
-	                data,
-	                JsonObject.class,
-	                QueryParams.OVERWRITE, "true",
-	                QueryParams.FORMAT, format);
-	        return result.getBody();
-	    }
-	 
+
+	public JsonObject updateContent(JsonObject doc, byte[] data) {
+		String format = (String) doc.getPropertyByName(DocumentumProperties.CONTENT_TYPE);
+		ResponseEntity<JsonObject> result = streamingTemplate.post(doc.getHref(LinkRelation.CONTENTS), data,
+				JsonObject.class, QueryParams.OVERWRITE, "true", QueryParams.FORMAT, format);
+		return result.getBody();
+	}
 
 	private JsonObject querySingleObjectById(String id) {
 		String dql = String.format(DQL_QUERY_BY_ID, DEFAULT_VIEW, id);
@@ -308,20 +306,25 @@ public class DctmRestClientX implements InitializingBean {
 		streamingTemplate = new DctmRestTemplate(data.username, data.password, true);
 		// get home doc
 		System.out.println(data.contextRootUri + "/services");
-		ResponseEntity<Map> homedoc = restTemplate.get(data.contextRootUri + "/services", Map.class);
+		try {
+			ResponseEntity<Map> homedoc = restTemplate.get(data.contextRootUri + "/services", Map.class);
 
-		Map rootResources = (Map) homedoc.getBody().get("resources");
-		Map repositoriesEntry = (Map) rootResources.get(LinkRelation.REPOSITORIES);
-		String repositoriesUri = (String) repositoriesEntry.get("href");
+			Map rootResources = (Map) homedoc.getBody().get("resources");
+			Map repositoriesEntry = (Map) rootResources.get(LinkRelation.REPOSITORIES);
+			String repositoriesUri = (String) repositoriesEntry.get("href");
 
-		// get repositories
-		ResponseEntity<JsonFeed> repositories = restTemplate.get(repositoriesUri, JsonFeed.class, QueryParams.INLINE,
-				"true");
-		for (JsonEntry repo : repositories.getBody().getEntries()) {
-			if (data.repo.equals(repo.getTitle())) {
-				repository = repo.getContentObject();
-				break;
+			// get repositories
+			ResponseEntity<JsonFeed> repositories = restTemplate.get(repositoriesUri, JsonFeed.class,
+					QueryParams.INLINE, "true");
+			for (JsonEntry repo : repositories.getBody().getEntries()) {
+				if (data.repo.equals(repo.getTitle())) {
+					repository = repo.getContentObject();
+					break;
+				}
 			}
+		} catch (ResourceAccessException e) {
+			e.printStackTrace();
+			throw new RepositoryNotAvailableException("CoreRest", e);
 		}
 	}
 }

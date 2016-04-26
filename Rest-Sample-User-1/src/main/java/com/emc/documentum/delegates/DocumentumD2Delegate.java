@@ -22,11 +22,11 @@ import com.emc.documentum.transformation.DCD2Transformation;
 import com.emc.documentum.wrappers.DCD2APIWrapper;
 
 @Component("DocumentumD2Delegate")
-public class DocumentumD2Delegate implements DocumentumDelegate{
+public class DocumentumD2Delegate implements DocumentumDelegate {
 
 	@Autowired
 	DCD2APIWrapper dcAPI;
-	
+
 	@Override
 	public DocumentumFolder createFolder(String cabinetName, String folderName)
 			throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException {
@@ -50,40 +50,41 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	@Override
 	public DocumentumObject getObjectById(String cabinetId)
 			throws CabinetNotFoundException, RepositoryNotAvailableException {
-		return DCD2Transformation.convertD2DocItemObject(dcAPI.getObjectById(cabinetId),dcAPI.getContext());
-		
+		return DCD2Transformation.convertD2DocItemObject(dcAPI.getObjectById(cabinetId), dcAPI.getContext());
+
 	}
 
 	@Override
 	public ArrayList<DocumentumFolder> getAllCabinets() throws RepositoryNotAvailableException {
-		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getAllCabinets(),dcAPI.getContext());
-	
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getAllCabinets(), dcAPI.getContext());
+
 	}
 
 	@Override
 	public ArrayList<DocumentumObject> getChildren(String folderId) throws RepositoryNotAvailableException {
-		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getChildren(folderId),dcAPI.getContext());
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getChildren(folderId), dcAPI.getContext());
 	}
 
 	@Override
 	public byte[] getDocumentContentById(String documentId)
 			throws DocumentNotFoundException, RepositoryNotAvailableException {
-			return dcAPI.getDocumentContent(documentId);
+		return dcAPI.getDocumentContent(documentId);
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getDocumentByName(String name) throws RepositoryNotAvailableException{
-		try{
-		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getDocumentByName(name),dcAPI.getContext());
-		}catch(DocumentNotFoundException e)
-		{
+	public ArrayList<DocumentumObject> getDocumentByName(String name) throws RepositoryNotAvailableException {
+		try {
+			return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getDocumentByName(name), dcAPI.getContext());
+		} catch (DocumentNotFoundException e) {
 			return new ArrayList<DocumentumObject>();
 		}
 	}
 
 	@Override
-	public DocumentumDocument checkoutDocument(String documentId) throws DocumentCheckoutException, RepositoryNotAvailableException {
-		DocumentumDocument document = DCD2Transformation.convertD2DocItemObject(dcAPI.checkoutDocument(documentId),dcAPI.getContext());
+	public DocumentumDocument checkoutDocument(String documentId)
+			throws DocumentCheckoutException, RepositoryNotAvailableException {
+		DocumentumDocument document = DCD2Transformation.convertD2DocItemObject(dcAPI.checkoutDocument(documentId),
+				dcAPI.getContext());
 		return document;
 	}
 
@@ -93,10 +94,10 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 		return null;
 	}
 
-
 	@Override
-	public DocumentumFolder createFolderByParentId(String ParentId, String folderName) throws FolderCreationException, RepositoryNotAvailableException {
-		return DCD2Transformation.convertD2DocItemObject(dcAPI.createFolder(ParentId, folderName),dcAPI.getContext());
+	public DocumentumFolder createFolderByParentId(String ParentId, String folderName)
+			throws FolderCreationException, RepositoryNotAvailableException {
+		return DCD2Transformation.convertD2DocItemObject(dcAPI.createFolder(ParentId, folderName), dcAPI.getContext());
 	}
 
 	@Override
@@ -109,24 +110,27 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	public ArrayList<DocumentumObject> getChildren(String folderId, int pageNumber, int pageSize)
 			throws RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
-		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getChildren(folderId,pageNumber,pageSize),dcAPI.getContext());
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getChildren(folderId, pageNumber, pageSize),
+				dcAPI.getContext());
 	}
 
 	@Override
 	public ArrayList<DocumentumFolder> getAllCabinets(int pageNumber, int pageSize)
 			throws RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
-		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getAllCabinets(pageNumber,pageSize),dcAPI.getContext());
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getAllCabinets(pageNumber, pageSize),
+				dcAPI.getContext());
 	}
 
 	@Override
-	public void deleteObject(String objectId , boolean deleteChildrenOrNot) throws CanNotDeleteFolderException {
+	public void deleteObject(String objectId, boolean deleteChildrenOrNot) throws CanNotDeleteFolderException {
 		dcAPI.deleteObject(objectId, deleteChildrenOrNot);
 	}
-	
+
+	@Override
 	public DocumentumDocument cancelCheckout(String documentId)
 			throws RepositoryNotAvailableException, DocumentCheckoutException {
-			return DCD2Transformation.convertD2DocItemObject(dcAPI.cancelCheckout(documentId),dcAPI.getContext());
+		return DCD2Transformation.convertD2DocItemObject(dcAPI.cancelCheckout(documentId), dcAPI.getContext());
 	}
 
 	@Override
@@ -142,7 +146,7 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	}
 
 	@Override
-	public ArrayList<DocumentumProperty> getObjectProperties(String objectId) throws RepositoryNotAvailableException{
+	public ArrayList<DocumentumProperty> getObjectProperties(String objectId) throws RepositoryNotAvailableException {
 		return DCD2Transformation.convertD2PropertiesList(dcAPI.getObjectProperties(objectId));
 	}
 
@@ -161,7 +165,13 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 
 	@Override
 	public ArrayList<DocumentumObject> getRenditionsByDocumentId(String doumentId) {
-		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getDocumentRenditions(doumentId), dcAPI.getContext());
+		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getDocumentRenditions(doumentId),
+				dcAPI.getContext());
+	}
+
+	@Override
+	public DocumentumObject renameObject(String documentId, String newName) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
