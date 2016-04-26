@@ -188,7 +188,7 @@ public class DCCMISAPIWrapper {
 
 	public ItemIterable<QueryResult> getObjectsByName(String name) throws RepositoryNotAvailableException {
 		try {
-			String queryString = String.format("Select * from cmis:document where cmis:name like '%s'",
+			String queryString = String.format("Select F.* FROM cmis:folder F where cmis:name like '%s'",
 					"%" + name + "%");
 			log.info("Executing Query " + queryString);
 			QueryStatement queryStatement = getSession(data.username, data.password, data.repo)

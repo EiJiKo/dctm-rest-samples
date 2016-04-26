@@ -147,7 +147,7 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getDocumentAnnotations(String objectId) throws RepositoryNotAvailableException {
+	public ArrayList<DocumentumObject> getDocumentDMNotesByRelationName(String objectId , String relationName){
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -162,6 +162,11 @@ public class DocumentumD2Delegate implements DocumentumDelegate{
 	@Override
 	public ArrayList<DocumentumObject> getRenditionsByDocumentId(String doumentId) {
 		return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getDocumentRenditions(doumentId), dcAPI.getContext());
+	}
+
+	@Override
+	public void addCommentToDocument(String documentId, String comment) {
+		// TODO Auto-generated method stub		
 	}
 
 }

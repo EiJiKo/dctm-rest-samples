@@ -214,7 +214,7 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getDocumentAnnotations(String objectId)
+	public ArrayList<DocumentumObject> getDocumentDMNotesByRelationName(String objectId , String relationName)
 			throws RepositoryNotAvailableException, DocumentumException {
 		return RestTransformation.convertCoreRSEntryList(restClientX.getDocumentAnnotations(objectId));
 	}
@@ -268,6 +268,12 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 	public ArrayList<DocumentumObject> getRenditionsByDocumentId(String doumentId) {
 		// TODO Auto-generated method stub
 		return null ;
+	}
+
+	@Override
+	public void addCommentToDocument(String documentId, String comment) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

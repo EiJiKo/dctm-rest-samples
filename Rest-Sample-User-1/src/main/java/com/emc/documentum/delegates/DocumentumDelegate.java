@@ -117,9 +117,12 @@ public interface DocumentumDelegate {
 	
 	ArrayList<DocumentumProperty> getObjectProperties(String objectId) throws RepositoryNotAvailableException;
 	
-	ArrayList<DocumentumObject> getDocumentAnnotations(String objectId) throws RepositoryNotAvailableException, DocumentumException;
-	
 	DocumentumObject createDocumentAnnotation(String documentId,byte[] content,HashMap<String, Object> properties) throws DocumentumException;
 		
 	ArrayList<DocumentumObject> getRenditionsByDocumentId(String doumentId) ;
+	
+	void addCommentToDocument(String documentId, String comment);
+
+	ArrayList<DocumentumObject> getDocumentDMNotesByRelationName(String documentId, String relationName)
+			throws DocumentumException;
 }

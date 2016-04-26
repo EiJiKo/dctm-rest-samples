@@ -334,9 +334,10 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getDocumentAnnotations(String documentId) throws DocumentumException {
-		return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getDocumentAnnotations(documentId));
+	public ArrayList<DocumentumObject> getDocumentDMNotesByRelationName(String documentId , String relationName) throws DocumentumException {
+		return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getDocumentDMNotesByRelationName(documentId , relationName));
 	}
+
 	@Override
 	public DocumentumObject createDocumentAnnotation(String documentId,byte[] content,HashMap<String, Object>properties) throws DocumentumException
 	{
@@ -359,4 +360,27 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		List<JsonEntry> list = dcAPI.getRenditionsByDocumentId(doumentId);
 		return CoreRestTransformation.convertCoreRSEntryList(list);
 	}
+	
+	
+	@Override
+	public void addCommentToDocument(String documentId , String comment )
+	{		
+		try {
+			String commentName = "comment" + documentId + "_Comm_"+((int)(Math.random()*10000));		
+			String folderId = (String) ((List)(getObjectById(documentId).getPropertiesAsMap().get("i_folder_id"))).get(0);
+			String format = "crtext";
+			byte[] commentBytes = comment.getBytes() ;
+			
+			JsonObject json = dcAPI.createAnnotationWithContent(folderId, commentName, commentBytes , format) ;
+			DocumentumObject commentObject = CoreRestTransformation.convertJsonObject(json);
+			//TODO change the relation type
+			dcAPI.createRelationShip("dm_relation", documentId, commentObject.getId(), "dm_wf_email_template", true);
+		} catch (CabinetNotFoundException | RepositoryNotAvailableException e) {
+			e.printStackTrace();
+		} catch (DocumentumException e) {
+			e.printStackTrace();
+		}
+
+	}
+
 }

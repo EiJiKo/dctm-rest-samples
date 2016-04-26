@@ -1,6 +1,8 @@
 package com.emc.documentum.services.rest;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.emc.documentum.delegate.provider.DelegateProvider;
 import com.emc.documentum.delegates.DocumentumDelegate;
@@ -303,12 +307,43 @@ public class FileManagerController extends BaseController{
 			resultJson = transformChildrenFromDocumentumObjects(folders) ;
 			return resultJson.toJSONString() ;
 		} catch (RepositoryNotAvailableException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return "";
 		}
 		
 	}
+	
+
+	@RequestMapping(value = "/api/document/{documentId}/comment/{comment}", method = RequestMethod.POST)
+	public String addCommentToDocument(@PathVariable(value="documentId")String documentId , @PathVariable(value="comment")String comment , @RequestHeader(value="API_BASE" , defaultValue="Rest") String delegateKey)
+			throws DocumentumException, DelegateNotFoundException {
+		log.entering("adding comment to document ", documentId);
+		try {
+			dcDelegate = delegateProvider.getDelegate(delegateKey) ;	
+			dcDelegate.addCommentToDocument(documentId, comment);
+			return commonResponse();
+		} catch (DelegateNotFoundException e) {
+			e.printStackTrace();
+			return errorResponse(delegateKey + " Repository is not available ") ;
+		}	
+	}
+	
+	@RequestMapping(value = "/api/document/{documentId}/comments", method = RequestMethod.GET)
+	public String getDocumentComments(@PathVariable(value="documentId")String documentId , @RequestHeader(value="API_BASE" , defaultValue="Rest") String delegateKey){
+		log.entering("getting  document comments ", documentId);
+			try {
+				dcDelegate = delegateProvider.getDelegate(delegateKey) ;	
+				//TODO add relation name 
+				ArrayList<DocumentumObject> comments = dcDelegate.getDocumentDMNotesByRelationName(documentId, "dm_wf_email_template") ;
+				return "" ;
+			} catch (DelegateNotFoundException e) {
+				e.printStackTrace();
+				return errorResponse(delegateKey + " Repository is not available ") ;
+			} catch (DocumentumException e) {
+				e.printStackTrace();
+				return errorResponse("Documentum exception ... ") ;
+			}
+	}	
 	
 	
 	

@@ -485,7 +485,7 @@ public class DCRestAPIWrapper {
 		return feed.getEntries() ;
 	}
 	
-	public List<JsonEntry> getDocumentAnnotations(String documentId) throws DocumentumException
+	public List<JsonEntry> getDocumentDMNotesByRelationName(String documentId , String relationName) throws DocumentumException
 	{
  		JsonObject document = getObjectById(documentId);
 		JsonLink link = getLink(document.getLinks(), LinkRelation.OBJECT_RELATIONS);
@@ -500,7 +500,7 @@ public class DCRestAPIWrapper {
 		httpHeader.setAccept(mediaTypes);
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		params.add("inline", "true" );
-		params.add("filter", "starts-with(relation_name,'DM_ANNOTATE')");
+		params.add("filter", "starts-with(relation_name,'"+relationName+"')");
 		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(link.getHref()).queryParams(params).build();
 		ResponseEntity<JsonFeed> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET,
 				new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
