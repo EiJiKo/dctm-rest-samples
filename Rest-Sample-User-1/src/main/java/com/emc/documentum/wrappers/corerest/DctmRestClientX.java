@@ -160,11 +160,11 @@ public class DctmRestClientX implements InitializingBean {
 				content.getHeaders().getContentType(), content.getHeaders().getContentLength());
 	}
 
-	public List<JsonEntry> getDocumentAnnotations(String documentId) {
+	public List<JsonEntry> getDocumentAnnotations(String documentId , String relationName) {
 		JsonObject document = getObjectById(documentId);
 		ResponseEntity<JsonFeed> result = restTemplate.get(document.getHref(LinkRelation.OBJECT_RELATIONS),
 				JsonFeed.class, QueryParams.INLINE, "true", QueryParams.FILTER,
-				"starts-with(relation_name,'DM_ANNOTATE')");
+				"starts-with(relation_name,'"+relationName+"')");
 		return result.getBody().getEntries();
 
 	}

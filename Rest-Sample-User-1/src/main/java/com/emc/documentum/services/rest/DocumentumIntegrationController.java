@@ -221,7 +221,7 @@ public class DocumentumIntegrationController {
 			@PathVariable(value = "documentId") String documentId)
 			throws DocumentumException, DelegateNotFoundException {
 		log.entering("Getting document annotations ", documentId);
-		return (delegateProvider.getDelegate(api)).getDocumentDMNotesByRelationName(documentId , "DM_ANNOTATE");
+		return (delegateProvider.getDelegate(api)).getDocumentRelationsByRelationName(documentId , "DM_ANNOTATE");
 	}
 
 	@ApiOperation(value = "create document annotation", notes = "creates annotation for a specific document")

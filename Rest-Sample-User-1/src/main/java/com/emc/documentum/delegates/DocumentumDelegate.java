@@ -146,7 +146,7 @@ public interface DocumentumDelegate {
 	
 	void addCommentToDocument(String documentId, String comment);
 
-	ArrayList<DocumentumObject> getDocumentDMNotesByRelationName(String documentId, String relationName) throws DocumentumException;
+	ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String documentId, String relationName) throws DocumentumException;
 
 	DocumentumObject renameObject(String objectId, String newName) throws DocumentNotFoundException, RepositoryNotAvailableException;
 
