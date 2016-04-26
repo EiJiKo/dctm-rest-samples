@@ -31,16 +31,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.emc.documentum.constants.DCCoreRestConstants;
 import com.emc.documentum.constants.LinkRelation;
 import com.emc.documentum.dtos.DocumentumFolder;
-import com.emc.documentum.dtos.DocumentumObject;
-import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckinException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentCreationException;
-import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
-import com.emc.documentum.exceptions.FolderNotFoundException;
+import com.emc.documentum.exceptions.ObjectNotFoundException;
 import com.emc.documentum.model.JsonEntry;
 import com.emc.documentum.model.JsonFeed;
 import com.emc.documentum.model.JsonLink;
@@ -183,7 +180,7 @@ public class DCRestAPIWrapper {
 	 * String)
 	 */
 
-	public JsonObject getCabinet(String cabinetName) throws CabinetNotFoundException {
+	public JsonObject getCabinet(String cabinetName) throws ObjectNotFoundException {
 		System.out.println("Entering Get Cabinet");
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = data.fetchCabinetURI + "?filter=starts-with(object_name,'" + cabinetName + "')";
@@ -198,7 +195,7 @@ public class DCRestAPIWrapper {
 				return getObjectByUri(entry.getContentSrc());
 			}
 		}
-		throw new CabinetNotFoundException(cabinetName);
+		throw new ObjectNotFoundException("cabinet " + cabinetName + " not found.");
 	}
 
 	/*
@@ -245,7 +242,7 @@ public class DCRestAPIWrapper {
 	 * lang.String)
 	 */
 
-	public JsonObject getFolderByPath(String queryFolderPath) throws FolderNotFoundException {
+	public JsonObject getFolderByPath(String queryFolderPath) throws ObjectNotFoundException {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = String.format(
 				data.dqlQuery + "select *,r_folder_path from dm_folder where any r_folder_path = '%s'",
@@ -266,7 +263,7 @@ public class DCRestAPIWrapper {
 			}
 		}
 
-		throw new FolderNotFoundException(queryFolderPath);
+		throw new ObjectNotFoundException("folder with folder path " + queryFolderPath + " not found.");
 	}
 
 	public List<JsonEntry> getAllCabinets(int pageNumber, int pageSize) {
@@ -319,7 +316,7 @@ public class DCRestAPIWrapper {
 		return response.getBody();
 	}
 
-	public byte[] getDocumentContentById(String documentId) throws DocumentNotFoundException {
+	public byte[] getDocumentContentById(String documentId) throws ObjectNotFoundException {
 		JsonObject document = getObjectById(documentId);
 		JsonLink link = getLink(document.getLinks(), LinkRelation.PRIMARY_CONTENT);
 		JsonObject content = getObjectByUri(link.getHref());
@@ -394,7 +391,7 @@ public class DCRestAPIWrapper {
 
 	}
 
-	public List<JsonEntry> getDocumentByName(String name) throws DocumentNotFoundException {
+	public List<JsonEntry> getDocumentByName(String name) throws ObjectNotFoundException {
 		RestTemplate restTemplate = new RestTemplate();
 		String URI = String.format(data.dqlQuery + "select * from dm_sysobject where object_name like '%s'",
 				"%" + name + "%");
@@ -404,7 +401,7 @@ public class DCRestAPIWrapper {
 		JsonFeed feed = response.getBody();
 
 		if (feed == null) {
-			throw new DocumentNotFoundException(name);
+			throw new ObjectNotFoundException("document  " + name + " not found.");
 		}
 
 		return feed.getEntries();

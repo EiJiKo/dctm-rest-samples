@@ -11,12 +11,11 @@ import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.dtos.DocumentumProperty;
-import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
-import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
+import com.emc.documentum.exceptions.ObjectNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.transformation.DCD2Transformation;
 import com.emc.documentum.wrappers.DCD2APIWrapper;
@@ -29,7 +28,7 @@ public class DocumentumD2Delegate implements DocumentumDelegate {
 
 	@Override
 	public DocumentumFolder createFolder(String cabinetName, String folderName)
-			throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException {
+			throws FolderCreationException, ObjectNotFoundException, RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -42,14 +41,14 @@ public class DocumentumD2Delegate implements DocumentumDelegate {
 
 	@Override
 	public DocumentumFolder getCabinetByName(String cabinetName)
-			throws CabinetNotFoundException, RepositoryNotAvailableException {
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public DocumentumObject getObjectById(String cabinetId)
-			throws CabinetNotFoundException, RepositoryNotAvailableException {
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
 		return DCD2Transformation.convertD2DocItemObject(dcAPI.getObjectById(cabinetId), dcAPI.getContext());
 
 	}
@@ -67,7 +66,7 @@ public class DocumentumD2Delegate implements DocumentumDelegate {
 
 	@Override
 	public byte[] getDocumentContentById(String documentId)
-			throws DocumentNotFoundException, RepositoryNotAvailableException {
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
 		return dcAPI.getDocumentContent(documentId);
 	}
 
@@ -75,7 +74,7 @@ public class DocumentumD2Delegate implements DocumentumDelegate {
 	public ArrayList<DocumentumObject> getDocumentByName(String name) throws RepositoryNotAvailableException {
 		try {
 			return DCD2Transformation.convertD2DocItemObjectList(dcAPI.getDocumentByName(name), dcAPI.getContext());
-		} catch (DocumentNotFoundException e) {
+		} catch (ObjectNotFoundException e) {
 			return new ArrayList<DocumentumObject>();
 		}
 	}

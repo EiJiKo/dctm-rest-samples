@@ -1,8 +1,6 @@
 package com.emc.documentum.services.rest;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,9 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.emc.documentum.delegate.provider.DelegateProvider;
 import com.emc.documentum.delegates.DocumentumDelegate;
@@ -26,13 +22,11 @@ import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.dtos.DocumentumProperty;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DelegateNotFoundException;
-import com.emc.documentum.exceptions.DocumentCheckinException;
-import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
+import com.emc.documentum.exceptions.ObjectNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.model.JsonObject;
 
-import io.swagger.annotations.ApiOperation;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
@@ -260,7 +254,7 @@ public class FileManagerController extends BaseController{
 	}
 
 	@RequestMapping(value= "/api/document/content/{documentId}" , produces = "application/pdf")
-	public byte[] getDocumentContentById(@PathVariable(value="documentId")String documentId , @RequestHeader(value="API_BASE" , defaultValue="Rest") String delegateKey) throws DocumentNotFoundException{
+	public byte[] getDocumentContentById(@PathVariable(value="documentId")String documentId , @RequestHeader(value="API_BASE" , defaultValue="Rest") String delegateKey) throws ObjectNotFoundException{
 		try {
 			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
 		} catch (DelegateNotFoundException e1) {
@@ -277,7 +271,7 @@ public class FileManagerController extends BaseController{
 	}
 	
 	@RequestMapping(value= "/api/document/open/{documentId}" )
-	public JSONObject openDocumentById(@PathVariable(value="documentId")String documentId , @RequestHeader(value="API_BASE", defaultValue="Rest") String delegateKey) throws DocumentNotFoundException{
+	public JSONObject openDocumentById(@PathVariable(value="documentId")String documentId , @RequestHeader(value="API_BASE", defaultValue="Rest") String delegateKey) throws ObjectNotFoundException{
 		try {
 			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
 		} catch (DelegateNotFoundException e1) {

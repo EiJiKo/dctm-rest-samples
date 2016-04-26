@@ -62,11 +62,10 @@ import com.emc.d2fs.services.repository_service.CheckLoginRequest;
 import com.emc.d2fs.services.repository_service.CheckLoginResponse;
 import com.emc.d2fs.services.repository_service.GetRepositoryRequest;
 import com.emc.documentum.constants.DCD2Constants;
-import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
-import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.FolderCreationException;
+import com.emc.documentum.exceptions.ObjectNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 
 @Component("DCD2APIWrapper")
@@ -157,14 +156,14 @@ public class DCD2APIWrapper {
 			if (response.getDocItems() != null && !response.getDocItems().getItems().isEmpty())
 				return response.getDocItems().getItems().get(0);
 			else
-				throw new CabinetNotFoundException("");
+				throw new ObjectNotFoundException("object with id "+ id + " not found.");
 
 		} catch (Exception e) {
 			throw new RepositoryNotAvailableException(data.repo);
 		}
 
 	}
-	public List<Item> getDocumentByName(String documentName) throws RepositoryNotAvailableException, DocumentNotFoundException
+	public List<Item> getDocumentByName(String documentName) throws RepositoryNotAvailableException, ObjectNotFoundException
 	{
 		try{
 		ModelPort port = getPort();
@@ -182,9 +181,9 @@ public class DCD2APIWrapper {
 		if (response.getDocItems() != null && !response.getDocItems().getItems().isEmpty())
 			return response.getDocItems().getItems();
 		else
-			throw new DocumentNotFoundException(documentName);
+			throw new ObjectNotFoundException("document " + documentName + " not found.");
 
-	} catch(DocumentNotFoundException e)
+	} catch(ObjectNotFoundException e)
 		{
 			throw e;
 		}catch (Exception e) {

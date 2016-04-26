@@ -37,13 +37,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.emc.documentum.constants.DCCMISConstants;
-import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
-import com.emc.documentum.exceptions.DocumentCreationException;
-import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
-import com.emc.documentum.exceptions.FolderNotFoundException;
+import com.emc.documentum.exceptions.ObjectNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.model.UserModel;
 
@@ -88,7 +85,7 @@ public class DCCMISAPIWrapper {
 	}
 
 	public Folder getFolderByPath(String queryFolderPath)
-			throws FolderNotFoundException, RepositoryNotAvailableException {
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
 		try {
 			return (Folder) (getSession(data.username, data.password, data.repo)).getObjectByPath(queryFolderPath);
 		} catch (CmisConnectionException e) {
@@ -133,13 +130,13 @@ public class DCCMISAPIWrapper {
 	}
 
 	public byte[] getDocumentContentById(String documentId)
-			throws DocumentNotFoundException, RepositoryNotAvailableException {
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
 		try {
 			Session session = getSession(data.username, data.password, data.repo);
 			CmisObject object = session.getObject(documentId);
 			if(!object.getBaseType().getLocalName().equals("dm_document"))
 			{
-				throw new DocumentNotFoundException(documentId +" is not a document.");
+				throw new ObjectNotFoundException(documentId +" is not a document.");
 			}
 			Document document = (Document) object;
 
@@ -264,7 +261,7 @@ public class DCCMISAPIWrapper {
 			throw new RepositoryNotAvailableException("CMIS", e);
 		}
 	}
-	public CmisObject renameObject(String objectId,String newName) throws RepositoryNotAvailableException, DocumentNotFoundException
+	public CmisObject renameObject(String objectId,String newName) throws RepositoryNotAvailableException, ObjectNotFoundException
 	{
 		try {
 			Session session = getSession(data.username, data.password, data.repo);
@@ -274,7 +271,7 @@ public class DCCMISAPIWrapper {
 		} catch (CmisConnectionException e) {
 			throw new RepositoryNotAvailableException("CMIS", e);
 		}catch (CmisRuntimeException e) {
-			throw new DocumentNotFoundException(objectId + " not found.");
+			throw new ObjectNotFoundException(objectId + " not found.");
 		}
 	}
 }

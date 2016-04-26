@@ -8,13 +8,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CreationException;
 import com.emc.documentum.exceptions.DocumentCreationException;
-import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
-import com.emc.documentum.exceptions.FolderNotFoundException;
+import com.emc.documentum.exceptions.ObjectNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 
 //@ControllerAdvice
@@ -28,28 +26,15 @@ public class CommonExceptionHandler {
 		return e;
 	}
 	
-	@ExceptionHandler(DocumentNotFoundException.class)
+	@ExceptionHandler(ObjectNotFoundException.class)
 	@ResponseStatus(value=HttpStatus.NOT_FOUND,reason="Document Not Found")
-	public DocumentNotFoundException documentNotFoundException(DocumentNotFoundException e,HttpServletRequest res)
+	public ObjectNotFoundException documentNotFoundException(ObjectNotFoundException e,HttpServletRequest res)
 	{
 		Logger log = Logger.getAnonymousLogger();
-		log.severe("document not found exception");
+		log.severe("object not found exception");
 		return e;
 	}
 	
-	@ExceptionHandler(CabinetNotFoundException.class)
-	//TODO  @ResponseStatus(HttpStatus.NOT_FOUND)
-	public CabinetNotFoundException cabinetNotFoundException(CabinetNotFoundException e)
-	{
-		return e;     
-	}
-	
-	@ExceptionHandler(FolderNotFoundException.class)
-	//TODO  @ResponseStatus(HttpStatus.NOT_FOUND)
-	public FolderNotFoundException folderNotFoundException(FolderNotFoundException e)
-	{
-		return e;      
-	}
 	
 	@ExceptionHandler(FolderCreationException.class)
 	//TODO  @ResponseStatus(HttpStatus.NOT_FOUND)
