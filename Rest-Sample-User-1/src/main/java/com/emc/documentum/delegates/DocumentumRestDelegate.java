@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
@@ -330,6 +331,19 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	@Override
 	public ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String documentId , String relationName) throws DocumentumException {
 		return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getDocumentDMNotesByRelationName(documentId , relationName));
+	}
+	
+	@Override
+	public ArrayList<DocumentumObject> getDocumentComments(String documentId , String relationName) throws DocumentumException {
+		List<JsonEntry> jsonResponse = dcAPI.getDocumentDMNotesByRelationName(documentId , relationName) ;
+		byte[] content = null ;
+		String s = null ;
+		for (int i = 0 ; i < jsonResponse.size() ; i++) {
+			content = dcAPI.getDocumentContentById((String) jsonResponse.get(i).getContent().getProperties().get("child_id")) ;
+			s = new String(Base64.decodeBase64(content));
+			jsonResponse.get(i).getContent().getProperties().put("content", s) ;
+		}
+		return CoreRestTransformation.convertCoreRSEntryList(jsonResponse);
 	}
 
 	@Override

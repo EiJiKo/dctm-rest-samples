@@ -226,4 +226,11 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 		
 	}
 
+	@Override
+	public ArrayList<DocumentumObject> getDocumentComments(String documentId, String relationName)
+			throws DocumentumException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

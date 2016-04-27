@@ -179,4 +179,11 @@ public class DocumentumD2Delegate implements DocumentumDelegate {
 		// TODO Auto-generated method stub		
 	}
 
+	@Override
+	public ArrayList<DocumentumObject> getDocumentComments(String documentId, String relationName)
+			throws DocumentumException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

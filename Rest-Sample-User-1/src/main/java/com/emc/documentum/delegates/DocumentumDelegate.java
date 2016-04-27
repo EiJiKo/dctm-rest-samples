@@ -149,5 +149,7 @@ public interface DocumentumDelegate {
 	ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String documentId, String relationName) throws DocumentumException;
 
 	DocumentumObject renameObject(String objectId, String newName) throws DocumentNotFoundException, RepositoryNotAvailableException;
+	
+	public ArrayList<DocumentumObject> getDocumentComments(String documentId , String relationName) throws DocumentumException ;
 
 }

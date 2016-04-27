@@ -337,7 +337,7 @@ public class FileManagerController extends BaseController{
 			try {
 				dcDelegate = delegateProvider.getDelegate(delegateKey) ;	
 				//TODO add relation name 
-				ArrayList<DocumentumObject> comments = dcDelegate.getDocumentRelationsByRelationName(documentId, "dm_wf_email_template") ;
+				ArrayList<DocumentumObject> comments = dcDelegate.getDocumentComments(documentId, "dm_wf_email_template") ;
 				return "" ;
 			} catch (DelegateNotFoundException e) {
 				e.printStackTrace();
