@@ -311,13 +311,13 @@ public class FileManagerController extends BaseController{
 	}
 	
 
-	@RequestMapping(value = "/api/document/{documentId}/comment/{comment}", method = RequestMethod.POST)
-	public String addCommentToDocument(@PathVariable(value="documentId")String documentId , @PathVariable(value="comment")String comment , @RequestHeader(value="API_BASE" , defaultValue="Rest") String delegateKey)
+	@RequestMapping(value = "/api/document/{documentId}/comment/{comment}/userName/{userName}", method = RequestMethod.POST)
+	public String addCommentToDocument(@PathVariable(value="documentId")String documentId , @PathVariable(value="comment")String comment , @PathVariable(value="userName")String userName , @RequestHeader(value="API_BASE" , defaultValue="Rest") String delegateKey)
 			throws DocumentumException, DelegateNotFoundException {
 		log.entering("adding comment to document ", documentId);
 		try {
-			dcDelegate = delegateProvider.getDelegate(delegateKey) ;	
-			dcDelegate.addCommentToDocument(documentId, comment);
+			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
+			dcDelegate.addCommentToDocument(documentId, userName+","+comment);
 			return commonResponse();
 		} catch (DelegateNotFoundException e) {
 			e.printStackTrace();
@@ -415,9 +415,22 @@ public class FileManagerController extends BaseController{
 		for (int i = 0 ; i < objects.size() ; i++) {
 			JSONObject json = new JSONObject() ;
 			ArrayList<DocumentumProperty> properties = objects.get(i).getProperties();
+			String comment = null ;
+			String[] array = null ;
 			for(DocumentumProperty property : properties){
 				if(property.getLocalName().equals("content")){
-						json.put("content", property.getValue()) ;
+						comment = (String) property.getValue() ;
+						array = comment.split(",") ;
+						if(array.length == 2)
+						{
+							json.put("user", array[0]) ;
+							json.put("content", array[1]) ;
+						}
+						else //case of user was not stored ...
+						{
+							json.put("user", "unknown") ;
+							json.put("content", array[0]) ;
+						}
 					break;
 				}
 			}
