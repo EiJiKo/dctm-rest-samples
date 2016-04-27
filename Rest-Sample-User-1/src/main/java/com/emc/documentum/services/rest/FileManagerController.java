@@ -332,7 +332,7 @@ public class FileManagerController extends BaseController{
 				dcDelegate = delegateProvider.getDelegate(delegateKey) ;	
 				//TODO add relation name 
 				ArrayList<DocumentumObject> comments = dcDelegate.getDocumentComments(documentId, "dm_wf_email_template") ;
-				return "" ;
+				return getDocumentComments(comments) ;
 			} catch (DelegateNotFoundException e) {
 				e.printStackTrace();
 				return errorResponse(delegateKey + " Repository is not available ") ;
@@ -406,6 +406,26 @@ public class FileManagerController extends BaseController{
 		JSONObject returnJson = new JSONObject() ;
 		returnJson.put("result", children) ;
 		return returnJson ;
+	}
+	
+	
+	private String getDocumentComments(ArrayList<DocumentumObject> objects)
+	{
+		JSONArray children = new JSONArray() ;
+		for (int i = 0 ; i < objects.size() ; i++) {
+			JSONObject json = new JSONObject() ;
+			ArrayList<DocumentumProperty> properties = objects.get(i).getProperties();
+			for(DocumentumProperty property : properties){
+				if(property.getLocalName().equals("content")){
+						json.put("content", property.getValue()) ;
+					break;
+				}
+			}
+			children.add(json) ;
+		}
+		JSONObject returnJson = new JSONObject() ;
+		returnJson.put("result", children) ;
+		return returnJson.toString() ;
 	}
 	
 }
