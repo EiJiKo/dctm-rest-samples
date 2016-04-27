@@ -17,13 +17,12 @@ import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.dtos.DocumentumProperty;
-import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentCreationException;
-import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
+import com.emc.documentum.exceptions.ObjectNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.model.JsonEntry;
 import com.emc.documentum.model.JsonObject;
@@ -60,7 +59,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 			return CoreRestTransformation.convertJsonObject(folder, DocumentumFolder.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
-		} catch (CabinetNotFoundException | FolderCreationException e) {
+		} catch (ObjectNotFoundException | FolderCreationException e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			throw e;
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -136,7 +135,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 			return CoreRestTransformation.convertJsonObject(dcAPI.getCabinet(cabinetName), DocumentumCabinet.class);
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
-		} catch (CabinetNotFoundException e) {
+		} catch (ObjectNotFoundException e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			throw e;
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -154,7 +153,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	 */
 	@Override
 	public DocumentumObject getObjectById(String cabinetId)
-			throws CabinetNotFoundException, RepositoryNotAvailableException {
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
 		try {
 			return CoreRestTransformation.convertJsonObject(dcAPI.getObjectById(cabinetId));
 		} catch (ResourceAccessException e) {
@@ -162,7 +161,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		} catch (Exception e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			// TODO Object Not Found Exception
-			throw new CabinetNotFoundException(cabinetId);
+			throw new ObjectNotFoundException("object " + cabinetId+ " not found.");
 		}
 	}
 
@@ -204,7 +203,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	 */
 	@Override
 	public byte[] getDocumentContentById(String documentId)
-			throws DocumentNotFoundException, RepositoryNotAvailableException {
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
 		try {
 			return dcAPI.getDocumentContentById(documentId);
 		} catch (ResourceAccessException e) {
@@ -218,7 +217,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 			return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getDocumentByName(name));
 		} catch (ResourceAccessException e) {
 			throw new RepositoryNotAvailableException("CoreRest");
-		} catch (DocumentNotFoundException e) {
+		} catch (ObjectNotFoundException e) {
 			return new ArrayList<DocumentumObject>();
 		}
 
@@ -387,7 +386,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 			DocumentumObject commentObject = CoreRestTransformation.convertJsonObject(json);
 			//TODO change the relation type
 			dcAPI.createRelationShip("dm_relation", documentId, commentObject.getId(), "dm_wf_email_template", true);
-		} catch (CabinetNotFoundException | RepositoryNotAvailableException e) {
+		} catch (ObjectNotFoundException | RepositoryNotAvailableException e) {
 			e.printStackTrace();
 		} catch (DocumentumException e) {
 			e.printStackTrace();
@@ -398,6 +397,20 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 
 	@Override
 	public DocumentumObject renameObject(String documentId, String newName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DocumentumObject copyObject(String objectId, String targetFolderId)
+			throws DocumentumException, RepositoryNotAvailableException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DocumentumObject moveObject(String objectId, String targetFolderId)
+			throws DocumentumException, RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
 		return null;
 	}

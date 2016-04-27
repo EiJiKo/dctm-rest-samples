@@ -24,12 +24,11 @@ import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.dtos.DocumentumProperty;
-import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DelegateNotFoundException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
-import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
+import com.emc.documentum.exceptions.ObjectNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.translation.TranslationUtility;
 
@@ -111,7 +110,7 @@ public class DocumentumIntegrationController {
 			DocumentumFolder cabinet = delegate.getCabinetByName(cabinetName);
 			translationUtility.translateFromRepo(cabinet, api);
 			return cabinet;
-		} catch (CabinetNotFoundException e) {
+		} catch (ObjectNotFoundException e) {
 			// TODO Auto-generated catch block
 			throw e;
 		}
@@ -122,7 +121,7 @@ public class DocumentumIntegrationController {
 	@RequestMapping(value = "get/object/id/{objectId}", method = { RequestMethod.GET })
 	public DocumentumObject getCabinetById(@PathVariable(value = "api") String api,
 			@PathVariable(value = "objectId") String objectId)
-			throws CabinetNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException {
+			throws ObjectNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException {
 		return (delegateProvider.getDelegate(api)).getObjectById(objectId);
 
 	}
@@ -131,7 +130,7 @@ public class DocumentumIntegrationController {
 	@RequestMapping(value = "delete/object/id/{objectId}", method = { RequestMethod.DELETE })
 	public void deleteObject(@PathVariable(value = "api") String api, @PathVariable(value = "objectId") String objectId,
 			@RequestParam(name = "deleteChildren", defaultValue = "false") boolean deleteChildren)
-			throws CabinetNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException,
+			throws ObjectNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException,
 			CanNotDeleteFolderException {
 		try {
 			(delegateProvider.getDelegate(api)).deleteObject(objectId, deleteChildren);
@@ -166,7 +165,7 @@ public class DocumentumIntegrationController {
 	@RequestMapping(value = "get/document/content/id/{documentId}", method = RequestMethod.GET)
 	public Object getDocumentContentById(@PathVariable(value = "api") String api,
 			@PathVariable(value = "documentId") String documentId)
-			throws DocumentNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException {
+			throws ObjectNotFoundException, RepositoryNotAvailableException, DelegateNotFoundException {
 		return (delegateProvider.getDelegate(api)).getDocumentContentById(documentId);
 	}
 
@@ -252,8 +251,21 @@ public class DocumentumIntegrationController {
 	@RequestMapping(value = "object/{objectId}/rename", method = RequestMethod.POST)
 	public DocumentumObject renameObject(@PathVariable(value = "api") String api,
 			@PathVariable(value = "objectId") String objectId, @RequestBody String newName)
-			throws DocumentNotFoundException, DelegateNotFoundException, RepositoryNotAvailableException {
+			throws ObjectNotFoundException, DelegateNotFoundException, RepositoryNotAvailableException {
 		return (delegateProvider.getDelegate(api)).renameObject(objectId, newName);
+	}
+	@RequestMapping(value = "object/{objectId}/move", method = RequestMethod.POST)
+	public DocumentumObject moveObject(@PathVariable(value = "api") String api,
+			@PathVariable(value = "objectId") String objectId, @RequestBody String targetFolderId)
+			throws DelegateNotFoundException, DocumentumException {
+		return (delegateProvider.getDelegate(api)).moveObject(objectId, targetFolderId);
+	}
+	
+	@RequestMapping(value = "object/{objectId}/copy", method = RequestMethod.POST)
+	public DocumentumObject copyObject(@PathVariable(value = "api") String api,
+			@PathVariable(value = "objectId") String objectId, @RequestBody String targetFolderId)
+			throws DelegateNotFoundException, DocumentumException {
+		return (delegateProvider.getDelegate(api)).copyObject(objectId, targetFolderId);
 	}
 
 }

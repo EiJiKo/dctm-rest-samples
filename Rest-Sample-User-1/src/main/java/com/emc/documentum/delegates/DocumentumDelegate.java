@@ -8,14 +8,13 @@ import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.dtos.DocumentumProperty;
-import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckinException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentCreationException;
-import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
+import com.emc.documentum.exceptions.ObjectNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 
 public interface DocumentumDelegate {
@@ -36,7 +35,7 @@ public interface DocumentumDelegate {
 	 * @throws DocumentumException
 	 */
 	DocumentumFolder createFolder(String cabinetName, String folderName) throws FolderCreationException,
-			CabinetNotFoundException, RepositoryNotAvailableException, DocumentumException;
+			ObjectNotFoundException, RepositoryNotAvailableException, DocumentumException;
 
 	@Deprecated
 	DocumentumDocument createDocument(DocumentCreation docCreation) throws DocumentumException;
@@ -51,7 +50,7 @@ public interface DocumentumDelegate {
 	 * @throws DocumentumException
 	 */
 	DocumentumFolder getCabinetByName(String cabinetName)
-			throws CabinetNotFoundException, RepositoryNotAvailableException, DocumentumException;
+			throws ObjectNotFoundException, RepositoryNotAvailableException, DocumentumException;
 
 	/**
 	 * Return a Documentum Object given it unique Id
@@ -61,7 +60,7 @@ public interface DocumentumDelegate {
 	 * @throws CabinetNotFoundException
 	 * @throws RepositoryNotAvailableException
 	 */
-	DocumentumObject getObjectById(String cabinetId) throws CabinetNotFoundException, RepositoryNotAvailableException;
+	DocumentumObject getObjectById(String cabinetId) throws ObjectNotFoundException, RepositoryNotAvailableException;
 
 	@Deprecated
 	/**
@@ -112,7 +111,7 @@ public interface DocumentumDelegate {
 	 * @throws DocumentNotFoundException
 	 * @throws RepositoryNotAvailableException
 	 */
-	byte[] getDocumentContentById(String documentId) throws DocumentNotFoundException, RepositoryNotAvailableException;
+	byte[] getDocumentContentById(String documentId) throws ObjectNotFoundException, RepositoryNotAvailableException;
 
 	ArrayList<DocumentumObject> getDocumentByName(String name) throws RepositoryNotAvailableException;
 
@@ -133,7 +132,7 @@ public interface DocumentumDelegate {
 			throws RepositoryNotAvailableException, DocumentCheckoutException;
 
 	DocumentumFolder createFolder(String parentId, HashMap<String, Object> properties) throws FolderCreationException,
-			CabinetNotFoundException, RepositoryNotAvailableException, DocumentumException;
+	ObjectNotFoundException, RepositoryNotAvailableException, DocumentumException;
 
 	DocumentumDocument createDocument(String parentId, DocumentumDocument docCreation)
 			throws DocumentCreationException, RepositoryNotAvailableException;
@@ -147,9 +146,12 @@ public interface DocumentumDelegate {
 	void addCommentToDocument(String documentId, String comment);
 
 	ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String documentId, String relationName) throws DocumentumException;
-
-	DocumentumObject renameObject(String objectId, String newName) throws DocumentNotFoundException, RepositoryNotAvailableException;
 	
 	public ArrayList<DocumentumObject> getDocumentComments(String documentId , String relationName) throws DocumentumException ;
 
+	DocumentumObject renameObject(String objectId, String newName) throws ObjectNotFoundException, RepositoryNotAvailableException;
+
+	DocumentumObject copyObject(String objectId,String targetFolderId) throws DocumentumException, RepositoryNotAvailableException;
+	
+	DocumentumObject moveObject(String objectId,String targetFolderId) throws DocumentumException, RepositoryNotAvailableException;
 }

@@ -15,14 +15,13 @@ import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.dtos.DocumentumProperty;
-import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckinException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentCreationException;
-import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
+import com.emc.documentum.exceptions.ObjectNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.wrappers.corerest.DctmRestClientX;
 import com.emc.documentum.wrappers.corerest.model.JsonObject;
@@ -43,7 +42,7 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 
 	@Override
 	public DocumentumFolder createFolder(String cabinetName, String folderName) throws FolderCreationException,
-			CabinetNotFoundException, RepositoryNotAvailableException, DocumentumException {
+			ObjectNotFoundException, RepositoryNotAvailableException, DocumentumException {
 		JsonObject cabinet = restClientX.getObjectByPath(cabinetName);
 		try {
 			return RestTransformation.convertJsonObject(restClientX
@@ -74,14 +73,14 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 
 	@Override
 	public DocumentumFolder getCabinetByName(String cabinetName)
-			throws CabinetNotFoundException, RepositoryNotAvailableException, DocumentumException {
+			throws ObjectNotFoundException, RepositoryNotAvailableException, DocumentumException {
 
 		return (DocumentumFolder) RestTransformation.convertJsonObject(restClientX.getObjectByPath("/" + cabinetName));
 	}
 
 	@Override
 	public DocumentumObject getObjectById(String objectId)
-			throws CabinetNotFoundException, RepositoryNotAvailableException {
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
 		return RestTransformation.convertJsonObject(restClientX.getObjectById(objectId));
 	}
 
@@ -104,7 +103,7 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 
 	@Override
 	public byte[] getDocumentContentById(String documentId)
-			throws DocumentNotFoundException, RepositoryNotAvailableException {
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
 		return restClientX.getContentById(documentId, true).getData();
 	}
 
@@ -179,7 +178,7 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 
 	@Override
 	public DocumentumFolder createFolder(String parentId, HashMap<String, Object> properties)
-			throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException,
+			throws FolderCreationException, ObjectNotFoundException, RepositoryNotAvailableException,
 			DocumentumException {
 		JsonObject folder = restClientX.createFolder(parentId,
 				(String) properties.get(DocumentumProperties.OBJECT_NAME));
@@ -277,10 +276,10 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public DocumentumObject renameObject(String objectId, String newName) throws DocumentNotFoundException {
+	public DocumentumObject renameObject(String objectId, String newName) throws ObjectNotFoundException {
 		JsonObject object = restClientX.getObjectById(objectId);
 		if (object == null) {
-			throw new DocumentNotFoundException(objectId);
+			throw new ObjectNotFoundException(objectId);
 		}
 		JsonObject updatedObject = restClientX.update(object,
 				Collections.<String, Object>singletonMap(DocumentumProperties.OBJECT_NAME, newName));
@@ -294,10 +293,57 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
+
 	public ArrayList<DocumentumObject> getDocumentComments(String documentId, String relationName)
 			throws DocumentumException {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public DocumentumObject copyObject(String objectId, String targetFolderId)
+			throws DocumentumException, RepositoryNotAvailableException {
+		if(objectId.equals(targetFolderId))
+		{
+			throw new DocumentumException("source object equals target folder Id .");
+		}
+		JsonObject object = restClientX.getObjectById(objectId);
+		if (object == null) {
+			throw new ObjectNotFoundException("object " + objectId +" not found.");
+		}
+		JsonObject targetFolder = restClientX.getObjectById(targetFolderId);
+		if(targetFolderId == null)
+		{
+			throw new ObjectNotFoundException("target folder " + targetFolderId +" not found.");
+		}
+		if(!targetFolder.isFolder())
+		{
+			throw new DocumentumException(targetFolderId +" is not a folder.");
+		}
+		return RestTransformation.convertJsonObject(restClientX.copy(object, targetFolder));
+	}
+
+	@Override
+	public DocumentumObject moveObject(String objectId, String targetFolderId)
+			throws DocumentumException, RepositoryNotAvailableException {
+		if(objectId.equals(targetFolderId))
+		{
+			throw new DocumentumException("source object equals target folder Id .");
+		}
+		JsonObject object = restClientX.getObjectById(objectId);
+		if (object == null) {
+			throw new ObjectNotFoundException("object " + objectId +" not found.");
+		}
+		JsonObject targetFolder = restClientX.getObjectById(targetFolderId);
+		if(targetFolderId == null)
+		{
+			throw new ObjectNotFoundException("target folder " + targetFolderId +" not found.");
+		}
+		if(!targetFolder.isFolder())
+		{
+			throw new DocumentumException(targetFolderId +" is not a folder.");
+		}
+		return RestTransformation.convertJsonObject(restClientX.move(object, targetFolder));
+
 	}
 
 }

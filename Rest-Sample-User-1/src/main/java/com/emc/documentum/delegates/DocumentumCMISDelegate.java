@@ -16,14 +16,12 @@ import com.emc.documentum.dtos.DocumentumDocument;
 import com.emc.documentum.dtos.DocumentumFolder;
 import com.emc.documentum.dtos.DocumentumObject;
 import com.emc.documentum.dtos.DocumentumProperty;
-import com.emc.documentum.exceptions.CabinetNotFoundException;
 import com.emc.documentum.exceptions.CanNotDeleteFolderException;
 import com.emc.documentum.exceptions.DocumentCheckoutException;
 import com.emc.documentum.exceptions.DocumentCreationException;
-import com.emc.documentum.exceptions.DocumentNotFoundException;
 import com.emc.documentum.exceptions.DocumentumException;
 import com.emc.documentum.exceptions.FolderCreationException;
-import com.emc.documentum.exceptions.FolderNotFoundException;
+import com.emc.documentum.exceptions.ObjectNotFoundException;
 import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.transformation.CMISTransformation;
 import com.emc.documentum.wrappers.DCCMISAPIWrapper;
@@ -38,12 +36,12 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 
 	@Override
 	public DocumentumFolder createFolder(String cabinetName, String folderName)
-			throws FolderCreationException, CabinetNotFoundException, RepositoryNotAvailableException {
+			throws FolderCreationException, ObjectNotFoundException, RepositoryNotAvailableException {
 		try {
 			Folder folder = dcAPI.getFolderByPath("/" + cabinetName);
 			return CMISTransformation.convertCMISFolder(dcAPI.createFolder(folder, folderName));
 
-		} catch (FolderNotFoundException e) {
+		} catch (ObjectNotFoundException e) {
 			// TODO
 		}
 		// TODO
@@ -59,11 +57,11 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 
 	@Override
 	public DocumentumFolder getCabinetByName(String cabinetName)
-			throws CabinetNotFoundException, RepositoryNotAvailableException {
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
 		try {
 			Folder folder = dcAPI.getFolderByPath("/" + cabinetName);
 			return CMISTransformation.convertCMISFolder(folder);
-		} catch (FolderNotFoundException e) {
+		} catch (ObjectNotFoundException e) {
 			// TODO
 		}
 		return null;
@@ -71,7 +69,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 
 	@Override
 	public DocumentumObject getObjectById(String cabinetId)
-			throws CabinetNotFoundException, RepositoryNotAvailableException {
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
 		return CMISTransformation.convertCMISObject(dcAPI.getObjectById(cabinetId));
 	}
 
@@ -90,7 +88,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 
 	@Override
 	public byte[] getDocumentContentById(String documentId)
-			throws DocumentNotFoundException, RepositoryNotAvailableException {
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
 		return dcAPI.getDocumentContentById(documentId);
 	}
 
@@ -216,7 +214,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public DocumentumObject renameObject(String documentId, String newName) throws RepositoryNotAvailableException, DocumentNotFoundException {
+	public DocumentumObject renameObject(String documentId, String newName) throws RepositoryNotAvailableException, ObjectNotFoundException {
 		return CMISTransformation.convertCMISObject(dcAPI.renameObject(documentId, newName));
 	}
 
@@ -227,10 +225,31 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
+
 	public ArrayList<DocumentumObject> getDocumentComments(String documentId, String relationName)
 			throws DocumentumException {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public DocumentumObject copyObject(String objectId, String targetFolderId)
+			throws DocumentumException, RepositoryNotAvailableException {
+		if(objectId.equals(targetFolderId))
+		{
+			throw new DocumentumException("source object equals target folder Id.");
+		}
+		return CMISTransformation.convertCMISObject(dcAPI.copyObject(objectId, targetFolderId));
+	}
+
+	@Override
+	public DocumentumObject moveObject(String objectId, String targetFolderId)
+			throws DocumentumException, RepositoryNotAvailableException {
+		if(objectId.equals(targetFolderId))
+		{
+			throw new DocumentumException("source object equals target folder Id.");
+		}
+		return CMISTransformation.convertCMISObject(dcAPI.moveObject(objectId, targetFolderId));
+
 	}
 
 }
