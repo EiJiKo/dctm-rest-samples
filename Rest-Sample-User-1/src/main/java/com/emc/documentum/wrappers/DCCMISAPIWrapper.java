@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -272,6 +273,85 @@ public class DCCMISAPIWrapper {
 			throw new RepositoryNotAvailableException("CMIS", e);
 		}catch (CmisRuntimeException e) {
 			throw new ObjectNotFoundException(objectId + " not found.");
+		}
+	}
+	public CmisObject moveObject(String objectId,String targetFolderId) throws DocumentumException
+	{
+		try {
+			Session session = getSession(data.username, data.password, data.repo);
+			CmisObject object = session.getObject(objectId);
+			CmisObject targetFolder = session.getObject(targetFolderId);
+			if(!targetFolder.getBaseType().getLocalName().equals("dm_folder"))
+			{
+				throw new DocumentumException(targetFolderId + " is not a folder.");
+			}
+			if(object.getBaseType().getLocalName().equals("dm_folder"))
+			{
+				Folder folder =(Folder)object;
+				return folder.move(session.createObjectId(folder.getParentId()), session.createObjectId(targetFolder.getId()));
+			}
+			else if(object.getBaseType().getLocalName().equals("dm_document"))
+			{
+				Document document =(Document)object;
+				return document.move(session.createObjectId(document.getParents().get(0).getId()), session.createObjectId(targetFolder.getId()));
+			}
+			return session.getObject(objectId);
+		} catch (CmisConnectionException e) {
+			throw new RepositoryNotAvailableException("CMIS", e);
+		}catch (CmisRuntimeException e) {
+			throw new ObjectNotFoundException(objectId + " not found.");
+		}
+	}
+	public CmisObject copyObject(String objectId,String targetFolderId) throws DocumentumException
+	{
+		try {
+			Session session = getSession(data.username, data.password, data.repo);
+			CmisObject object = session.getObject(objectId);
+			CmisObject targetFolder = session.getObject(targetFolderId);
+			if(!targetFolder.getBaseType().getLocalName().equals("dm_folder"))
+			{
+				throw new DocumentumException(targetFolderId + " is not a folder.");
+			}
+			if(object.getBaseType().getLocalName().equals("dm_folder"))
+			{
+				Folder folder =(Folder)object;
+				return copyFolder(folder, (Folder)targetFolder);
+			}
+			else if(object.getBaseType().getLocalName().equals("dm_document"))
+			{
+				Document document =(Document)object;
+				return document.copy(targetFolder);
+			}
+			return session.getObject(objectId);
+		} catch (CmisConnectionException e) {
+			throw new RepositoryNotAvailableException("CMIS", e);
+		}catch (CmisRuntimeException e) {
+			throw new ObjectNotFoundException(objectId + " not found.");
+		}
+	}
+	private Folder copyFolder(Folder sourceFolder,Folder targetFolder) throws ObjectNotFoundException, RepositoryNotAvailableException
+	{
+		try{
+			Map<String,Object> folderProperties = new HashMap<String,Object>();
+			folderProperties.put(PropertyIds.NAME, sourceFolder.getPropertyValue(PropertyIds.NAME));
+			folderProperties.put(PropertyIds.OBJECT_TYPE_ID, sourceFolder.getPropertyValue(PropertyIds.OBJECT_TYPE_ID));
+			Folder createdFolder = targetFolder.createFolder(folderProperties);
+			ItemIterable<CmisObject>children =  sourceFolder.getChildren();
+			for (CmisObject cmisObject : children) {
+				if(cmisObject.getBaseType().getLocalName().equals("dm_document"))
+				{
+					((Document)cmisObject).copy(createdFolder);
+				}
+				else
+				{
+					copyFolder((Folder)cmisObject, createdFolder);
+				}
+			}
+			return createdFolder;
+		} catch (CmisConnectionException e) {
+			throw new RepositoryNotAvailableException("CMIS", e);
+		}catch (CmisRuntimeException e) {
+			throw new ObjectNotFoundException(sourceFolder.getId() + " not found.");
 		}
 	}
 }

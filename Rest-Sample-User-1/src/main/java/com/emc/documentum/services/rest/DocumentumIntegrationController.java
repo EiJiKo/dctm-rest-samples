@@ -254,5 +254,18 @@ public class DocumentumIntegrationController {
 			throws ObjectNotFoundException, DelegateNotFoundException, RepositoryNotAvailableException {
 		return (delegateProvider.getDelegate(api)).renameObject(objectId, newName);
 	}
+	@RequestMapping(value = "object/{objectId}/move", method = RequestMethod.POST)
+	public DocumentumObject moveObject(@PathVariable(value = "api") String api,
+			@PathVariable(value = "objectId") String objectId, @RequestBody String targetFolderId)
+			throws DelegateNotFoundException, DocumentumException {
+		return (delegateProvider.getDelegate(api)).moveObject(objectId, targetFolderId);
+	}
+	
+	@RequestMapping(value = "object/{objectId}/copy", method = RequestMethod.POST)
+	public DocumentumObject copyObject(@PathVariable(value = "api") String api,
+			@PathVariable(value = "objectId") String objectId, @RequestBody String targetFolderId)
+			throws DelegateNotFoundException, DocumentumException {
+		return (delegateProvider.getDelegate(api)).copyObject(objectId, targetFolderId);
+	}
 
 }

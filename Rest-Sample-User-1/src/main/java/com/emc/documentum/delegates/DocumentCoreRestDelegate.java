@@ -295,6 +295,10 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 	@Override
 	public DocumentumObject copyObject(String objectId, String targetFolderId)
 			throws DocumentumException, RepositoryNotAvailableException {
+		if(objectId.equals(targetFolderId))
+		{
+			throw new DocumentumException("source object equals target folder Id .");
+		}
 		JsonObject object = restClientX.getObjectById(objectId);
 		if (object == null) {
 			throw new ObjectNotFoundException("object " + objectId +" not found.");
@@ -314,6 +318,10 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 	@Override
 	public DocumentumObject moveObject(String objectId, String targetFolderId)
 			throws DocumentumException, RepositoryNotAvailableException {
+		if(objectId.equals(targetFolderId))
+		{
+			throw new DocumentumException("source object equals target folder Id .");
+		}
 		JsonObject object = restClientX.getObjectById(objectId);
 		if (object == null) {
 			throw new ObjectNotFoundException("object " + objectId +" not found.");

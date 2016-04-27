@@ -227,15 +227,21 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	@Override
 	public DocumentumObject copyObject(String objectId, String targetFolderId)
 			throws DocumentumException, RepositoryNotAvailableException {
-		// TODO Auto-generated method stub
-		return null;
+		if(objectId.equals(targetFolderId))
+		{
+			throw new DocumentumException("source object equals target folder Id.");
+		}
+		return CMISTransformation.convertCMISObject(dcAPI.copyObject(objectId, targetFolderId));
 	}
 
 	@Override
 	public DocumentumObject moveObject(String objectId, String targetFolderId)
 			throws DocumentumException, RepositoryNotAvailableException {
-		// TODO Auto-generated method stub
-		return null;
+		if(objectId.equals(targetFolderId))
+		{
+			throw new DocumentumException("source object equals target folder Id.");
+		}
+		return CMISTransformation.convertCMISObject(dcAPI.moveObject(objectId, targetFolderId));
 	}
 
 }
