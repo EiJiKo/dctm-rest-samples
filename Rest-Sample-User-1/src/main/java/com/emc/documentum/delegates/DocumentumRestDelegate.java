@@ -328,7 +328,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String documentId , String relationName) throws DocumentumException {
+	public ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String documentId , String relationName,int pageNumber) throws DocumentumException {
 		return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getDocumentDMNotesByRelationName(documentId , relationName));
 	}
 	

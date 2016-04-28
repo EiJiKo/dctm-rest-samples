@@ -215,12 +215,12 @@ public class DocumentumIntegrationController {
 	}
 
 	@ApiOperation(value = "Get document annotations", notes = "Gets the annotations of a specific document")
-	@RequestMapping(value = "get/document/annotations/id/{documentId}", method = RequestMethod.GET)
+	@RequestMapping(value = "get/document/annotations/id/{documentId}/page/{pageNumber}", method = RequestMethod.GET)
 	public ArrayList<DocumentumObject> GetDocumentAnnotations(@PathVariable(value = "api") String api,
-			@PathVariable(value = "documentId") String documentId)
+			@PathVariable(value = "documentId") String documentId,@PathVariable(value = "pageNumber") int pageNumber)
 			throws DocumentumException, DelegateNotFoundException {
 		log.entering("Getting document annotations ", documentId);
-		return (delegateProvider.getDelegate(api)).getDocumentRelationsByRelationName(documentId , "DM_ANNOTATE");
+		return (delegateProvider.getDelegate(api)).getDocumentRelationsByRelationName(documentId , "DM_ANNOTATE",pageNumber);
 	}
 
 	@ApiOperation(value = "create document annotation", notes = "creates annotation for a specific document")

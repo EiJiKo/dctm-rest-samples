@@ -47,7 +47,8 @@ public class DctmRestClientX implements InitializingBean {
 	public static final String DQL_QUERY_BY_NAME = "select %s from dm_sysobject where object_name like '%s'";
 	public static final String DQL_QUERY_BY_PATH = "select %s from dm_sysobject where object_name='%s' and folder('%s')";
 	public static final String DQL_QUERY_CABINET_BY_PATH = "select %s from dm_cabinet where object_name='%s'";
-
+	public static final String DQL_QUERY_GET_ANNOTATIONS = "select %s from dm_note n where n.r_object_id in (select child_id from dm_relation where relation_name = '%s' and parent_id = '%s') and any n.keywords = '%s'";
+	
 	@Autowired
 	AppRuntime data;
 
@@ -160,13 +161,9 @@ public class DctmRestClientX implements InitializingBean {
 				content.getHeaders().getContentType(), content.getHeaders().getContentLength());
 	}
 
-	public List<JsonEntry> getDocumentAnnotations(String documentId , String relationName) {
-		JsonObject document = getObjectById(documentId);
-		ResponseEntity<JsonFeed> result = restTemplate.get(document.getHref(LinkRelation.OBJECT_RELATIONS),
-				JsonFeed.class, QueryParams.INLINE, "true", QueryParams.FILTER,
-				"starts-with(relation_name,'"+relationName+"')");
-		return result.getBody().getEntries();
-
+	public List<JsonEntry> getDocumentAnnotations(String documentId , String relationName,int pageNumber) {
+		String dql = String.format(DQL_QUERY_GET_ANNOTATIONS,DEFAULT_VIEW,"DM_ANNOTATE",documentId,"page_number = "+pageNumber);
+		return queryMultipleObjects(dql);
 	}
 
 	public JsonObject checkinDocument(String documentId, byte[] data) throws DocumentCheckinException {

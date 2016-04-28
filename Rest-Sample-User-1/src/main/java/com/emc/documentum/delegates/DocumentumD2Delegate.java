@@ -150,7 +150,7 @@ public class DocumentumD2Delegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String objectId , String relationName){
+	public ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String objectId , String relationName,int pageNumber){
 		// TODO Auto-generated method stub
 		return null;
 	}

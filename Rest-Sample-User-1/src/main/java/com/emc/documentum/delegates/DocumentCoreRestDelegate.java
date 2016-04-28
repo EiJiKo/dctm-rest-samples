@@ -3,6 +3,7 @@ package com.emc.documentum.delegates;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -220,9 +221,9 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String objectId , String relationName)
+	public ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String objectId , String relationName,int pageNumber)
 			throws RepositoryNotAvailableException, DocumentumException {
-		return RestTransformation.convertCoreRSEntryList(restClientX.getDocumentAnnotations(objectId , relationName));
+		return RestTransformation.convertCoreRSEntryList(restClientX.getDocumentAnnotations(objectId , relationName,pageNumber));
 	}
 
 	@Override
@@ -233,7 +234,14 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 		if (!document.isDocument()) {
 			throw new DocumentumException(documentId + " is not a document");
 		}
-
+		Integer pageNumberProperty =  (Integer) properties.get("page_number");
+		if(pageNumberProperty == null)
+		{
+			throw new DocumentumException("annotation page number is missing.");
+		}
+		List<String> keywords = new ArrayList<String>();
+		keywords.add("page_number = "+pageNumberProperty);
+		
 		String annotationNameProperty = (String) properties.get("annotation_name");
 		String annotationName = (annotationNameProperty == null)
 				? documentId + "_Annot_" + ((int) (Math.random() * 10000)) : annotationNameProperty;
@@ -252,6 +260,7 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 		HashMap<String, Object> creationProperties = new HashMap<>();
 		creationProperties.put(DocumentumProperties.OBJECT_NAME, annotationName);
 		creationProperties.put(DocumentumProperties.CONTENT_TYPE, format);
+		creationProperties.put(DocumentumProperties.KEYWORDS, keywords);
 		PlainRestObject noteCreation = new PlainRestObject("dm_note", creationProperties);
 
 		DocumentumObject note = RestTransformation

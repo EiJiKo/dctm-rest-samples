@@ -145,7 +145,7 @@ public interface DocumentumDelegate {
 	
 	void addCommentToDocument(String documentId, String comment);
 
-	ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String documentId, String relationName) throws DocumentumException;
+	ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String documentId, String relationName,int pageNumber) throws DocumentumException;
 	
 	public ArrayList<DocumentumObject> getDocumentComments(String documentId , String relationName) throws DocumentumException ;
 

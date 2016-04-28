@@ -193,7 +193,7 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String objectId , String relationName)
+	public ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String objectId , String relationName,int pageNumber)
 			throws RepositoryNotAvailableException, DocumentumException {
 		// TODO Auto-generated method stub
 		return null;
