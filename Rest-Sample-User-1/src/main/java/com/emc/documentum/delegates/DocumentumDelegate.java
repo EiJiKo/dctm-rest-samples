@@ -143,7 +143,7 @@ public interface DocumentumDelegate {
 		
 	ArrayList<DocumentumObject> getRenditionsByDocumentId(String doumentId) ;
 	
-	void addCommentToDocument(String documentId, String comment);
+	DocumentumObject addCommentToDocument(String documentId, String comment);
 
 	ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String documentId, String relationName,int pageNumber) throws DocumentumException;
 	

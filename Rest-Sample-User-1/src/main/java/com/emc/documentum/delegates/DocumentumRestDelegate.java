@@ -380,7 +380,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	
 	
 	@Override
-	public void addCommentToDocument(String documentId , String comment )
+	public DocumentumObject addCommentToDocument(String documentId , String comment )
 	{		
 		try {
 			String commentName = "comment" + documentId + "_Comm_"+((int)(Math.random()*10000));		
@@ -392,12 +392,13 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 			DocumentumObject commentObject = CoreRestTransformation.convertJsonObject(json);
 			//TODO change the relation type
 			dcAPI.createRelationShip("dm_relation", documentId, commentObject.getId(), "dm_wf_email_template", true);
+			return commentObject ;
 		} catch (ObjectNotFoundException | RepositoryNotAvailableException e) {
 			e.printStackTrace();
 		} catch (DocumentumException e) {
 			e.printStackTrace();
 		}
-
+		return null ;
 	}
 
 

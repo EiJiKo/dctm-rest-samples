@@ -280,8 +280,18 @@ public class DocumentumIntegrationController extends BaseController {
 		log.entering("adding comment to document ", documentId);
 		try {
 			DocumentumDelegate dcDelegate = delegateProvider.getDelegate(api) ;
-			dcDelegate.addCommentToDocument(documentId, userName+","+comment);
-			return commonResponse();
+			DocumentumObject commentObject = dcDelegate.addCommentToDocument(documentId, userName+","+comment);
+			String date = (String) commentObject.getPropertiesAsMap().get("r_creation_date") ;
+
+			JSONArray children = new JSONArray() ;
+			JSONObject json = new JSONObject() ;
+			json.put("user", userName) ;
+			json.put("content", comment) ;
+			json.put("date", date) ;
+			children.add(json) ;
+			JSONObject returnJson = new JSONObject() ;
+			returnJson.put("result", children) ;
+			return returnJson.toString() ;
 		} catch (DelegateNotFoundException e) {
 			e.printStackTrace();
 			return errorResponse(api + " Repository is not available ") ;
