@@ -337,10 +337,16 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		List<JsonEntry> jsonResponse = dcAPI.getDocumentDMNotesByRelationName(documentId , relationName) ;
 		byte[] content = null ;
 		String s = null ;
+		if(jsonResponse == null)
+		{
+			jsonResponse = new ArrayList<JsonEntry>() ;
+		}
+		
 		for (int i = 0 ; i < jsonResponse.size() ; i++) {
 			content = dcAPI.getDocumentContentById((String) jsonResponse.get(i).getContent().getProperties().get("child_id")) ;
 			s = new String(Base64.decodeBase64(content));
 			jsonResponse.get(i).getContent().getProperties().put("content", s) ;
+			jsonResponse.get(i).getContent().getProperties().put("date",jsonResponse.get(i).getUpdated()) ;
 		}
 		return CoreRestTransformation.convertCoreRSEntryList(jsonResponse);
 	}
