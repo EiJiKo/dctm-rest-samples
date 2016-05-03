@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,11 +34,13 @@ import com.emc.documentum.exceptions.RepositoryNotAvailableException;
 import com.emc.documentum.translation.TranslationUtility;
 
 import io.swagger.annotations.ApiOperation;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 @RestController
 @RequestMapping("{api}/services")
 @CrossOrigin("*")
-public class DocumentumIntegrationController {
+public class DocumentumIntegrationController extends BaseController {
 
 	Logger log = Logger.getLogger(DocumentumIntegrationController.class.getCanonicalName());
 
@@ -264,4 +267,86 @@ public class DocumentumIntegrationController {
 		return (delegateProvider.getDelegate(api)).copyObject(objectId, targetFolderId);
 	}
 
+	
+	
+	
+	@RequestMapping(value = "document/{documentId}/comment/{comment}/userName/{userName}", method = RequestMethod.POST)
+	public String addCommentToDocument(@PathVariable(value="documentId")String documentId , @PathVariable(value="comment")String comment , @PathVariable(value="userName")String userName , @PathVariable(value = "api") String api)
+			throws DocumentumException, DelegateNotFoundException {
+		log.entering("adding comment to document ", documentId);
+		try {
+			DocumentumDelegate dcDelegate = delegateProvider.getDelegate(api) ;
+			DocumentumObject commentObject = dcDelegate.addCommentToDocument(documentId, userName+","+comment);
+			String date = (String) commentObject.getPropertiesAsMap().get("r_creation_date") ;
+
+			JSONArray children = new JSONArray() ;
+			JSONObject json = new JSONObject() ;
+			json.put("user", userName) ;
+			json.put("content", comment) ;
+			json.put("date", date) ;
+			children.add(json) ;
+			JSONObject returnJson = new JSONObject() ;
+			returnJson.put("result", children) ;
+			return returnJson.toString() ;
+		} catch (DelegateNotFoundException e) {
+			e.printStackTrace();
+			return errorResponse(api + " Repository is not available ") ;
+		}	
+	}
+	
+	@RequestMapping(value = "document/{documentId}/comments", method = RequestMethod.GET)
+	public String getDocumentComments(@PathVariable(value="documentId")String documentId ,@PathVariable(value = "api") String api){
+		log.entering("getting  document comments ", documentId);
+			try {
+				DocumentumDelegate dcDelegate = delegateProvider.getDelegate(api) ;	
+				//TODO add relation name 
+				ArrayList<DocumentumObject> comments = dcDelegate.getDocumentComments(documentId, "dm_wf_email_template") ;
+				return getDocumentComments(comments) ;
+			} catch (DelegateNotFoundException e) {
+				e.printStackTrace();
+				return errorResponse(api + " Repository is not available ") ;
+			} catch (DocumentumException e) {
+				e.printStackTrace();
+				return errorResponse("Documentum exception ... ") ;
+			}
+	}
+	
+	private String getDocumentComments(ArrayList<DocumentumObject> objects)
+	{
+		JSONArray children = new JSONArray() ;
+		for (int i = 0 ; i < objects.size() ; i++) {
+			JSONObject json = new JSONObject() ;
+			ArrayList<DocumentumProperty> properties = objects.get(i).getProperties();
+			String comment = null ;
+			String date = null ;
+			String[] array = null ;
+			for(DocumentumProperty property : properties){
+				if(property.getLocalName().equals("content")){
+						comment = (String) property.getValue() ;
+						array = comment.split(",") ;
+						if(array.length == 2)
+						{
+							json.put("user", array[0]) ;
+							json.put("content", array[1]) ;
+						}
+						else //case of user was not stored ...
+						{
+							json.put("user", "unknown") ;
+							json.put("content", array[0]) ;
+						}
+				}
+				else if(property.getLocalName().equals("date"))
+				{
+					date = (String) property.getValue() ;
+					json.put("date", date) ;
+				}
+				
+			}
+			children.add(json) ;
+		}
+		JSONObject returnJson = new JSONObject() ;
+		returnJson.put("result", children) ;
+		return returnJson.toString() ;
+	}
+	
 }

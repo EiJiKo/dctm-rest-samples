@@ -311,36 +311,7 @@ public class FileManagerController extends BaseController{
 	}
 	
 
-	@RequestMapping(value = "/api/document/{documentId}/comment/{comment}/userName/{userName}", method = RequestMethod.POST)
-	public String addCommentToDocument(@PathVariable(value="documentId")String documentId , @PathVariable(value="comment")String comment , @PathVariable(value="userName")String userName , @RequestHeader(value="API_BASE" , defaultValue="Rest") String delegateKey)
-			throws DocumentumException, DelegateNotFoundException {
-		log.entering("adding comment to document ", documentId);
-		try {
-			dcDelegate = delegateProvider.getDelegate(delegateKey) ;
-			dcDelegate.addCommentToDocument(documentId, userName+","+comment);
-			return commonResponse();
-		} catch (DelegateNotFoundException e) {
-			e.printStackTrace();
-			return errorResponse(delegateKey + " Repository is not available ") ;
-		}	
-	}
 	
-	@RequestMapping(value = "/api/document/{documentId}/comments", method = RequestMethod.GET)
-	public String getDocumentComments(@PathVariable(value="documentId")String documentId , @RequestHeader(value="API_BASE" , defaultValue="Rest") String delegateKey){
-		log.entering("getting  document comments ", documentId);
-			try {
-				dcDelegate = delegateProvider.getDelegate(delegateKey) ;	
-				//TODO add relation name 
-				ArrayList<DocumentumObject> comments = dcDelegate.getDocumentComments(documentId, "dm_wf_email_template") ;
-				return getDocumentComments(comments) ;
-			} catch (DelegateNotFoundException e) {
-				e.printStackTrace();
-				return errorResponse(delegateKey + " Repository is not available ") ;
-			} catch (DocumentumException e) {
-				e.printStackTrace();
-				return errorResponse("Documentum exception ... ") ;
-			}
-	}	
 	
 	
 	
@@ -407,38 +378,5 @@ public class FileManagerController extends BaseController{
 		returnJson.put("result", children) ;
 		return returnJson ;
 	}
-	
-	
-	private String getDocumentComments(ArrayList<DocumentumObject> objects)
-	{
-		JSONArray children = new JSONArray() ;
-		for (int i = 0 ; i < objects.size() ; i++) {
-			JSONObject json = new JSONObject() ;
-			ArrayList<DocumentumProperty> properties = objects.get(i).getProperties();
-			String comment = null ;
-			String[] array = null ;
-			for(DocumentumProperty property : properties){
-				if(property.getLocalName().equals("content")){
-						comment = (String) property.getValue() ;
-						array = comment.split(",") ;
-						if(array.length == 2)
-						{
-							json.put("user", array[0]) ;
-							json.put("content", array[1]) ;
-						}
-						else //case of user was not stored ...
-						{
-							json.put("user", "unknown") ;
-							json.put("content", array[0]) ;
-						}
-					break;
-				}
-			}
-			children.add(json) ;
-		}
-		JSONObject returnJson = new JSONObject() ;
-		returnJson.put("result", children) ;
-		return returnJson.toString() ;
-	}
-	
+
 }

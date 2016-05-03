@@ -219,9 +219,9 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public void addCommentToDocument(String documentId, String comment) {
+	public DocumentumObject addCommentToDocument(String documentId, String comment) {
 		// TODO Auto-generated method stub
-		
+		return null ;
 	}
 
 	@Override
