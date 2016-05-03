@@ -228,16 +228,12 @@ public class DocumentumIntegrationController {
 			"multipart/form-data" })
 	public DocumentumObject createDocumentAnnotations(@PathVariable(value = "api") String api,
 			@PathVariable(value = "documentId") String documentId,
-			@RequestPart("properties") HashMap<String, Object> properties, @RequestPart("binary") MultipartFile file)
+			@RequestPart("properties") HashMap<String, Object> properties, @RequestPart("binary") byte[] file)
 			throws DocumentumException, DelegateNotFoundException {
 		log.entering("creating document annotation ", documentId);
-		try {
-			return (delegateProvider.getDelegate(api)).createDocumentAnnotation(documentId, file.getBytes(),
+			return (delegateProvider.getDelegate(api)).createDocumentAnnotation(documentId, file,
 					properties);
-		} catch (IOException e) {
-			throw new DocumentumException("Error occurred while reading binary part", e);
 		}
-	}
 
 	@ApiOperation(value = "get document renditions", notes = "gets renditions for a specific document")
 	@RequestMapping(value = "get/document/{documentId}/renditions", method = RequestMethod.GET)
