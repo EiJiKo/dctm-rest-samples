@@ -351,7 +351,9 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 		{
 			throw new DocumentumException(targetFolderId +" is not a folder.");
 		}
-		return RestTransformation.convertJsonObject(restClientX.move(object, targetFolder));
+		restClientX.move(object, targetFolder);
+		object = restClientX.getObjectById(objectId);
+		return RestTransformation.convertJsonObject(object);
 
 	}
 
