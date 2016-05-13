@@ -5,6 +5,7 @@
 package com.emc.documentum.wrappers.corerest;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -16,16 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
 import com.emc.documentum.constants.DCCoreRestConstants;
@@ -55,13 +51,13 @@ public class DctmRestClientX implements InitializingBean {
 	public static final String DQL_QUERY_CABINET_BY_PATH = "select %s from dm_cabinet where object_name='%s'";
 	public static final String DQL_QUERY_GET_ANNOTATIONS = "select %s from dm_note n where n.r_object_id in (select child_id from dm_relation where relation_name = '%s' and parent_id = '%s') and any n.keywords = '%s'";
 	public static final String DQL_QUERY_GET_CHILDREN_BY_PARENT_ID = "select *,r_lock_owner from dm_folder where  FOLDER(ID('%s')) union select *,r_lock_owner from dm_document where FOLDER(ID('%s'))";
-	
+
 	@Autowired
 	AppRuntime data;
 
 	@Autowired
 	DCCoreRestConstants constants;
-	
+
 	protected DctmRestTemplate restTemplate;
 	protected DctmRestTemplate streamingTemplate;
 	protected JsonObject repository;
@@ -78,20 +74,13 @@ public class DctmRestClientX implements InitializingBean {
 	}
 
 	public List<JsonEntry> getChildrenByObjectId(String id, int pageNumber, int pageSize) {
-//		JsonObject folder = getObjectById(id);
-//		String childrenUrl = folder.getHref(LinkRelation.OBJECTS);
-//		return getJsonEntriesByUrl(pageNumber, pageSize, childrenUrl);
+		// JsonObject folder = getObjectById(id);
+		// String childrenUrl = folder.getHref(LinkRelation.OBJECTS);
+		// return getJsonEntriesByUrl(pageNumber, pageSize, childrenUrl);
 
-		//TODO this code needs to be separated in functions ...
-		RestTemplate restTemplate = new RestTemplate();
-		String URI = constants.dqlQuery + String.format(DQL_QUERY_GET_CHILDREN_BY_PARENT_ID, id , id);
-		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-		params.add("page", "" + pageNumber);
-		params.add("items-per-page", "" + pageSize);
-		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(URI).queryParams(params).build();
-		ResponseEntity<JsonFeed> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET,new HttpEntity<Object>(createHeaders(data.username, data.password)), JsonFeed.class);
-		JsonFeed feed = response.getBody();
-		return feed.getEntries();
+		String dqlQuery = String.format(DQL_QUERY_GET_CHILDREN_BY_PARENT_ID, id, id);
+		return queryMultipleObjects(dqlQuery, pageNumber, pageSize);
+
 	}
 
 	public JsonObject checkout(String objectId) throws DocumentCheckoutException {
@@ -182,8 +171,9 @@ public class DctmRestClientX implements InitializingBean {
 				content.getHeaders().getContentType(), content.getHeaders().getContentLength());
 	}
 
-	public List<JsonEntry> getDocumentAnnotations(String documentId , String relationName,int pageNumber) {
-		String dql = String.format(DQL_QUERY_GET_ANNOTATIONS,DEFAULT_VIEW,"DM_ANNOTATE",documentId,"page_number = "+pageNumber);
+	public List<JsonEntry> getDocumentAnnotations(String documentId, String relationName, int pageNumber) {
+		String dql = String.format(DQL_QUERY_GET_ANNOTATIONS, DEFAULT_VIEW, "DM_ANNOTATE", documentId,
+				"page_number = " + pageNumber);
 		return queryMultipleObjects(dql);
 	}
 
@@ -271,7 +261,19 @@ public class DctmRestClientX implements InitializingBean {
 				constructDqlParam(dql));
 		List<JsonEntry> entries = response.getBody().getEntries();
 		if (entries == null || entries.size() == 0) {
-			throw new RuntimeException("No object for dql: " + dql);
+			entries = Arrays.asList(new JsonEntry[0]);
+		}
+
+		return entries;
+	}
+
+	private List<JsonEntry> queryMultipleObjects(String dql, int pageNumber, int pageSize) {
+		String dqlUrl = repository.getHref(LinkRelation.DQL);
+		ResponseEntity<JsonFeed> response = restTemplate.get(dqlUrl, JsonFeed.class, QueryParams.DQL,
+				constructDqlParam(dql), QueryParams.PAGE, "" + pageNumber, QueryParams.ITEMS_PER_PAGE, "" + pageSize);
+		List<JsonEntry> entries = response.getBody().getEntries();
+		if (entries == null || entries.size() == 0) {
+			entries = Arrays.asList(new JsonEntry[0]);
 		}
 
 		return entries;
@@ -295,7 +297,7 @@ public class DctmRestClientX implements InitializingBean {
 				constructDqlParam(dql));
 		List<JsonEntry> entries = response.getBody().getEntries();
 		if (entries == null || entries.size() == 0) {
-			throw new RuntimeException("No object for dql: " + dql);
+			entries = Arrays.asList(new JsonEntry[0]);
 		}
 		if (entries.size() > 1) {
 			throw new RuntimeException("Ambiguous objects for dql: " + dql);
@@ -345,16 +347,5 @@ public class DctmRestClientX implements InitializingBean {
 			throw new RepositoryNotAvailableException("CoreRest", e);
 		}
 	}
-	
-	
-	private HttpHeaders createHeaders(final String username, final String password) {
-		return new HttpHeaders() {
-			private static final long serialVersionUID = -3310695110391522574L;
-			{
-				String usernameAndPassword = username + ":" + password;
-				String authHeader = "Basic " + new String(Base64.encodeBase64(usernameAndPassword.getBytes()));
-				set("Authorization", authHeader);
-			}
-		};
-	}
+
 }
