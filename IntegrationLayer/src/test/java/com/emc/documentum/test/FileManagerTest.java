@@ -14,7 +14,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import com.emc.documentum.RestSampleUser1Application;
+import com.emc.documentum.IntegrationLayer;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -22,7 +22,7 @@ import net.minidev.json.JSONValue;
 import net.minidev.json.parser.ParseException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = RestSampleUser1Application.class)
+@SpringApplicationConfiguration(classes = IntegrationLayer.class)
 @WebAppConfiguration
 @IntegrationTest({ "server.port=8080", "management.port=0" })
 public class FileManagerTest {

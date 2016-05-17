@@ -33,20 +33,26 @@ public class CoreRestTransformation {
 
 	}
 
-	private static void setDocumentumObjectProperties(DocumentumObject documentumObject, HashMap<String,Object> properties){
+	private static void setDocumentumObjectProperties(DocumentumObject documentumObject,
+			HashMap<String, Object> properties) {
 		ArrayList<DocumentumProperty> objectProperties = documentumObject.getProperties();
 		Iterator<Entry<String, Object>> it = properties.entrySet().iterator();
-	    while (it.hasNext()) {
-	    	Map.Entry<String, Object> pair = it.next();
-	    	Object value = pair.getValue();
-	    	Cardinality cardinality = Cardinality.Single;
-	    	if(value instanceof List<?>){
-	    		cardinality = Cardinality.List;
-	    	}
-	    	objectProperties.add(new DocumentumProperty(pair.getKey(), pair.getValue(),cardinality));
-	    }
+		while (it.hasNext()) {
+
+			Map.Entry<String, Object> pair = it.next();
+			Object value = pair.getValue();
+			String key = pair.getKey();
+			if (key.startsWith("i_")) {
+				continue;
+			}
+			Cardinality cardinality = Cardinality.Single;
+			if (value instanceof List<?>) {
+				cardinality = Cardinality.List;
+			}
+			objectProperties.add(new DocumentumProperty(key, value, cardinality));
+		}
 	}
-	
+
 	private static void mapJsonObjectProperties(JsonObject jsonObject, DocumentumObject documentumObject) {
 		documentumObject.setId((String) jsonObject.getPropertyByName(DocumentumProperties.OBJECT_ID));
 		documentumObject.setName((String) jsonObject.getPropertyByName("object_name"));
@@ -61,7 +67,7 @@ public class CoreRestTransformation {
 
 	private static DocumentumObject getDocumentumObject(JsonObject jsonObject) {
 		JsonLink link = DCRestAPIWrapper.getLink(jsonObject.getLinks(), "canonical");
-		if(link == null){
+		if (link == null) {
 			link = DCRestAPIWrapper.getLink(jsonObject.getLinks(), "self");
 		}
 		String[] linkParts = link.getHref().split("/");
@@ -100,16 +106,13 @@ public class CoreRestTransformation {
 
 	private static DocumentumObject ConvertCoreRSJsonEntry(JsonEntry jsonEntry) {
 		Content content = jsonEntry.getContent();
-		String baseType = null ;
-		if(content.getLinks() != null )
-		{
+		String baseType = null;
+		if (content.getLinks() != null) {
 			String linkUrl = DCRestAPIWrapper.getLink(content.getLinks(), "self").getHref();
 			String[] linkParts = linkUrl.split("/");
 			baseType = linkParts[linkParts.length - 2];
-		}
-		else
-		{
-			baseType = "other" ;
+		} else {
+			baseType = "other";
 		}
 		DocumentumObject documentumObject = createDocumentumObject(baseType);
 		convertCoreRSContent(content, documentumObject);
@@ -161,8 +164,10 @@ public class CoreRestTransformation {
 
 	private static void convertCoreRSContent(Content content, DocumentumObject documentumObject) {
 
-		documentumObject.setId(content.getPropertyByName("r_object_id") ==null ? null :  content.getPropertyByName("r_object_id").toString());
-		documentumObject.setName(content.getPropertyByName("object_name") == null ? null : content.getPropertyByName("object_name").toString());
+		documentumObject.setId(content.getPropertyByName("r_object_id") == null ? null
+				: content.getPropertyByName("r_object_id").toString());
+		documentumObject.setName(content.getPropertyByName("object_name") == null ? null
+				: content.getPropertyByName("object_name").toString());
 		setDocumentumObjectProperties(documentumObject, content.getProperties());
 		Object lockUser = content.getPropertyByName("r_lock_owner");
 		if (lockUser != null && lockUser.toString().length() > 0) {
