@@ -2,6 +2,7 @@ package com.emc.documentum.delegates;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
@@ -193,8 +194,8 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String objectId , String relationName,int pageNumber)
-			throws RepositoryNotAvailableException, DocumentumException {
+	public ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String objectId, String relationName,
+			int pageNumber) throws RepositoryNotAvailableException, DocumentumException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -214,14 +215,15 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public DocumentumObject renameObject(String documentId, String newName) throws RepositoryNotAvailableException, ObjectNotFoundException {
+	public DocumentumObject renameObject(String documentId, String newName)
+			throws RepositoryNotAvailableException, ObjectNotFoundException {
 		return CMISTransformation.convertCMISObject(dcAPI.renameObject(documentId, newName));
 	}
 
 	@Override
 	public DocumentumObject addCommentToDocument(String documentId, String comment) {
 		// TODO Auto-generated method stub
-		return null ;
+		return null;
 	}
 
 	@Override
@@ -231,11 +233,11 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
+	@Override
 	public DocumentumObject copyObject(String objectId, String targetFolderId)
 			throws DocumentumException, RepositoryNotAvailableException {
-		if(objectId.equals(targetFolderId))
-		{
+		if (objectId.equals(targetFolderId)) {
 			throw new DocumentumException("source object equals target folder Id.");
 		}
 		return CMISTransformation.convertCMISObject(dcAPI.copyObject(objectId, targetFolderId));
@@ -244,12 +246,18 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 	@Override
 	public DocumentumObject moveObject(String objectId, String targetFolderId)
 			throws DocumentumException, RepositoryNotAvailableException {
-		if(objectId.equals(targetFolderId))
-		{
+		if (objectId.equals(targetFolderId)) {
 			throw new DocumentumException("source object equals target folder Id.");
 		}
 		return CMISTransformation.convertCMISObject(dcAPI.moveObject(objectId, targetFolderId));
 
+	}
+
+	@Override
+	public DocumentumObject updateProperties(String objectId, Map<String, Object> newProperties)
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
+
+		return CMISTransformation.convertCMISObject(dcAPI.updateObject(objectId, newProperties));
 	}
 
 }

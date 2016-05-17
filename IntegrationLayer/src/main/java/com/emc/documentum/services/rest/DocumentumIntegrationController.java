@@ -310,7 +310,14 @@ public class DocumentumIntegrationController extends BaseController {
 				return errorResponse("Documentum exception ... ") ;
 			}
 	}
-	
+	@ApiOperation(value = "update Object Properties", notes = "updates the properties of a specific object")
+	@RequestMapping(value = "object/properties/id/{objectId}", method = RequestMethod.POST)
+	public DocumentumObject updateObjectProperties(@PathVariable(value = "api") String api,
+			@PathVariable(value = "objectId") String objectId,@RequestBody HashMap<String, Object> newProperties)
+			throws RepositoryNotAvailableException, DelegateNotFoundException, ObjectNotFoundException {
+		log.entering("updating object properties ", objectId);
+		return (delegateProvider.getDelegate(api)).updateProperties(objectId, newProperties);
+	}
 	private String getDocumentComments(ArrayList<DocumentumObject> objects)
 	{
 		JSONArray children = new JSONArray() ;

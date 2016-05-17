@@ -2,6 +2,7 @@ package com.emc.documentum.delegates;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.emc.documentum.dtos.DocumentCreation;
 import com.emc.documentum.dtos.DocumentumDocument;
@@ -211,7 +212,7 @@ public interface DocumentumDelegate {
 
 	/**
 	 * retrieve properties of an object
-	 * 
+	 *
 	 * @param objectId
 	 * @return
 	 * @throws RepositoryNotAvailableException
@@ -239,4 +240,7 @@ public interface DocumentumDelegate {
 
 	DocumentumObject moveObject(String objectId, String targetFolderId)
 			throws DocumentumException, RepositoryNotAvailableException;
+
+	DocumentumObject updateProperties(String objectId, Map<String, Object> newProperties)
+			throws ObjectNotFoundException, RepositoryNotAvailableException;
 }

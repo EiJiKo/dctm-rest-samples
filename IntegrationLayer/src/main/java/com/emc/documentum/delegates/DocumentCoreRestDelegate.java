@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -221,9 +222,10 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String objectId , String relationName,int pageNumber)
-			throws RepositoryNotAvailableException, DocumentumException {
-		return RestTransformation.convertCoreRSEntryList(restClientX.getDocumentAnnotations(objectId , relationName,pageNumber));
+	public ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String objectId, String relationName,
+			int pageNumber) throws RepositoryNotAvailableException, DocumentumException {
+		return RestTransformation
+				.convertCoreRSEntryList(restClientX.getDocumentAnnotations(objectId, relationName, pageNumber));
 	}
 
 	@Override
@@ -234,14 +236,13 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 		if (!document.isDocument()) {
 			throw new DocumentumException(documentId + " is not a document");
 		}
-		Integer pageNumberProperty =  (Integer) properties.get("page_number");
-		if(pageNumberProperty == null)
-		{
+		Integer pageNumberProperty = (Integer) properties.get("page_number");
+		if (pageNumberProperty == null) {
 			throw new DocumentumException("annotation page number is missing.");
 		}
 		List<String> keywords = new ArrayList<String>();
-		keywords.add("page_number = "+pageNumberProperty);
-		
+		keywords.add("page_number = " + pageNumberProperty);
+
 		String annotationNameProperty = (String) properties.get("annotation_name");
 		String annotationName = (annotationNameProperty == null)
 				? documentId + "_Annot_" + ((int) (Math.random() * 10000)) : annotationNameProperty;
@@ -296,9 +297,19 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
+	public DocumentumObject updateProperties(String objectId, Map<String, Object> newProperties)
+			throws ObjectNotFoundException {
+		JsonObject object = restClientX.getObjectById(objectId);
+		if (object == null) {
+			throw new ObjectNotFoundException(objectId + " not found.");
+		}
+		return RestTransformation.convertJsonObject(restClientX.update(object, newProperties));
+	}
+
+	@Override
 	public DocumentumObject addCommentToDocument(String documentId, String comment) {
 		// TODO Auto-generated method stub
-		return null ;
+		return null;
 	}
 
 	@Override
@@ -308,25 +319,23 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
+	@Override
 	public DocumentumObject copyObject(String objectId, String targetFolderId)
 			throws DocumentumException, RepositoryNotAvailableException {
-		if(objectId.equals(targetFolderId))
-		{
+		if (objectId.equals(targetFolderId)) {
 			throw new DocumentumException("source object equals target folder Id .");
 		}
 		JsonObject object = restClientX.getObjectById(objectId);
 		if (object == null) {
-			throw new ObjectNotFoundException("object " + objectId +" not found.");
+			throw new ObjectNotFoundException("object " + objectId + " not found.");
 		}
 		JsonObject targetFolder = restClientX.getObjectById(targetFolderId);
-		if(targetFolderId == null)
-		{
-			throw new ObjectNotFoundException("target folder " + targetFolderId +" not found.");
+		if (targetFolderId == null) {
+			throw new ObjectNotFoundException("target folder " + targetFolderId + " not found.");
 		}
-		if(!targetFolder.isFolder())
-		{
-			throw new DocumentumException(targetFolderId +" is not a folder.");
+		if (!targetFolder.isFolder()) {
+			throw new DocumentumException(targetFolderId + " is not a folder.");
 		}
 		return RestTransformation.convertJsonObject(restClientX.copy(object, targetFolder));
 	}
@@ -334,22 +343,19 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 	@Override
 	public DocumentumObject moveObject(String objectId, String targetFolderId)
 			throws DocumentumException, RepositoryNotAvailableException {
-		if(objectId.equals(targetFolderId))
-		{
+		if (objectId.equals(targetFolderId)) {
 			throw new DocumentumException("source object equals target folder Id .");
 		}
 		JsonObject object = restClientX.getObjectById(objectId);
 		if (object == null) {
-			throw new ObjectNotFoundException("object " + objectId +" not found.");
+			throw new ObjectNotFoundException("object " + objectId + " not found.");
 		}
 		JsonObject targetFolder = restClientX.getObjectById(targetFolderId);
-		if(targetFolderId == null)
-		{
-			throw new ObjectNotFoundException("target folder " + targetFolderId +" not found.");
+		if (targetFolderId == null) {
+			throw new ObjectNotFoundException("target folder " + targetFolderId + " not found.");
 		}
-		if(!targetFolder.isFolder())
-		{
-			throw new DocumentumException(targetFolderId +" is not a folder.");
+		if (!targetFolder.isFolder()) {
+			throw new DocumentumException(targetFolderId + " is not a folder.");
 		}
 		restClientX.move(object, targetFolder);
 		object = restClientX.getObjectById(objectId);

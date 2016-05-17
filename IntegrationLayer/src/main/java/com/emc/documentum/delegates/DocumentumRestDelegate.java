@@ -3,6 +3,7 @@ package com.emc.documentum.delegates;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -161,7 +162,7 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		} catch (Exception e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 			// TODO Object Not Found Exception
-			throw new ObjectNotFoundException("object " + cabinetId+ " not found.");
+			throw new ObjectNotFoundException("object " + cabinetId + " not found.");
 		}
 	}
 
@@ -328,25 +329,28 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	}
 
 	@Override
-	public ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String documentId , String relationName,int pageNumber) throws DocumentumException {
-		return CoreRestTransformation.convertCoreRSEntryList(dcAPI.getDocumentDMNotesByRelationName(documentId , relationName));
+	public ArrayList<DocumentumObject> getDocumentRelationsByRelationName(String documentId, String relationName,
+			int pageNumber) throws DocumentumException {
+		return CoreRestTransformation
+				.convertCoreRSEntryList(dcAPI.getDocumentDMNotesByRelationName(documentId, relationName));
 	}
-	
+
 	@Override
-	public ArrayList<DocumentumObject> getDocumentComments(String documentId , String relationName) throws DocumentumException {
-		List<JsonEntry> jsonResponse = dcAPI.getDocumentDMNotesByRelationName(documentId , relationName) ;
-		byte[] content = null ;
-		String s = null ;
-		if(jsonResponse == null)
-		{
-			jsonResponse = new ArrayList<JsonEntry>() ;
+	public ArrayList<DocumentumObject> getDocumentComments(String documentId, String relationName)
+			throws DocumentumException {
+		List<JsonEntry> jsonResponse = dcAPI.getDocumentDMNotesByRelationName(documentId, relationName);
+		byte[] content = null;
+		String s = null;
+		if (jsonResponse == null) {
+			jsonResponse = new ArrayList<JsonEntry>();
 		}
-		
-		for (int i = 0 ; i < jsonResponse.size() ; i++) {
-			content = dcAPI.getDocumentContentById((String) jsonResponse.get(i).getContent().getProperties().get("child_id")) ;
+
+		for (int i = 0; i < jsonResponse.size(); i++) {
+			content = dcAPI
+					.getDocumentContentById((String) jsonResponse.get(i).getContent().getProperties().get("child_id"));
 			s = new String(Base64.decodeBase64(content));
-			jsonResponse.get(i).getContent().getProperties().put("content", s) ;
-			jsonResponse.get(i).getContent().getProperties().put("date",jsonResponse.get(i).getUpdated()) ;
+			jsonResponse.get(i).getContent().getProperties().put("content", s);
+			jsonResponse.get(i).getContent().getProperties().put("date", jsonResponse.get(i).getUpdated());
 		}
 		return CoreRestTransformation.convertCoreRSEntryList(jsonResponse);
 	}
@@ -377,30 +381,28 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 		List<JsonEntry> list = dcAPI.getRenditionsByDocumentId(doumentId);
 		return CoreRestTransformation.convertCoreRSEntryList(list);
 	}
-	
-	
+
 	@Override
-	public DocumentumObject addCommentToDocument(String documentId , String comment )
-	{		
+	public DocumentumObject addCommentToDocument(String documentId, String comment) {
 		try {
-			String commentName = "comment" + documentId + "_Comm_"+((int)(Math.random()*10000));		
-			String folderId = (String) ((List)(getObjectById(documentId).getPropertiesAsMap().get("i_folder_id"))).get(0);
+			String commentName = "comment" + documentId + "_Comm_" + ((int) (Math.random() * 10000));
+			String folderId = (String) ((List) (getObjectById(documentId).getPropertiesAsMap().get("i_folder_id")))
+					.get(0);
 			String format = "crtext";
-			byte[] commentBytes = comment.getBytes() ;
-			
-			JsonObject json = dcAPI.createAnnotationWithContent(folderId, commentName, commentBytes , format) ;
+			byte[] commentBytes = comment.getBytes();
+
+			JsonObject json = dcAPI.createAnnotationWithContent(folderId, commentName, commentBytes, format);
 			DocumentumObject commentObject = CoreRestTransformation.convertJsonObject(json);
-			//TODO change the relation type
+			// TODO change the relation type
 			dcAPI.createRelationShip("dm_relation", documentId, commentObject.getId(), "dm_wf_email_template", true);
-			return commentObject ;
+			return commentObject;
 		} catch (ObjectNotFoundException | RepositoryNotAvailableException e) {
 			e.printStackTrace();
 		} catch (DocumentumException e) {
 			e.printStackTrace();
 		}
-		return null ;
+		return null;
 	}
-
 
 	@Override
 	public DocumentumObject renameObject(String documentId, String newName) {
@@ -418,6 +420,13 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	@Override
 	public DocumentumObject moveObject(String objectId, String targetFolderId)
 			throws DocumentumException, RepositoryNotAvailableException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DocumentumObject updateProperties(String objectId, Map<String, Object> newProperties)
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
 		return null;
 	}
