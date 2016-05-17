@@ -275,6 +275,19 @@ public class DCCMISAPIWrapper {
 			throw new ObjectNotFoundException(objectId + " not found.");
 		}
 	}
+	public CmisObject updateObject(String objectId,Map<String,Object> newProperties) throws RepositoryNotAvailableException, ObjectNotFoundException
+	{
+		try {
+			Session session = getSession(data.username, data.password, data.repo);
+			CmisObject object = session.getObject(objectId);
+			object.updateProperties(newProperties);
+			return session.getObject(objectId);
+		} catch (CmisConnectionException e) {
+			throw new RepositoryNotAvailableException("CMIS", e);
+		}catch (CmisRuntimeException e) {
+			throw new ObjectNotFoundException(objectId + " not found.");
+		}
+	}
 	public CmisObject moveObject(String objectId,String targetFolderId) throws DocumentumException
 	{
 		try {

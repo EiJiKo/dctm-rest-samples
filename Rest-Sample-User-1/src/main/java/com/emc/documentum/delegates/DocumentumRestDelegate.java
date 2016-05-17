@@ -3,6 +3,7 @@ package com.emc.documentum.delegates;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -418,6 +419,13 @@ public class DocumentumRestDelegate implements DocumentumDelegate {
 	@Override
 	public DocumentumObject moveObject(String objectId, String targetFolderId)
 			throws DocumentumException, RepositoryNotAvailableException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DocumentumObject updateProperties(String objectId, Map<String, Object> newProperties)
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -2,6 +2,7 @@ package com.emc.documentum.delegates;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -197,6 +198,13 @@ public class DocumentumD2Delegate implements DocumentumDelegate {
 	@Override
 	public DocumentumObject copyObject(String objectId, String targetFolderId)
 			throws DocumentumException, RepositoryNotAvailableException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DocumentumObject updateProperties(String objectId, Map<String, Object> newProperties)
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
 		// TODO Auto-generated method stub
 		return null;
 	}

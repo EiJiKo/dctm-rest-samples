@@ -2,6 +2,7 @@ package com.emc.documentum.delegates;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
@@ -250,6 +251,13 @@ public class DocumentumCMISDelegate implements DocumentumDelegate {
 		}
 		return CMISTransformation.convertCMISObject(dcAPI.moveObject(objectId, targetFolderId));
 
+	}
+
+	@Override
+	public DocumentumObject updateProperties(String objectId, Map<String, Object> newProperties)
+			throws ObjectNotFoundException, RepositoryNotAvailableException {
+		
+		return CMISTransformation.convertCMISObject(dcAPI.updateObject(objectId, newProperties));
 	}
 
 }

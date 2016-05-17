@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -294,7 +295,15 @@ public class DocumentCoreRestDelegate implements DocumentumDelegate {
 				Collections.<String, Object>singletonMap(DocumentumProperties.OBJECT_NAME, newName));
 		return RestTransformation.convertJsonObject(updatedObject);
 	}
-
+	public DocumentumObject updateProperties(String objectId,Map<String,Object> newProperties) throws ObjectNotFoundException
+	{
+		JsonObject object = restClientX.getObjectById(objectId);
+		if(object == null)
+		{
+			throw new ObjectNotFoundException(objectId + " not found.");
+		}
+		return RestTransformation.convertJsonObject(restClientX.update(object, newProperties));
+	}
 	@Override
 	public DocumentumObject addCommentToDocument(String documentId, String comment) {
 		// TODO Auto-generated method stub
